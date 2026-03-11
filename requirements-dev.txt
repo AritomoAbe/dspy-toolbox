@@ -1,0 +1,11 @@
+pip-tools
+isort
+black
+flake8
+mypy==1.19.1
+wemake-python-styleguide
+coverage
+pytest
+hypothesis
+pytest-pythonpath
+faker

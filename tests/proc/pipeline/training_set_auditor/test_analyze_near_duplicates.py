@@ -1,0 +1,94 @@
+from pathlib import Path
+
+import pytest
+from returns.pipeline import is_successful
+
+from proc.pipeline.training_set_auditor.analyze_near_duplicates import AnalyzeNearDuplicates
+from proc.pipeline.training_set_auditor.models import FieldDuplicateStats, NearDuplicatePair
+
+DATASET = Path(__file__).parent / "dataset" / "emails_20.jsonl"
+TEXT_FIELDS = ["email_body", "email_to"]
+
+
+@pytest.fixture(scope="module")
+def analysis() -> dict:
+    return AnalyzeNearDuplicates(DATASET, TEXT_FIELDS).invoke().unwrap()
+
+
+class TestInvoke:
+
+    def test_success_on_valid_file(self) -> None:
+        result = AnalyzeNearDuplicates(DATASET, TEXT_FIELDS).invoke()
+        assert is_successful(result)
+
+    def test_failure_on_missing_file(self) -> None:
+        result = AnalyzeNearDuplicates(Path("/nonexistent/path.jsonl"), TEXT_FIELDS).invoke()
+        assert not is_successful(result)
+
+    def test_failure_message_mentions_path(self) -> None:
+        path = Path("/nonexistent/path.jsonl")
+        result = AnalyzeNearDuplicates(path, TEXT_FIELDS).invoke()
+        assert str(path) in result.failure().message
+
+    def test_returns_only_requested_fields(self, analysis: dict) -> None:
+        assert set(analysis.keys()) == set(TEXT_FIELDS)
+
+    def test_unknown_field_excluded(self) -> None:
+        result = AnalyzeNearDuplicates(DATASET, ["nonexistent_field"]).invoke()
+        assert is_successful(result)
+        assert result.unwrap() == {}
+
+
+class TestFieldStats:
+
+    def test_all_values_are_field_duplicate_stats(self, analysis: dict) -> None:
+        assert all(isinstance(v, FieldDuplicateStats) for v in analysis.values())
+
+    def test_email_body_total_is_20(self, analysis: dict) -> None:
+        assert analysis["email_body"].total == 20
+
+    def test_email_to_total_is_20(self, analysis: dict) -> None:
+        assert analysis["email_to"].total == 20
+
+    def test_email_body_pairs_non_negative(self, analysis: dict) -> None:
+        assert analysis["email_body"].near_duplicate_pairs >= 0
+
+    def test_email_body_rate_pct_non_negative(self, analysis: dict) -> None:
+        assert analysis["email_body"].near_duplicate_rate_pct >= 0.0
+
+    def test_email_body_examples_at_most_five(self, analysis: dict) -> None:
+        assert len(analysis["email_body"].examples) <= 5
+
+    def test_email_to_has_near_duplicates(self, analysis: dict) -> None:
+        assert analysis["email_to"].near_duplicate_pairs > 0
+
+    def test_email_to_rate_pct_positive(self, analysis: dict) -> None:
+        assert analysis["email_to"].near_duplicate_rate_pct > 0.0
+
+
+class TestNearDuplicatePairs:
+
+    def test_examples_are_near_duplicate_pair_instances(self, analysis: dict) -> None:
+        for field_stats in analysis.values():
+            for example in field_stats.examples:
+                assert isinstance(example, NearDuplicatePair)
+
+    def test_example_scores_above_threshold(self, analysis: dict) -> None:
+        for field_stats in analysis.values():
+            for example in field_stats.examples:
+                assert example.score > 0.85
+
+    def test_example_scores_at_most_one(self, analysis: dict) -> None:
+        for field_stats in analysis.values():
+            for example in field_stats.examples:
+                assert example.score <= 1.0
+
+    def test_examples_sorted_descending_by_score(self, analysis: dict) -> None:
+        for field_stats in analysis.values():
+            scores = [e.score for e in field_stats.examples]
+            assert scores == sorted(scores, reverse=True)
+
+    def test_pair_indices_are_ordered(self, analysis: dict) -> None:
+        for field_stats in analysis.values():
+            for example in field_stats.examples:
+                assert example.index_a < example.index_b
