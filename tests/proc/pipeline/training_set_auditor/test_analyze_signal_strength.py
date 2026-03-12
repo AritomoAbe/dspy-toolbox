@@ -41,7 +41,7 @@ def dataset() -> TrainingSetDataset:
 
 @pytest.fixture(scope="module")
 def analysis(dataset: TrainingSetDataset) -> dict:
-    return AnalyzeSignalStrength(dataset, _TEXT_FIELDS).invoke().unwrap()
+    return AnalyzeSignalStrength(dataset, _TEXT_FIELDS).invoke().unwrap().context.result
 
 
 class TestInvoke:
@@ -49,6 +49,10 @@ class TestInvoke:
     def test_success_on_valid_dataset(self, dataset: TrainingSetDataset) -> None:
         result = AnalyzeSignalStrength(dataset, _TEXT_FIELDS).invoke()
         assert is_successful(result)
+
+    def test_score_is_one(self, dataset: TrainingSetDataset) -> None:
+        score = AnalyzeSignalStrength(dataset, _TEXT_FIELDS).invoke().unwrap()
+        assert score.value == pytest.approx(1.0)
 
     def test_returns_dict(self, analysis: dict) -> None:
         assert isinstance(analysis, dict)
@@ -124,13 +128,13 @@ class TestWithSyntheticData:
     def test_clear_signal_yields_classifier_stats(self, tmp_path: Path) -> None:
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, _make_clear_signal_records())
-        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap()
+        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap().context.result
         assert isinstance(result["label"].proxy_classifier, ClassifierStats)
 
     def test_classifier_stats_learnability_is_learnability_level(self, tmp_path: Path) -> None:
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, _make_clear_signal_records())
-        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap()
+        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap().context.result
         stats = result["label"].proxy_classifier
         assert isinstance(stats, ClassifierStats)
         assert isinstance(stats.learnability, LearnabilityLevel)
@@ -138,7 +142,7 @@ class TestWithSyntheticData:
     def test_clear_signal_accuracy_above_chance(self, tmp_path: Path) -> None:
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, _make_clear_signal_records())
-        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap()
+        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap().context.result
         stats = result["label"].proxy_classifier
         assert isinstance(stats, ClassifierStats)
         assert stats.accuracy > stats.chance_baseline
@@ -146,13 +150,13 @@ class TestWithSyntheticData:
     def test_clear_signal_separability_has_one_pair(self, tmp_path: Path) -> None:
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, _make_clear_signal_records())
-        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap()
+        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap().context.result
         assert len(result["label"].separability.pairwise) == 1
 
     def test_clear_signal_keywords_not_empty(self, tmp_path: Path) -> None:
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, _make_clear_signal_records())
-        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap()
+        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap().context.result
         keywords = result["label"].discriminating_keywords
         assert any(len(kws) > 0 for kws in keywords.values())
 
@@ -160,7 +164,7 @@ class TestWithSyntheticData:
         records = [{"text": "hello", "expected": {"label": "ONLY"}} for _ in range(10)]
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, records)
-        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap()
+        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap().context.result
         assert isinstance(result["label"], SkippedField)
 
     def test_non_dict_expected_is_ignored(self, tmp_path: Path) -> None:

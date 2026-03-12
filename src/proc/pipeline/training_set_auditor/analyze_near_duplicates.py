@@ -1,5 +1,5 @@
 from operator import attrgetter
-from typing import Any
+from typing import Any, Sequence
 
 import numpy as np
 from returns.result import Result, Success
@@ -8,7 +8,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from proc.base.proc_error import ProcError
 from proc.base.proc_node import ProcNode
+from proc.base.proc_score import ProcScore
 from proc.pipeline.dataset.training_dataset import TrainingSetDataset
+from proc.pipeline.training_set_auditor.contexts import NearDuplicatesContext
 from proc.pipeline.training_set_auditor.models import FieldDuplicateStats, NearDuplicatePair
 
 _DEFAULT_THRESHOLD: float = 0.85
@@ -16,15 +18,20 @@ _MAX_EXAMPLES: int = 5
 
 
 class AnalyzeNearDuplicates(ProcNode):
+    _SCORE: float = 1.0
 
-    def __init__(self, dataset: TrainingSetDataset, text_fields: list[str]) -> None:
+    def __init__(self, dataset: TrainingSetDataset, text_fields: Sequence[str]) -> None:
         self._dataset = dataset
         self._text_fields = text_fields
 
-    def invoke(self) -> Result[dict[str, FieldDuplicateStats], ProcError]:
+    def invoke(self) -> Result[ProcScore, ProcError]:
         examples = self._dataset.load()
         records = [{k: v for k, v in ex.items()} for ex in examples]
-        return Success(self._analyze_near_duplicates(records))
+        result = self._analyze_near_duplicates(records)
+        return Success(ProcScore(value=self._score(), context=NearDuplicatesContext(result)))
+
+    def _score(self) -> float:
+        return self._SCORE
 
     def _find_near_duplicates(
         self, texts: list[str], threshold: float = _DEFAULT_THRESHOLD,

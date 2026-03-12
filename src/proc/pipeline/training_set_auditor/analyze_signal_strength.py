@@ -1,7 +1,7 @@
 import warnings
 from itertools import combinations
 from operator import attrgetter
-from typing import Any
+from typing import Any, Sequence
 
 import numpy as np
 from returns.result import Result, Success
@@ -13,7 +13,9 @@ from sklearn.preprocessing import LabelEncoder
 
 from proc.base.proc_error import ProcError
 from proc.base.proc_node import ProcNode
+from proc.base.proc_score import ProcScore
 from proc.pipeline.dataset.training_dataset import TrainingSetDataset
+from proc.pipeline.training_set_auditor.contexts import SignalStrengthContext
 from proc.pipeline.training_set_auditor.enums import (
     LearnabilityLevel,
     ListPresence,
@@ -69,7 +71,7 @@ def _separability_level(dist: float) -> SeparabilityLevel:
     return SeparabilityLevel.indistinct
 
 
-def _build_text_from_fields(rec: dict[str, Any], text_fields: list[str]) -> str:
+def _build_text_from_fields(rec: dict[str, Any], text_fields: Sequence[str]) -> str:
     parts: list[str] = []
     for field in text_fields:
         val = rec.get(field, "")
@@ -99,14 +101,20 @@ def _collect_field_labels(
 
 class AnalyzeSignalStrength(ProcNode):
 
-    def __init__(self, dataset: TrainingSetDataset, text_fields: list[str]) -> None:
+    _SCORE: float = 1.0
+
+    def __init__(self, dataset: TrainingSetDataset, text_fields: Sequence[str]) -> None:
         self._dataset = dataset
         self._text_fields = text_fields
 
-    def invoke(self) -> Result[dict[str, FieldSignalResult], ProcError]:
+    def invoke(self) -> Result[ProcScore, ProcError]:
         examples = self._dataset.load()
         records = [{k: v for k, v in ex.items()} for ex in examples]
-        return Success(self._analyze_signal_strength(records))
+        result = self._analyze_signal_strength(records)
+        return Success(ProcScore(value=self._score(), context=SignalStrengthContext(result)))
+
+    def _score(self) -> float:
+        return self._SCORE
 
     def _proxy_classifier_accuracy(
         self, texts: list[str], labels: list[str],

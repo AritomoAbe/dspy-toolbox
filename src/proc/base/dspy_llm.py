@@ -1,15 +1,14 @@
-import abc
 import logging
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 
 import dspy
 from returns.result import Result
 
-from proc.base.base_llm import BaseLLM, OUT, IN, BaseLLMConfig
+from proc.base.base_llm import BaseLLM, IN, OUT, BaseLLMConfig
 from proc.base.proc_error import ProcError
 
 
-class _DSpyABCMeta(type(dspy.Module), ABCMeta):  # type: ignore[misc]
+class _DSpyABCMeta(type(dspy.Module), ABCMeta):  # type: ignore[misc]  # noqa: WPS606
     """Combined metaclass that satisfies both dspy.Module and ABCMeta."""
     pass
 
@@ -21,6 +20,14 @@ class DSpyLLM(dspy.Module, BaseLLM[IN, OUT], metaclass=_DSpyABCMeta):
         dspy.Module.__init__(self)
         BaseLLM.__init__(self, config=config)
         self._dspy_configured = False
+
+    @abstractmethod
+    def invoke(self, payload: IN) -> Result[OUT, ProcError]:
+        pass
+
+    @abstractmethod
+    def get_demos(self, module: dspy.Module) -> Result[list[dspy.Example], ProcError]:  # noqa: WPS463
+        pass
 
     def _ensure_dspy_configured(self) -> None:
         """
@@ -39,11 +46,3 @@ class DSpyLLM(dspy.Module, BaseLLM[IN, OUT], metaclass=_DSpyABCMeta):
         self._dspy_configured = True
         self._logger.info("DSPy configured with Ollama model=%s base_url=%s",
                           self._config.name.value, self._config.base_url)
-
-    @abc.abstractmethod
-    def invoke(self, payload: IN) -> Result[OUT, ProcError]:
-        pass
-
-    @abc.abstractmethod
-    def get_demos(self, module: dspy.Module) -> Result[list[dspy.Example], ProcError]:
-        pass

@@ -27,7 +27,14 @@ class MeetingInviteScoreExtractor(ScoreExtractor):
         self._logger = logging.getLogger(__name__)
 
     def extraction_metric(self, example: dspy.Example, prediction: dspy.Prediction, trace: Any = None) -> float:
-        gold: EmailMeetingInfo = example.expected
+        expected = example.expected
+        if isinstance(expected, EmailMeetingInfo):
+            gold: EmailMeetingInfo = expected
+        else:
+            try:
+                gold = _dict_to_email_meeting_info(expected)
+            except Exception:
+                return 0
         raw_json = getattr(prediction, "extracted_json", "") or ""
         try:
             pred = _dict_to_email_meeting_info(json.loads(_strip_fences(raw_json)))

@@ -24,7 +24,7 @@ def examples() -> list[Any]:
 
 @pytest.fixture(scope="module")
 def scores(examples: list[Any]) -> list[float]:
-    llm = MeetingInviteLLM(config=BaseLLMConfig(), optimization=False)
+    llm = MeetingInviteLLM(config=BaseLLMConfig())
     extractor = MeetingInviteScoreExtractor()
     result: list[float] = []
     for ex in examples:

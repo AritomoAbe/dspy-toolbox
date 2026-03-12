@@ -1,7 +1,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import dspy
 from returns.result import Result, Success, Failure
@@ -29,19 +29,19 @@ class MeetingInvitePayload(PromptPayLoad):
 
 class MeetingInviteLLM(DSpyLLM[MeetingInvitePayload, EmailMeetingInfo]):  # type: ignore[type-var]
 
-    def __init__(self, config: BaseLLMConfig, optimization: bool = True, tune: bool = False) -> None:
+    def __init__(self, config: BaseLLMConfig, optimized_path: Optional[Path] = None) -> None:
         self._logger = logging.getLogger(__name__)
         super().__init__(config=config)
         self.predict = dspy.ChainOfThought(EmailToMeetingInfo)
 
-        if optimization:
-            optimized_path = Path(__file__).parent / "optimized_extractor.json"
+        if optimized_path:
             if optimized_path.exists():
                 self.load(str(optimized_path))
-                self._logger.info("suggest_times: loaded optimised extractor from %s", optimized_path)
+                self._logger.info("Loaded optimised extractor from %s", optimized_path)
+            else:
+                self._logger.error(f"MeetingInvite: {optimized_path} does not exist")
 
-        if tune:
-            self._ensure_dspy_configured()
+        self._ensure_dspy_configured()
 
     def get_demos(self, module: dspy.Module) -> Result[list[dspy.Example], ProcError]:
         all_predictors = module.named_predictors()

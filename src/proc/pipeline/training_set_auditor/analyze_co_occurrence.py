@@ -7,7 +7,9 @@ from returns.result import Result, Success
 
 from proc.base.proc_error import ProcError
 from proc.base.proc_node import ProcNode
+from proc.base.proc_score import ProcScore
 from proc.pipeline.dataset.training_dataset import TrainingSetDataset
+from proc.pipeline.training_set_auditor.contexts import CoOccurrenceContext
 from proc.pipeline.training_set_auditor.enums import CorrelationRisk, FieldType
 from proc.pipeline.training_set_auditor.models import CoOccurrenceEntry
 from proc.pipeline.training_set_auditor.utils import FieldStatsUtils
@@ -18,14 +20,19 @@ _EXPECTED_KEY: str = "expected"
 
 
 class AnalyzeCoOccurrence(ProcNode):
+    _SCORE: float = 1.0
 
     def __init__(self, dataset: TrainingSetDataset) -> None:
         self._dataset = dataset
 
-    def invoke(self) -> Result[list[CoOccurrenceEntry], ProcError]:
+    def invoke(self) -> Result[ProcScore, ProcError]:
         examples = self._dataset.load()
         records = [{k: v for k, v in ex.items()} for ex in examples]
-        return Success(self._analyze_co_occurrence(records))
+        result = self._analyze_co_occurrence(records)
+        return Success(ProcScore(value=self._score(), context=CoOccurrenceContext(result)))
+
+    def _score(self) -> float:
+        return self._SCORE
 
     def _collect_field_values(
         self, records: list[dict[str, Any]],

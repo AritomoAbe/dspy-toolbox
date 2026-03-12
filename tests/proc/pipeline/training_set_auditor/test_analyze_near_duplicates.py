@@ -18,7 +18,7 @@ def dataset() -> TrainingSetDataset:
 
 @pytest.fixture(scope="module")
 def analysis(dataset: TrainingSetDataset) -> dict:
-    return AnalyzeNearDuplicates(dataset, _TEXT_FIELDS).invoke().unwrap()
+    return AnalyzeNearDuplicates(dataset, _TEXT_FIELDS).invoke().unwrap().context.result
 
 
 class TestInvoke:
@@ -33,7 +33,11 @@ class TestInvoke:
     def test_unknown_field_excluded(self, dataset: TrainingSetDataset) -> None:
         result = AnalyzeNearDuplicates(dataset, ["nonexistent_field"]).invoke()
         assert is_successful(result)
-        assert result.unwrap() == {}
+        assert result.unwrap().context.result == {}
+
+    def test_score_is_one(self, dataset: TrainingSetDataset) -> None:
+        score = AnalyzeNearDuplicates(dataset, _TEXT_FIELDS).invoke().unwrap()
+        assert score.value == pytest.approx(1.0)
 
 
 class TestFieldStats:

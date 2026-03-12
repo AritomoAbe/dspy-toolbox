@@ -4,7 +4,9 @@ from returns.result import Result, Success
 
 from proc.base.proc_error import ProcError
 from proc.base.proc_node import ProcNode
+from proc.base.proc_score import ProcScore
 from proc.pipeline.dataset.training_dataset import TrainingSetDataset
+from proc.pipeline.training_set_auditor.contexts import ExpectedFieldsContext
 from proc.pipeline.training_set_auditor.enums import FieldType, ListPresence
 from proc.pipeline.training_set_auditor.models import (
     FieldAnalysis,
@@ -18,14 +20,19 @@ _EXPECTED_KEY: str = "expected"
 
 
 class AnalyzeExpectedFields(ProcNode):
+    _SCORE: float = 1.0
 
     def __init__(self, dataset: TrainingSetDataset) -> None:
         self._dataset = dataset
 
-    def invoke(self) -> Result[dict[str, FieldAnalysis], ProcError]:
+    def invoke(self) -> Result[ProcScore, ProcError]:
         examples = self._dataset.load()
         records = [{k: v for k, v in ex.items()} for ex in examples]
-        return Success(self._analyze_expected_fields(records))
+        result = self._analyze_expected_fields(records)
+        return Success(ProcScore(value=self._score(), context=ExpectedFieldsContext(result)))
+
+    def _score(self) -> float:
+        return self._SCORE
 
     def _build_stats_for_field(self, ftype: FieldType, values: list[Any]) -> FieldStats:
         if ftype == FieldType.numeric:
