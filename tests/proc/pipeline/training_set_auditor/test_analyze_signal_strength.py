@@ -4,8 +4,9 @@ from pathlib import Path
 import pytest
 from returns.pipeline import is_successful
 
+from proc.pipeline.dataset.training_dataset import TrainingSetDataset
 from proc.pipeline.training_set_auditor.analyze_signal_strength import AnalyzeSignalStrength
-from proc.pipeline.training_set_auditor.enums import CorrelationRisk, LearnabilityLevel, SeparabilityLevel
+from proc.pipeline.training_set_auditor.enums import LearnabilityLevel, SeparabilityLevel
 from proc.pipeline.training_set_auditor.models import (
     ClassifierError,
     ClassifierStats,
@@ -16,13 +17,8 @@ from proc.pipeline.training_set_auditor.models import (
     SkippedField,
 )
 
-DATASET = Path(__file__).parent / "dataset" / "emails_20.jsonl"
-TEXT_FIELDS = ["email_body"]
-
-
-@pytest.fixture(scope="module")
-def analysis() -> dict:
-    return AnalyzeSignalStrength(DATASET, TEXT_FIELDS).invoke().unwrap()
+_DATASET_PATH: Path = Path(__file__).parent / "dataset" / "emails_20.jsonl"
+_TEXT_FIELDS = ["email_body"]
 
 
 def _write_jsonl(path: Path, records: list) -> None:
@@ -38,20 +34,21 @@ def _make_clear_signal_records(n_per_class: int = 10) -> list:
     return records
 
 
+@pytest.fixture(scope="module")
+def dataset() -> TrainingSetDataset:
+    return TrainingSetDataset(_DATASET_PATH)
+
+
+@pytest.fixture(scope="module")
+def analysis(dataset: TrainingSetDataset) -> dict:
+    return AnalyzeSignalStrength(dataset, _TEXT_FIELDS).invoke().unwrap()
+
+
 class TestInvoke:
 
-    def test_success_on_valid_file(self) -> None:
-        result = AnalyzeSignalStrength(DATASET, TEXT_FIELDS).invoke()
+    def test_success_on_valid_dataset(self, dataset: TrainingSetDataset) -> None:
+        result = AnalyzeSignalStrength(dataset, _TEXT_FIELDS).invoke()
         assert is_successful(result)
-
-    def test_failure_on_missing_file(self) -> None:
-        result = AnalyzeSignalStrength(Path("/nonexistent/path.jsonl"), TEXT_FIELDS).invoke()
-        assert not is_successful(result)
-
-    def test_failure_message_mentions_path(self) -> None:
-        path = Path("/nonexistent/path.jsonl")
-        result = AnalyzeSignalStrength(path, TEXT_FIELDS).invoke()
-        assert str(path) in result.failure().message
 
     def test_returns_dict(self, analysis: dict) -> None:
         assert isinstance(analysis, dict)
@@ -127,13 +124,13 @@ class TestWithSyntheticData:
     def test_clear_signal_yields_classifier_stats(self, tmp_path: Path) -> None:
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, _make_clear_signal_records())
-        result = AnalyzeSignalStrength(dataset, ["text"]).invoke().unwrap()
+        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap()
         assert isinstance(result["label"].proxy_classifier, ClassifierStats)
 
     def test_classifier_stats_learnability_is_learnability_level(self, tmp_path: Path) -> None:
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, _make_clear_signal_records())
-        result = AnalyzeSignalStrength(dataset, ["text"]).invoke().unwrap()
+        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap()
         stats = result["label"].proxy_classifier
         assert isinstance(stats, ClassifierStats)
         assert isinstance(stats.learnability, LearnabilityLevel)
@@ -141,7 +138,7 @@ class TestWithSyntheticData:
     def test_clear_signal_accuracy_above_chance(self, tmp_path: Path) -> None:
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, _make_clear_signal_records())
-        result = AnalyzeSignalStrength(dataset, ["text"]).invoke().unwrap()
+        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap()
         stats = result["label"].proxy_classifier
         assert isinstance(stats, ClassifierStats)
         assert stats.accuracy > stats.chance_baseline
@@ -149,13 +146,13 @@ class TestWithSyntheticData:
     def test_clear_signal_separability_has_one_pair(self, tmp_path: Path) -> None:
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, _make_clear_signal_records())
-        result = AnalyzeSignalStrength(dataset, ["text"]).invoke().unwrap()
+        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap()
         assert len(result["label"].separability.pairwise) == 1
 
     def test_clear_signal_keywords_not_empty(self, tmp_path: Path) -> None:
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, _make_clear_signal_records())
-        result = AnalyzeSignalStrength(dataset, ["text"]).invoke().unwrap()
+        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap()
         keywords = result["label"].discriminating_keywords
         assert any(len(kws) > 0 for kws in keywords.values())
 
@@ -163,7 +160,7 @@ class TestWithSyntheticData:
         records = [{"text": "hello", "expected": {"label": "ONLY"}} for _ in range(10)]
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, records)
-        result = AnalyzeSignalStrength(dataset, ["text"]).invoke().unwrap()
+        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke().unwrap()
         assert isinstance(result["label"], SkippedField)
 
     def test_non_dict_expected_is_ignored(self, tmp_path: Path) -> None:
@@ -171,5 +168,5 @@ class TestWithSyntheticData:
         records += _make_clear_signal_records(5)
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, records)
-        result = AnalyzeSignalStrength(dataset, ["text"]).invoke()
+        result = AnalyzeSignalStrength(TrainingSetDataset(dataset), ["text"]).invoke()
         assert is_successful(result)

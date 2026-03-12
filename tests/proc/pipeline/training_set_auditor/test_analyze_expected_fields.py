@@ -3,32 +3,35 @@ from pathlib import Path
 import pytest
 from returns.pipeline import is_successful
 
-from proc.pipeline.training_set_auditor.enums import FieldType
-from proc.pipeline.training_set_auditor.models import CategoricalStats, NumericStats
+from proc.pipeline.dataset.training_dataset import TrainingSetDataset
 from proc.pipeline.training_set_auditor.analyze_expected_fields import AnalyzeExpectedFields
+from proc.pipeline.training_set_auditor.enums import FieldType
+from proc.pipeline.training_set_auditor.models import CategoricalStats, FieldAnalysis, NumericStats
 
-DATASET = Path(__file__).parent / "dataset" / "emails_20.jsonl"
+_DATASET_PATH: Path = Path(__file__).parent / "dataset" / "emails_20.jsonl"
 
 
 @pytest.fixture(scope="module")
-def analysis() -> dict:
-    return AnalyzeExpectedFields(DATASET).invoke().unwrap()
+def dataset() -> TrainingSetDataset:
+    return TrainingSetDataset(_DATASET_PATH)
+
+
+@pytest.fixture(scope="module")
+def analysis(dataset: TrainingSetDataset) -> dict:
+    return AnalyzeExpectedFields(dataset).invoke().unwrap()
 
 
 class TestInvoke:
 
-    def test_success_on_valid_file(self) -> None:
-        result = AnalyzeExpectedFields(DATASET).invoke()
+    def test_success_on_valid_dataset(self, dataset: TrainingSetDataset) -> None:
+        result = AnalyzeExpectedFields(dataset).invoke()
         assert is_successful(result)
 
-    def test_failure_on_missing_file(self) -> None:
-        result = AnalyzeExpectedFields(Path("/nonexistent/path.jsonl")).invoke()
-        assert not is_successful(result)
-
-    def test_failure_message_mentions_path(self) -> None:
-        path = Path("/nonexistent/path.jsonl")
-        result = AnalyzeExpectedFields(path).invoke()
-        assert str(path) in result.failure().message
+    def test_empty_dataset_returns_empty_dict(self, tmp_path: Path) -> None:
+        empty = tmp_path / "empty.jsonl"
+        empty.write_text("")
+        result = AnalyzeExpectedFields(TrainingSetDataset(empty)).invoke()
+        assert result.unwrap() == {}
 
     def test_all_expected_fields_present(self, analysis: dict) -> None:
         assert set(analysis.keys()) == {
@@ -41,7 +44,6 @@ class TestInvoke:
         }
 
     def test_all_values_are_field_analysis(self, analysis: dict) -> None:
-        from proc.pipeline.training_set_auditor.models import FieldAnalysis
         assert all(isinstance(v, FieldAnalysis) for v in analysis.values())
 
 
