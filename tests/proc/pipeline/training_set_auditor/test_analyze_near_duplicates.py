@@ -3,38 +3,35 @@ from pathlib import Path
 import pytest
 from returns.pipeline import is_successful
 
+from proc.pipeline.dataset.training_dataset import TrainingSetDataset
 from proc.pipeline.training_set_auditor.analyze_near_duplicates import AnalyzeNearDuplicates
 from proc.pipeline.training_set_auditor.models import FieldDuplicateStats, NearDuplicatePair
 
-DATASET = Path(__file__).parent / "dataset" / "emails_20.jsonl"
-TEXT_FIELDS = ["email_body", "email_to"]
+_DATASET_PATH: Path = Path(__file__).parent / "dataset" / "emails_20.jsonl"
+_TEXT_FIELDS = ["email_body", "email_to"]
 
 
 @pytest.fixture(scope="module")
-def analysis() -> dict:
-    return AnalyzeNearDuplicates(DATASET, TEXT_FIELDS).invoke().unwrap()
+def dataset() -> TrainingSetDataset:
+    return TrainingSetDataset(_DATASET_PATH)
+
+
+@pytest.fixture(scope="module")
+def analysis(dataset: TrainingSetDataset) -> dict:
+    return AnalyzeNearDuplicates(dataset, _TEXT_FIELDS).invoke().unwrap()
 
 
 class TestInvoke:
 
-    def test_success_on_valid_file(self) -> None:
-        result = AnalyzeNearDuplicates(DATASET, TEXT_FIELDS).invoke()
+    def test_success_on_valid_dataset(self, dataset: TrainingSetDataset) -> None:
+        result = AnalyzeNearDuplicates(dataset, _TEXT_FIELDS).invoke()
         assert is_successful(result)
 
-    def test_failure_on_missing_file(self) -> None:
-        result = AnalyzeNearDuplicates(Path("/nonexistent/path.jsonl"), TEXT_FIELDS).invoke()
-        assert not is_successful(result)
-
-    def test_failure_message_mentions_path(self) -> None:
-        path = Path("/nonexistent/path.jsonl")
-        result = AnalyzeNearDuplicates(path, TEXT_FIELDS).invoke()
-        assert str(path) in result.failure().message
-
     def test_returns_only_requested_fields(self, analysis: dict) -> None:
-        assert set(analysis.keys()) == set(TEXT_FIELDS)
+        assert set(analysis.keys()) == set(_TEXT_FIELDS)
 
-    def test_unknown_field_excluded(self) -> None:
-        result = AnalyzeNearDuplicates(DATASET, ["nonexistent_field"]).invoke()
+    def test_unknown_field_excluded(self, dataset: TrainingSetDataset) -> None:
+        result = AnalyzeNearDuplicates(dataset, ["nonexistent_field"]).invoke()
         assert is_successful(result)
         assert result.unwrap() == {}
 

@@ -1,11 +1,10 @@
-import json
-from pathlib import Path
 from typing import Any
 
-from returns.result import Failure, Result, Success
+from returns.result import Result, Success
 
 from proc.base.proc_error import ProcError
 from proc.base.proc_node import ProcNode
+from proc.pipeline.dataset.training_dataset import TrainingSetDataset
 from proc.pipeline.training_set_auditor.enums import FieldType, ListPresence
 from proc.pipeline.training_set_auditor.models import (
     FieldAnalysis,
@@ -15,28 +14,18 @@ from proc.pipeline.training_set_auditor.models import (
 )
 from proc.pipeline.training_set_auditor.utils import FieldStatsUtils
 
+_EXPECTED_KEY: str = "expected"
+
 
 class AnalyzeInputFields(ProcNode):
 
-    def __init__(self, path: Path) -> None:
-        self._path = path
+    def __init__(self, dataset: TrainingSetDataset) -> None:
+        self._dataset = dataset
 
     def invoke(self) -> Result[dict[str, FieldAnalysis], ProcError]:
-        try:
-            return Success(self._analyze_input_fields(self._read_records()))
-        except FileNotFoundError:
-            return Failure(ProcError(f"File not found: {self._path}"))
-        except json.JSONDecodeError as e:
-            return Failure(ProcError(f"Invalid JSONL: {e}"))
-
-    def _read_records(self) -> list[dict[str, Any]]:
-        records: list[dict[str, Any]] = []
-        with open(self._path) as f:
-            for line in f:
-                stripped = line.strip()
-                if stripped:
-                    records.append(json.loads(stripped))
-        return records
+        examples = self._dataset.load()
+        records = [{k: v for k, v in ex.items()} for ex in examples]
+        return Success(self._analyze_input_fields(records))
 
     def _build_stats_for_field(self, ftype: FieldType, values: list[Any]) -> FieldStats:
         if ftype == FieldType.numeric:
@@ -71,14 +60,13 @@ class AnalyzeInputFields(ProcNode):
         return FieldStatsUtils.categorical_stats([str(v) for v in values])
 
     def _analyze_input_fields(
-        self, records: list[dict[str, Any]], expected_key: str = "expected",
+        self, records: list[dict[str, Any]],
     ) -> dict[str, FieldAnalysis]:
-        """Analyze top-level input fields (everything except expected)."""
         field_values: dict[str, list[Any]] = {}
 
         for rec in records:
             for key, value in rec.items():
-                if key == expected_key:
+                if key == _EXPECTED_KEY:
                     continue
                 field_values.setdefault(key, []).append(value)
 

@@ -1,14 +1,13 @@
-import json
 from collections import Counter
 from itertools import combinations
 from operator import attrgetter
-from pathlib import Path
 from typing import Any
 
-from returns.result import Failure, Result, Success
+from returns.result import Result, Success
 
 from proc.base.proc_error import ProcError
 from proc.base.proc_node import ProcNode
+from proc.pipeline.dataset.training_dataset import TrainingSetDataset
 from proc.pipeline.training_set_auditor.enums import CorrelationRisk, FieldType
 from proc.pipeline.training_set_auditor.models import CoOccurrenceEntry
 from proc.pipeline.training_set_auditor.utils import FieldStatsUtils
@@ -20,25 +19,13 @@ _EXPECTED_KEY: str = "expected"
 
 class AnalyzeCoOccurrence(ProcNode):
 
-    def __init__(self, path: Path) -> None:
-        self._path = path
+    def __init__(self, dataset: TrainingSetDataset) -> None:
+        self._dataset = dataset
 
     def invoke(self) -> Result[list[CoOccurrenceEntry], ProcError]:
-        try:
-            return Success(self._analyze_co_occurrence(self._read_records()))
-        except FileNotFoundError:
-            return Failure(ProcError(f"File not found: {self._path}"))
-        except json.JSONDecodeError as e:
-            return Failure(ProcError(f"Invalid JSONL: {e}"))
-
-    def _read_records(self) -> list[dict[str, Any]]:
-        records: list[dict[str, Any]] = []
-        with open(self._path) as f:
-            for line in f:
-                stripped = line.strip()
-                if stripped:
-                    records.append(json.loads(stripped))
-        return records
+        examples = self._dataset.load()
+        records = [{k: v for k, v in ex.items()} for ex in examples]
+        return Success(self._analyze_co_occurrence(records))
 
     def _collect_field_values(
         self, records: list[dict[str, Any]],

@@ -4,36 +4,33 @@ from pathlib import Path
 import pytest
 from returns.pipeline import is_successful
 
+from proc.pipeline.dataset.training_dataset import TrainingSetDataset
 from proc.pipeline.training_set_auditor.analyze_co_occurrence import AnalyzeCoOccurrence
 from proc.pipeline.training_set_auditor.enums import CorrelationRisk
 from proc.pipeline.training_set_auditor.models import CoOccurrenceEntry
 
-DATASET = Path(__file__).parent / "dataset" / "emails_20.jsonl"
-
-
-@pytest.fixture(scope="module")
-def analysis() -> list:
-    return AnalyzeCoOccurrence(DATASET).invoke().unwrap()
+_DATASET_PATH: Path = Path(__file__).parent / "dataset" / "emails_20.jsonl"
 
 
 def _write_jsonl(path: Path, records: list) -> None:
     path.write_text("\n".join(json.dumps(r) for r in records))
 
 
+@pytest.fixture(scope="module")
+def dataset() -> TrainingSetDataset:
+    return TrainingSetDataset(_DATASET_PATH)
+
+
+@pytest.fixture(scope="module")
+def analysis(dataset: TrainingSetDataset) -> list:
+    return AnalyzeCoOccurrence(dataset).invoke().unwrap()
+
+
 class TestInvoke:
 
-    def test_success_on_valid_file(self) -> None:
-        result = AnalyzeCoOccurrence(DATASET).invoke()
+    def test_success_on_valid_dataset(self, dataset: TrainingSetDataset) -> None:
+        result = AnalyzeCoOccurrence(dataset).invoke()
         assert is_successful(result)
-
-    def test_failure_on_missing_file(self) -> None:
-        result = AnalyzeCoOccurrence(Path("/nonexistent/path.jsonl")).invoke()
-        assert not is_successful(result)
-
-    def test_failure_message_mentions_path(self) -> None:
-        path = Path("/nonexistent/path.jsonl")
-        result = AnalyzeCoOccurrence(path).invoke()
-        assert str(path) in result.failure().message
 
     def test_returns_list(self, analysis: list) -> None:
         assert isinstance(analysis, list)
@@ -96,7 +93,7 @@ class TestWithSyntheticData:
         records += [{"expected": {"status": "B", "tier": "Y"}}] * 2
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, records)
-        result = AnalyzeCoOccurrence(dataset).invoke().unwrap()
+        result = AnalyzeCoOccurrence(TrainingSetDataset(dataset)).invoke().unwrap()
         assert len(result) == 1
         assert result[0].risk == CorrelationRisk.moderate
         assert result[0].dominant_pair == ("A", "X")
@@ -106,7 +103,7 @@ class TestWithSyntheticData:
         records += [{"expected": {"status": "B", "tier": "Y"}}] * 1
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, records)
-        result = AnalyzeCoOccurrence(dataset).invoke().unwrap()
+        result = AnalyzeCoOccurrence(TrainingSetDataset(dataset)).invoke().unwrap()
         assert len(result) == 1
         assert result[0].risk == CorrelationRisk.high
         assert result[0].dominant_pct > 85.0
@@ -115,7 +112,7 @@ class TestWithSyntheticData:
         records = [{"expected": "not_a_dict"}, {"expected": {"status": "A", "tier": "X"}}]
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, records)
-        result = AnalyzeCoOccurrence(dataset).invoke()
+        result = AnalyzeCoOccurrence(TrainingSetDataset(dataset)).invoke()
         assert is_successful(result)
 
     def test_sorted_by_dominant_pct_descending(self, tmp_path: Path) -> None:
@@ -127,6 +124,6 @@ class TestWithSyntheticData:
         )
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, records)
-        result = AnalyzeCoOccurrence(dataset).invoke().unwrap()
+        result = AnalyzeCoOccurrence(TrainingSetDataset(dataset)).invoke().unwrap()
         pcts = [e.dominant_pct for e in result]
         assert pcts == sorted(pcts, reverse=True)
