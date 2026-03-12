@@ -23,7 +23,7 @@ def dataset() -> TrainingSetDataset:
 
 @pytest.fixture(scope="module")
 def analysis(dataset: TrainingSetDataset) -> list:
-    return AnalyzeCoOccurrence(dataset).invoke().unwrap()
+    return AnalyzeCoOccurrence(dataset).invoke().unwrap().context.result
 
 
 class TestInvoke:
@@ -40,6 +40,10 @@ class TestInvoke:
 
     def test_no_correlations_in_diverse_dataset(self, analysis: list) -> None:
         assert analysis == []
+
+    def test_score_is_one(self, dataset: TrainingSetDataset) -> None:
+        score = AnalyzeCoOccurrence(dataset).invoke().unwrap()
+        assert score.value == pytest.approx(1.0)
 
 
 class TestCoOccurrenceEntries:
@@ -93,7 +97,7 @@ class TestWithSyntheticData:
         records += [{"expected": {"status": "B", "tier": "Y"}}] * 2
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, records)
-        result = AnalyzeCoOccurrence(TrainingSetDataset(dataset)).invoke().unwrap()
+        result = AnalyzeCoOccurrence(TrainingSetDataset(dataset)).invoke().unwrap().context.result
         assert len(result) == 1
         assert result[0].risk == CorrelationRisk.moderate
         assert result[0].dominant_pair == ("A", "X")
@@ -103,7 +107,7 @@ class TestWithSyntheticData:
         records += [{"expected": {"status": "B", "tier": "Y"}}] * 1
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, records)
-        result = AnalyzeCoOccurrence(TrainingSetDataset(dataset)).invoke().unwrap()
+        result = AnalyzeCoOccurrence(TrainingSetDataset(dataset)).invoke().unwrap().context.result
         assert len(result) == 1
         assert result[0].risk == CorrelationRisk.high
         assert result[0].dominant_pct > 85.0
@@ -124,6 +128,6 @@ class TestWithSyntheticData:
         )
         dataset = tmp_path / "data.jsonl"
         _write_jsonl(dataset, records)
-        result = AnalyzeCoOccurrence(TrainingSetDataset(dataset)).invoke().unwrap()
+        result = AnalyzeCoOccurrence(TrainingSetDataset(dataset)).invoke().unwrap().context.result
         pcts = [e.dominant_pct for e in result]
         assert pcts == sorted(pcts, reverse=True)

@@ -1,0 +1,135 @@
+{
+  "predict.predict": {
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "email_from": "diana@salesforce.com",
+        "email_to": "sam@abe-health.com",
+        "email_body": "Dear Sam,\n\nDo you have a couple of hours free Thursday at 4:30pm ET or Friday at end of day to go over the demo? I'm based in New York, so I'm on ET.\n\nThanks,\nDiana",
+        "current_date": "2024-03-11",
+        "expected": {
+          "sender_iana_timezone": "America/New_York",
+          "duration_minutes": 120,
+          "urgency": "THIS_WEEK",
+          "flexibility": "SPECIFIC",
+          "preferred_windows": [
+            {
+              "day_of_week": "Thursday",
+              "time_of_day": "16:30",
+              "iana_timezone": "America/New_York"
+            },
+            {
+              "day_of_week": "Friday",
+              "time_of_day": "end of day"
+            }
+          ],
+          "meeting_topic": "demo"
+        }
+      },
+      {
+        "email_from": "uma@research.edu",
+        "email_to": "pm@product.io",
+        "email_body": "Hey Taylor,\n\nI'd like to set up a product roadmap. Are you around Monday at end of day or Tuesday at 1:30pm Seattle time for 20 minutes?\n\nThanks,\nUma",
+        "current_date": "2024-06-03",
+        "expected": {
+          "sender_iana_timezone": "America/Los_Angeles",
+          "duration_minutes": 20,
+          "urgency": "NEXT_WEEK",
+          "flexibility": "SPECIFIC",
+          "preferred_windows": [
+            {
+              "day_of_week": "Monday",
+              "time_of_day": "end of day"
+            },
+            {
+              "day_of_week": "Tuesday",
+              "time_of_day": "13:30",
+              "iana_timezone": "America/Los_Angeles"
+            }
+          ],
+          "meeting_topic": "product roadmap"
+        }
+      },
+      {
+        "email_from": "paul@agency.co",
+        "email_to": "matt@abe-health.com",
+        "email_body": "Good day Matt,\n\nLet's catch up on the Q2 planning. I can do Wednesday at afternoon or Thursday at 11am Australian Eastern time for 15 mins. I'm based in Australia, so I'm on Australian Eastern time.\n\nCheers,\nPaul",
+        "current_date": "2024-04-08",
+        "expected": {
+          "sender_iana_timezone": "Australia/Sydney",
+          "duration_minutes": 15,
+          "urgency": "NEXT_WEEK",
+          "flexibility": "SPECIFIC",
+          "preferred_windows": [
+            {
+              "day_of_week": "Wednesday",
+              "time_of_day": "afternoon"
+            },
+            {
+              "day_of_week": "Thursday",
+              "time_of_day": "11:00",
+              "iana_timezone": "Australia/Sydney"
+            }
+          ],
+          "meeting_topic": "Q2 planning"
+        }
+      },
+      {
+        "email_from": "quinn@marketing.biz",
+        "email_to": "dev@engineering.com",
+        "email_body": "Hello Riley,\n\nI'd like to set up a Q1 review. Are you around at end of day for 15 minutes?\n\nBest,\nQuinn",
+        "current_date": "2024-01-08",
+        "expected": {
+          "sender_iana_timezone": "Europe/London",
+          "duration_minutes": 15,
+          "urgency": "FLEXIBLE",
+          "flexibility": "FLEXIBLE",
+          "preferred_windows": [
+            {
+              "time_of_day": "end of day"
+            }
+          ],
+          "meeting_topic": "Q1 review"
+        }
+      }
+    ],
+    "signature": {
+      "instructions": "You are a scheduling assistant.  Your job is to read a meeting-proposal email\nand extract structured scheduling data from it.\n\nRules:\n- duration_minutes: if not stated, default to 30.\n- sender_iana_timezone: infer from city/region clues (e.g. \"San Francisco\" ->\n  \"America/Los_Angeles\").  If genuinely unknown, return \"UNKNOWN\".\n- urgency: pick the most specific one: \"today\" > \"this_week\" > \"next_week\" > \"flexible\".\n- flexibility: \"specific\" if the sender named concrete times; \"flexible\" if open-ended.\n- preferred_windows: list every time-window the sender explicitly proposed.\n  Each window may have day_of_week, date, time_of_day (HH:MM or \"morning\"/\n  \"afternoon\"/\"evening\"), iana_timezone, and duration_hint.\n- meeting_topic: short phrase for the meeting purpose, or null.\n\nOutput ONLY valid JSON matching the schema below - no prose, no markdown fences.\n\nJSON schema:\n{\n  \"sender_iana_timezone\": \"<IANA tz string or UNKNOWN>\",\n  \"duration_minutes\": <int>,\n  \"urgency\": \"<today|this_week|next_week|flexible>\",\n  \"flexibility\": \"<specific|flexible>\",\n  \"preferred_windows\": [\n    {\n      \"day_of_week\":   \"<Monday...Sunday or null>\",\n      \"date\":          \"<YYYY-MM-DD or null>\",\n      \"time_of_day\":   \"<HH:MM or morning/afternoon/evening or null>\",\n      \"iana_timezone\": \"<IANA tz string or null>\",\n      \"duration_hint\": <int or null>\n    }\n  ],\n  \"meeting_topic\": \"<string or null>\"\n}",
+      "fields": [
+        {
+          "prefix": "Email From:",
+          "description": "Sender's email address"
+        },
+        {
+          "prefix": "Email To:",
+          "description": "Recipient's email address"
+        },
+        {
+          "prefix": "Email Body:",
+          "description": "Full email body text"
+        },
+        {
+          "prefix": "Current Date:",
+          "description": "Today's date as YYYY-MM-DD (for relative references)"
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Extracted Json:",
+          "description": "JSON object matching the schema described in the docstring"
+        }
+      ]
+    },
+    "lm": null
+  },
+  "metadata": {
+    "dependency_versions": {
+      "python": "3.12",
+      "dspy": "3.1.3",
+      "cloudpickle": "3.1"
+    }
+  }
+}

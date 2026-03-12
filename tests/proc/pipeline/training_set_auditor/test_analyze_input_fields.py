@@ -18,7 +18,7 @@ def dataset() -> TrainingSetDataset:
 
 @pytest.fixture(scope="module")
 def analysis(dataset: TrainingSetDataset) -> dict:
-    return AnalyzeInputFields(dataset).invoke().unwrap()
+    return AnalyzeInputFields(dataset).invoke().unwrap().context.result
 
 
 class TestInvoke:
@@ -31,7 +31,11 @@ class TestInvoke:
         empty = tmp_path / "empty.jsonl"
         empty.write_text("")
         result = AnalyzeInputFields(TrainingSetDataset(empty)).invoke()
-        assert result.unwrap() == {}
+        assert result.unwrap().context.result == {}
+
+    def test_score_is_one(self, dataset: TrainingSetDataset) -> None:
+        score = AnalyzeInputFields(dataset).invoke().unwrap()
+        assert score.value == pytest.approx(1.0)
 
     def test_all_input_fields_present(self, analysis: dict) -> None:
         assert set(analysis.keys()) == {"email_from", "email_to", "email_body", "current_date"}
