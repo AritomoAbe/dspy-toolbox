@@ -29,7 +29,7 @@ class AuditTrainingSamples(TestSuite):
 
 
 def _main() -> None:
-    dataset = TrainingSetDataset(Path(__file__).parent.parent / "dataset" / "emails_50.jsonl")
+    dataset = TrainingSetDataset(Path(__file__).parent.parent / "dataset" / "trainset_emails_50.jsonl")
     AuditTrainingSamples(dataset).run()
 
 

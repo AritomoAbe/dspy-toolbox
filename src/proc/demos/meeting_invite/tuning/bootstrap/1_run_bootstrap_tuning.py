@@ -2,9 +2,10 @@ import logging
 import time
 from pathlib import Path
 
+import dspy
 from dspy import BootstrapFewShot
 
-from proc.base.base_llm import BaseLLMConfig
+from proc.base.base_llm import BaseLLMConfig, MainModelNames
 from proc.demos.meeting_invite.meeting_invite_extractor_llm import MeetingInviteLLM
 from proc.demos.meeting_invite.meeting_invite_score_extractor import MeetingInviteScoreExtractor
 from proc.pipeline.dataset.training_dataset import TrainingSetDataset
@@ -15,9 +16,11 @@ LOGGER = logging.getLogger(__name__)
 
 
 def _main() -> None:
-    dataset = TrainingSetDataset(Path(__file__).parent.parent / "dataset" / "emails_50.jsonl")
+    dataset = TrainingSetDataset(Path(__file__).parent.parent / "dataset" / "trainset_emails_50.jsonl")
 
-    config = BaseLLMConfig()
+    config = BaseLLMConfig(
+        name = MainModelNames.QWEN_3_4B_INSTRUCT
+    )
     llm = MeetingInviteLLM(config=config)
 
     scorer = MeetingInviteScoreExtractor()
@@ -30,13 +33,19 @@ def _main() -> None:
     )
 
     trainset = dataset.load()
-    LOGGER.info("Starting BootstrapFewShot optimisation on %d examples…", len(trainset))
-    optimized = optimizer.compile(llm, trainset=trainset)
-    LOGGER.info("BootstrapFewShot complete.")
 
-    save_path = Path(__file__).parent / f'optimized_extractor_bootstrap_{time.time()}.json'
-    optimized.save(str(save_path))
+    original_cache = dspy.settings.lm.cache
+    dspy.settings.lm.cache = False
+    try:  # noqa: WPS501
+        LOGGER.info("Starting BootstrapFewShot optimisation on %d examples…", len(trainset))
+        optimized = optimizer.compile(llm, trainset=trainset)
+        LOGGER.info("BootstrapFewShot complete.")
 
+        save_path = Path(__file__).parent / f'optimized_extractor_bootstrap_{time.time()}.json'
+        optimized.save(str(save_path))
+
+    finally:
+        dspy.settings.lm.cache = original_cache
 
 if __name__ == "__main__":
     _main()

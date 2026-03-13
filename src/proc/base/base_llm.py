@@ -10,11 +10,13 @@ from proc.base.proc_error import ProcError
 
 class MainModelNames(Enum):
     QWEN_2_5_05B_INSTRUCT = "qwen2.5:0.5b-instruct"
+    QWEN_2_5_3B_INSTRUCT = "qwen2.5:3b-instruct"
     QWEN_2_5_7B_INSTRUCT = "qwen2.5:7b-instruct"
+    QWEN_3_4B_INSTRUCT = "qwen3:4b-instruct"
 
 
 class BaseLLMConfig(BaseModel):
-    name: MainModelNames = MainModelNames.QWEN_2_5_7B_INSTRUCT
+    name: MainModelNames = MainModelNames.QWEN_3_4B_INSTRUCT
     base_url: str = 'http://localhost:11434'
     temperature: float = 0.0  # noqa: WPS358
     do_warmup: bool = False
@@ -54,3 +56,7 @@ class BaseLLM(abc.ABC, Generic[IN, OUT]):
     @abc.abstractmethod
     def invoke(self, payload: IN) -> Result[OUT, ProcError]:
         pass
+
+    @property
+    def config(self) -> BaseLLMConfig:
+        return self._config
