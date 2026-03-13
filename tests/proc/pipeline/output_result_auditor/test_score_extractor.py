@@ -9,6 +9,9 @@ class _ConcreteExtractor(ScoreExtractor):
     def extraction_metric(self, example: Any, prediction: Any, trace: Any = None) -> float:
         return 1.0
 
+    def field_metric(self, field: str, expected_val: Any, predicted_val: Any) -> bool:
+        return bool(expected_val == predicted_val)
+
 
 class TestScoreExtractor:
 

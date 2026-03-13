@@ -1,8 +1,9 @@
 import logging
 from typing import Any
 
+import dspy
 import numpy as np
-from returns.result import Result, Success
+from returns.result import Result, Success, Failure
 
 from proc.base.dspy_llm import DSpyLLM
 from proc.base.proc_error import ProcError
@@ -11,7 +12,7 @@ from proc.base.proc_score import ProcScore
 from proc.pipeline.dataset.base_dataset import BaseDataset
 from proc.pipeline.output_result_auditor.contexts import SNRContext
 from proc.pipeline.output_result_auditor.models import SNRResult
-from proc.pipeline.output_result_auditor.score_extractor import ScoreExtractor
+from proc.pipeline.output_result_auditor.score_extractor import ScoreExtractor, INVALID_SCORE
 
 _EPSILON: float = 1e-9
 _DEFAULT_RUNS: int = 5
@@ -34,15 +35,33 @@ class SignalToNoiseRatio(ProcNode):
         self._scorer = scorer
         self._n_runs = n_runs
 
+    """
+    SNR formula is mean / (sqrt(variance) + ε). For a discrete classifier scoring 0/1,
+    the variance is entirely driven by how often the model flips its answer across runs. So the math reduces to:
+    
+    - If the model never flips → variance ≈ 0 → SNR artificially huge (like your training set result)
+    - If the model flips on ~20% of runs → variance ≈ 0.16 → SNR in the 2–10 range
+    - If the model flips on ~50% of runs → variance ≈ 0.25 → SNR near 1 (problematic)
+    """
     def invoke(self) -> Result[ProcScore, ProcError]:
+
+        if self._llm.config.temperature == 0:
+            self._logger.warning("LLM model temperature is 0. SNR will produce useless data.")
+
         per_example_scores: list[list[float]] = []
         for index, example in enumerate(self._dataset.load()):
             self._logger.info(f"Processing example {index}")
             run_scores: list[float] = []
             for n_run in range(self._n_runs):
-                self._logger.info(f"Running run {n_run}")
-                pred = self._llm(**example.inputs())
+                self._logger.info(f"Running run {index}/{n_run}")
+                with dspy.context(cache=False):
+                    pred = self._llm(**example.inputs())
                 score = self._scorer.extraction_metric(example, pred)
+
+                if score == INVALID_SCORE:
+                    return Failure(ProcError(f'Cannot calculate SNR for example {index}'))
+
+                self._logger.info(f"Finished run {index}/{n_run} with score {score}")
                 run_scores.append(score)
             per_example_scores.append(run_scores)
 

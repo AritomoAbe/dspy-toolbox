@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 _DEFAULT_DURATION: int = 30
 _UNKNOWN_TZ: str = "UNKNOWN"
@@ -49,3 +49,11 @@ class EmailMeetingInfo(BaseModel):
         default_factory=list, description="Times the sender explicitly proposed",
     )
     meeting_topic: Optional[str] = Field(None, description="Subject / purpose of meeting")
+    edge_case: Optional[str] = Field(None, description="Edge case of meeting")
+
+    @field_validator('urgency', 'flexibility', mode='before')
+    @classmethod
+    def normalise_case(cls, value: object) -> object:
+        if isinstance(value, str):
+            return value.lower()
+        return value

@@ -7,7 +7,7 @@ import dspy
 from proc.demos.meeting_invite.calendar_utils import _normalise_time_of_day
 from proc.demos.meeting_invite.meeting_invite_extractor_llm import _strip_fences, _dict_to_email_meeting_info
 from proc.demos.meeting_invite.models import EmailMeetingInfo
-from proc.pipeline.output_result_auditor.score_extractor import ScoreExtractor
+from proc.pipeline.output_result_auditor.score_extractor import ScoreExtractor, INVALID_SCORE
 
 
 class _ScoreWeights:
@@ -26,6 +26,9 @@ class MeetingInviteScoreExtractor(ScoreExtractor):
     def __init__(self) -> None:
         self._logger = logging.getLogger(__name__)
 
+    def field_metric(self, field: str, expected_val: Any, predicted_val: Any) -> bool:
+        return bool(expected_val == predicted_val)
+
     def extraction_metric(self, example: dspy.Example, prediction: dspy.Prediction, trace: Any = None) -> float:
         expected = example.expected
         if isinstance(expected, EmailMeetingInfo):
@@ -33,13 +36,15 @@ class MeetingInviteScoreExtractor(ScoreExtractor):
         else:
             try:
                 gold = _dict_to_email_meeting_info(expected)
-            except Exception:
-                return 0
+            except Exception as e:
+                self._logger.error(f'Cannot process expected data: {e}')
+                return INVALID_SCORE
         raw_json = getattr(prediction, "extracted_json", "") or ""
         try:
             pred = _dict_to_email_meeting_info(json.loads(_strip_fences(raw_json)))
-        except Exception:
-            return 0
+        except Exception as e:
+            self._logger.error(f'Cannot process extracted_json: {e}')
+            return INVALID_SCORE
 
         score: float = 0
 

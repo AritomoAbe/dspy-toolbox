@@ -37,12 +37,15 @@ class MonteCarloEstimation(ProcNode):
         self._scorer = scorer
 
     def invoke(self) -> Result[ProcScore, ProcError]:
+        if self._llm.config.temperature == 0:
+            self._logger.warning("LLM model temperature is 0. SNR will produce useless data.")
+
         probs_list: list[float] = []
-        for ex in self._dataset.load():
+        for index, ex in enumerate(self._dataset.load()):
+            self._logger.info(f"Running example {index}")
             prob = self._estimate_pass_probability(ex, n_samples=_DETAIL_SAMPLES)
+            self._logger.info(f"Finished example {index} with prob={prob:.2f}")
             probs_list.append(prob)
-            preview = str(ex)[:_PREVIEW_LEN]
-            self._logger.info(f"P(pass)={prob:.2f}  |  {preview}")
 
         probs = np.array(probs_list)
         above_hard = probs >= _HARD_THRESHOLD
@@ -67,7 +70,10 @@ class MonteCarloEstimation(ProcNode):
         n_samples: int = _DEFAULT_SAMPLES,
     ) -> float:
         passes = 0
-        for _ in range(n_samples):
+        for n_sample in range(n_samples):
+            self._logger.info(f"Executing iteration {n_sample}")
             pred = self._llm(**example.inputs())
-            passes += int(self._scorer.extraction_metric(example, pred))
+            score = self._scorer.extraction_metric(example, pred)
+            self._logger.info(f"Finished iteration {n_sample} with score = {score:.2f}")
+            passes += int(score)
         return passes / n_samples

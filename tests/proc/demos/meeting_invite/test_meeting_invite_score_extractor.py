@@ -6,6 +6,7 @@ import pytest
 
 from proc.demos.meeting_invite.meeting_invite_score_extractor import MeetingInviteScoreExtractor
 from proc.demos.meeting_invite.models import EmailMeetingInfo, Flexibility, PreferredWindow, Urgency
+from proc.pipeline.output_result_auditor.score_extractor import INVALID_SCORE
 
 
 class _F:
@@ -54,11 +55,11 @@ class TestExtractionMetricPerfect:
         raw = json.dumps(dict(_F.base))
         assert _F.score(raw) == pytest.approx(1.0)
 
-    def test_invalid_json_returns_zero(self) -> None:
-        assert _F.score("not json") == 0
+    def test_invalid_json_returns_invalid_score(self) -> None:
+        assert _F.score("not json") == INVALID_SCORE
 
-    def test_empty_prediction_returns_zero(self) -> None:
-        assert _F.score("") == 0
+    def test_empty_prediction_returns_invalid_score(self) -> None:
+        assert _F.score("") == INVALID_SCORE
 
 
 class TestExtractionMetricPenalties:
