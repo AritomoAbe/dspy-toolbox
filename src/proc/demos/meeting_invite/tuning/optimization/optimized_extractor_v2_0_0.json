@@ -1,0 +1,96 @@
+{
+  "predict.predict": {
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "augmented": true,
+        "email_from": "frank@logistics.de",
+        "email_to": "ceo@startup.com",
+        "email_body": "Hi Jordan,\n\nI'd love to schedule a 1:1 in the coming weeks — do you have 1 hour free? I'm based in the Midwest, so I'm on CT.\n\nBest wishes,\nFrank",
+        "current_date": "2024-01-08",
+        "reasoning": "The sender, Frank, is based in the Midwest, which typically refers to the Central Time Zone (CT), corresponding to the IANA timezone \"America/Chicago\". The email proposes a 1-hour meeting in the \"coming weeks\", which is interpreted as \"this_week\" in urgency since it's a short-term request following the current date. The meeting duration is explicitly stated as \"1 hour\", which is 60 minutes. The time windows are not specified, so flexibility is \"flexible\". The meeting topic is not mentioned, so it is null. The sender does not provide specific times, so no preferred windows are extracted. The duration_minutes is set to 60 based on the stated 1-hour meeting.",
+        "extracted_json": "{\n  \"sender_iana_timezone\": \"America/Chicago\",\n  \"duration_minutes\": 60,\n  \"urgency\": \"this_week\",\n  \"flexibility\": \"flexible\",\n  \"preferred_windows\": [],\n  \"meeting_topic\": null\n}"
+      },
+      {
+        "augmented": true,
+        "email_from": "diana@salesforce.com",
+        "email_to": "alex@abe-health.com",
+        "email_body": "Hi Alex,\n\nCould we find a quick call this afternoon for a user research debrief? I'm free 11:30am CET.\n\nCheers,\nDiana",
+        "current_date": "2024-01-15",
+        "reasoning": "The email proposes a meeting for \"a user research debrief\" and specifies \"11:30am CET\" as a time window. The sender is in San Francisco (inferred from the domain diana@salesforce.com), which corresponds to the IANA timezone \"America/Los_Angeles\". The time is specified as \"11:30am\", which is a concrete time, indicating \"specific\" flexibility. The meeting is proposed for \"this afternoon\", which, relative to the current date (2024-01-15), falls within the same day, so urgency is \"today\". The duration is not explicitly stated, so it defaults to 30 minutes. The meeting topic is \"user research debrief\". The preferred window is extracted as: day_of_week = null (not specified), date = 2024-01-15 (current date), time_of_day = \"11:30am\", iana_timezone = \"Europe/Berlin\" (CET is in Europe/Berlin), duration_hint = null (not specified).",
+        "extracted_json": "{\n  \"sender_iana_timezone\": \"America/Los_Angeles\",\n  \"duration_minutes\": 30,\n  \"urgency\": \"today\",\n  \"flexibility\": \"specific\",\n  \"preferred_windows\": [\n    {\n      \"day_of_week\": null,\n      \"date\": \"2024-01-15\",\n      \"time_of_day\": \"11:30am\",\n      \"iana_timezone\": \"Europe/Berlin\",\n      \"duration_hint\": null\n    }\n  ],\n  \"meeting_topic\": \"user research debrief\"\n}"
+      },
+      {
+        "augmented": true,
+        "email_from": "henry@lawfirm.com",
+        "email_to": "alex@abe-health.com",
+        "email_body": "Hey Alex,\n\nCould we find an hour and a half sometime this week for a marketing strategy? I'm free Tuesday at 9:30am CET or Friday at lunchtime. I'm based in Berlin, so I'm on CET.\n\nThanks,\nHenry",
+        "current_date": "2024-01-22",
+        "reasoning": "The email proposes a meeting of 90 minutes (one hour and a half) during this week. The sender, Henry, is based in Berlin, which is in the CET (Central European Time) timezone. Two specific time windows are mentioned: Tuesday at 9:30am CET and Friday at lunchtime (interpreted as 12:00–1:00pm, or 12:00pm CET). The urgency is \"this_week\" since the meeting is proposed for \"sometime this week\". The time windows are specific, so flexibility is \"specific\". The meeting topic is \"marketing strategy\". The current date (2024-01-22) falls in January, and Tuesday and Friday this week are within the current week. The day_of_week and date are extracted from the proposed times. The duration_hint is 90 minutes for both windows. The sender's timezone is inferred as \"Europe/Berlin\" (CET).",
+        "extracted_json": "{\n  \"sender_iana_timezone\": \"Europe/Berlin\",\n  \"duration_minutes\": 90,\n  \"urgency\": \"this_week\",\n  \"flexibility\": \"specific\",\n  \"preferred_windows\": [\n    {\n      \"day_of_week\": \"Tuesday\",\n      \"date\": \"2024-01-23\",\n      \"time_of_day\": \"09:30\",\n      \"iana_timezone\": \"Europe/Berlin\",\n      \"duration_hint\": 90\n    },\n    {\n      \"day_of_week\": \"Friday\",\n      \"date\": \"2024-01-26\",\n      \"time_of_day\": \"12:00\",\n      \"iana_timezone\": \"Europe/Berlin\",\n      \"duration_hint\": 90\n    }\n  ],\n  \"meeting_topic\": \"marketing strategy\"\n}"
+      },
+      {
+        "email_from": "paul@agency.co",
+        "email_to": "matt@abe-health.com",
+        "email_body": "Good day Matt,\n\nLet's catch up on the Q2 planning. I can do Wednesday at afternoon or Thursday at 11am Australian Eastern time for 15 mins. I'm based in Australia, so I'm on Australian Eastern time.\n\nCheers,\nPaul",
+        "current_date": "2024-04-08",
+        "expected": {
+          "sender_iana_timezone": "Australia/Sydney",
+          "duration_minutes": 15,
+          "urgency": "NEXT_WEEK",
+          "flexibility": "SPECIFIC",
+          "preferred_windows": [
+            {
+              "day_of_week": "Wednesday",
+              "time_of_day": "afternoon"
+            },
+            {
+              "day_of_week": "Thursday",
+              "time_of_day": "11:00",
+              "iana_timezone": "Australia/Sydney"
+            }
+          ],
+          "meeting_topic": "Q2 planning"
+        }
+      }
+    ],
+    "signature": {
+      "instructions": "You are a scheduling assistant.  Your job is to read a meeting-proposal email\nand extract structured scheduling data from it.\n\nRules:\n- duration_minutes: if not stated, default to 30.\n- sender_iana_timezone: infer from city/region clues (e.g. \"San Francisco\" ->\n  \"America/Los_Angeles\").  If genuinely unknown, return \"UNKNOWN\".\n- urgency: pick the most specific one: \"today\" > \"this_week\" > \"next_week\" > \"flexible\".\n- flexibility: \"specific\" if the sender named concrete times; \"flexible\" if open-ended.\n- preferred_windows: list every time-window the sender explicitly proposed.\n  Each window may have day_of_week, date, time_of_day (HH:MM or \"morning\"/\n  \"afternoon\"/\"evening\"), iana_timezone, and duration_hint.\n- meeting_topic: short phrase for the meeting purpose, or null.\n\nOutput ONLY valid JSON matching the schema below - no prose, no markdown fences.\n\nJSON schema:\n{\n  \"sender_iana_timezone\": \"<IANA tz string or UNKNOWN>\",\n  \"duration_minutes\": <int>,\n  \"urgency\": \"<today|this_week|next_week|flexible>\",\n  \"flexibility\": \"<specific|flexible>\",\n  \"preferred_windows\": [\n    {\n      \"day_of_week\":   \"<Monday...Sunday or null>\",\n      \"date\":          \"<YYYY-MM-DD or null>\",\n      \"time_of_day\":   \"<HH:MM or morning/afternoon/evening or null>\",\n      \"iana_timezone\": \"<IANA tz string or null>\",\n      \"duration_hint\": <int or null>\n    }\n  ],\n  \"meeting_topic\": \"<string or null>\"\n}",
+      "fields": [
+        {
+          "prefix": "Email From:",
+          "description": "Sender's email address"
+        },
+        {
+          "prefix": "Email To:",
+          "description": "Recipient's email address"
+        },
+        {
+          "prefix": "Email Body:",
+          "description": "Full email body text"
+        },
+        {
+          "prefix": "Current Date:",
+          "description": "Today's date as YYYY-MM-DD (for relative references)"
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Extracted Json:",
+          "description": "JSON object matching the schema described in the docstring"
+        }
+      ]
+    },
+    "lm": null
+  },
+  "metadata": {
+    "dependency_versions": {
+      "python": "3.12",
+      "dspy": "3.1.3",
+      "cloudpickle": "3.1"
+    }
+  }
+}

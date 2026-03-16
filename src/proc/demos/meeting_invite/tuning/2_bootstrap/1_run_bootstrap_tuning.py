@@ -3,7 +3,6 @@ import time
 from pathlib import Path
 
 import dspy
-from dspy import BootstrapFewShot
 
 from proc.base.base_llm import BaseLLMConfig, MainModelNames
 from proc.demos.meeting_invite.meeting_invite_extractor_llm import MeetingInviteLLM
@@ -19,13 +18,13 @@ def _main() -> None:
     dataset = TrainingSetDataset(Path(__file__).parent.parent / "dataset" / "trainset_emails_50.jsonl")
 
     config = BaseLLMConfig(
-        name = MainModelNames.QWEN_3_4B_INSTRUCT
+        name=MainModelNames.QWEN_3_4B_INSTRUCT
     )
     llm = MeetingInviteLLM(config=config)
 
     scorer = MeetingInviteScoreExtractor()
 
-    optimizer = BootstrapFewShot(
+    optimizer = dspy.BootstrapFewShot(
         metric=scorer.extraction_metric,
         max_bootstrapped_demos=3,
         max_labeled_demos=4,
@@ -46,6 +45,7 @@ def _main() -> None:
 
     finally:
         dspy.settings.lm.cache = original_cache
+
 
 if __name__ == "__main__":
     _main()
