@@ -15,7 +15,7 @@ Each stage answers a different question:
 |---|---|
 | 1. Score the Training Set | Is my data good enough to optimize against? |
 | 2. Score Actual Outputs | Is my compiled prompt stable and accurate? |
-| 3. Score How the LLM Uses the Prompt | Is the prompt working for the right reasons? |
+| 3. Score How the LLM Uses the Prompt | Is the prompt working for the right reasons? (`SimplePromptAttributionAuditor` / `LIGAttributionAuditor`) |
 | 4. LoRA Fine-tuning + Re-scoring | Did fine-tuning internalize the task or overfit? |
 
 ---
@@ -85,17 +85,42 @@ src/proc/demos/meeting_invite/tuning/2_bootstrap/3_audit_bootstrap_tuning.py
 
 ---
 
-## Stage 3 — Score How the LLM Uses the Prompt (Captum Attribution)
+## Stage 3 — Score How the LLM Uses the Prompt
 
-> **Planned**
+Two complementary auditors answer the same question from different angles.
 
-Using Captum (or equivalent token attribution), analyze which parts of the compiled prompt actually drive the model's outputs. This reveals:
+### 3a. Leave-one-out Perturbation (`SimplePromptAttributionAuditor`)
 
-- Whether few-shot examples are doing real work or being ignored
-- Whether the instruction text is attended to
-- Whether the model is latching onto spurious surface patterns
+Masks each logical prompt segment (INSTRUCTION, each DEMO) one at a time and re-runs the model. Attribution score = `score_full − score_ablated`. Works with any API-based LLM — no model weights required.
 
-This step is often skipped but is essential for debugging prompts that "pass" metrics for the wrong reasons. A compiled prompt can achieve high accuracy by memorizing shallow patterns while completely ignoring the instruction intent.
+| Metric | Threshold |
+|---|---|
+| `avg_instruction_attribution` | > 0.1 instruction actively used; < 0.05 model ignoring it |
+| `avg_demo_attribution` | > 0.1 demos doing real work; < 0.02 dead weight |
+| `per_demo_avg_attribution` | per-demo breakdown — identifies which few-shot examples to prune |
+
+When ablating a segment causes unparseable output, `score_ablated` is treated as `0.0` (the segment was critical).
+
+### 3b. Captum LayerIntegratedGradients (`LIGAttributionAuditor`)
+
+Gradient-based token attribution against a local PyTorch model. Produces a three-panel analysis:
+
+| Panel | What it shows |
+|---|---|
+| A — Token Saliency | Per-token L2 norm of integrated gradients |
+| B — Logit Lens | Target-token rank per decoder layer (forward hooks) — shows where the model "commits" to its answer |
+| C — Segment Attribution | Token saliency aggregated per DSPy prompt segment (INSTRUCTION, DEMO, INPUT) |
+
+Requires a local HuggingFace model (`pip install torch transformers captum`). Default attribution model: `Qwen/Qwen2.5-1.5B-Instruct`.
+
+**Demo entry points:**
+```
+src/proc/demos/meeting_invite/tuning/3_prompt_attribution/1_simple_prompt_attribution.py
+    → LIGAttributionAuditor against Qwen/Qwen2.5-1.5B-Instruct
+
+src/proc/demos/meeting_invite/tuning/3_prompt_attribution/2_simple_prompt_attribution_abe_gpt.py
+    → LIGAttributionAuditor wired to abe-gpt (custom GPT trained from scratch, served locally)
+```
 
 ---
 
