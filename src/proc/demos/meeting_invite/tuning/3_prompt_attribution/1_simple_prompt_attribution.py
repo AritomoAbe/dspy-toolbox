@@ -27,8 +27,16 @@ class PromptAttributionTestSuite(TestSuite):
         llm = MeetingInviteLLM(config=config, optimized_path=optimized_path)
         scorer = MeetingInviteScoreExtractor()
 
+        h_model_name = "Qwen/Qwen3-4B-Instruct-2507"
         nodes: list[ProcNode] = [
-            LIGAttributionAuditor(dataset=dataset, llm=llm, scorer=scorer),
+            LIGAttributionAuditor(
+                dataset=dataset,
+                llm=llm,
+                scorer=scorer,
+                hf_model_name=h_model_name,
+                ig_steps=360,
+                attr_device="cpu"
+            ),
         ]
 
         super().__init__(nodes)

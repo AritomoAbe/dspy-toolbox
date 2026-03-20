@@ -1,0 +1,20 @@
+{
+  "model_type": "ByteLevelBPE",
+  "vocab_size": 1206,
+  "requested_vocab_size": 8000,
+  "min_frequency": 2,
+  "special_tokens": [
+    "[UNK]",
+    "<|pad|>",
+    "<|bos|>",
+    "<|eos|>",
+    "<|email_start|>",
+    "<|email_end|>"
+  ],
+  "input_corpus": "../dataset/bpe_corpus_500.txt",
+  "files": {
+    "tokenizer_json": "tokenizer.json",
+    "vocab": "vocab.json",
+    "merges": "merges.txt"
+  }
+}

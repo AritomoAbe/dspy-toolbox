@@ -149,7 +149,7 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("input.txt"),
+        default=Path("input_v0_0_0.txt"),
         help="Path to write input.txt (default: input.txt)",
     )
     parser.add_argument(

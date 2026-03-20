@@ -36,10 +36,12 @@ Usage in your demo script
 
 from __future__ import annotations
 
+import logging
+from dataclasses import dataclass
+from typing import Callable
+
 import torch
 import torch.nn as nn
-from dataclasses import dataclass
-from typing import Any, Callable
 
 
 # ── Logits container (mimics HuggingFace CausalLMOutput) ─────────────────────
@@ -89,6 +91,7 @@ class GPTModelAdapter(nn.Module):
 
     def __init__(self, gpt: nn.Module):
         super().__init__()
+        self._logger = logging.getLogger(__name__)
         self.model   = _InnerModel(gpt)
         self.lm_head = gpt.lm_head
         self._gpt    = gpt
@@ -104,10 +107,14 @@ class GPTModelAdapter(nn.Module):
         **kwargs,
     ) -> _CausalLMOutput:
         # Crop to block_size — position_embedding_table only has block_size entries.
-        # DSPy prompts can easily exceed 256 tokens; silently truncate from the left
+        # DSPy prompts can easily exceed 512 tokens; silently truncate from the left
         # (keep the most recent tokens, matching how generate() crops context).
         from proc.demos.meeting_invite.tuning.abe_gpt.gpt import block_size
+        shape_before = input_ids.shape
         input_ids = input_ids[:, -block_size:]
+        shape_after = input_ids.shape
+        if shape_before != shape_after:
+            self._logger.warning(f'Input shapes have been truncated: {shape_before} != {shape_after}')
 
         B, T = input_ids.shape
         device = input_ids.device
@@ -155,6 +162,7 @@ class GPTTokenizerAdapter:
         decode_fn: Callable[[list[int]], str],
         vocab_size: int,
     ) -> None:
+        self._logger = logging.getLogger(__name__)
         self._encode_fn = encode_fn   # always gpt.encode — never self.encode
         self._decode_fn = decode_fn   # always gpt.decode — never self.decode
         self.vocab_size = vocab_size
@@ -192,12 +200,12 @@ class GPTTokenizerAdapter:
     ) -> str:
         if isinstance(ids, torch.Tensor):
             ids = ids.tolist()
-        # Convert individual tensor elements (e.g. tensor(41)) to plain ints.
-        # The auditor calls tokenizer.decode([t]) where t is a raw tensor
-        # element from input_ids[0], not a Python int. itos has int keys,
-        # so itos[tensor(41)] raises KeyError without this conversion.
         ids = [int(i) for i in ids]
-        return self._decode_fn(ids)
+        try:
+            return self._decode_fn(ids)
+        except Exception as e:
+            self._logger.warning(f'Decode failed for ids {ids[:5]}...: {e}')
+            return ''
 
     def apply_chat_template(
         self,
@@ -219,16 +227,12 @@ class GPTTokenizerAdapter:
         return "\n".join(parts)
 
     def _safe_encode(self, text: str) -> list[int]:
-        """Encode, silently dropping characters not in the vocabulary."""
-        result = []
-        for ch in text:
-            try:
-                ids = self._encode_fn(ch)
-                result.extend(ids if isinstance(ids, list) else [ids])
-            except (KeyError, IndexError):
-                pass   # character not in vocab — skip
-        return result if result else [0]
-
+        try:
+            result = self._encode_fn(text)
+            return result if result else [0]
+        except Exception as e:
+            self._logger.warning(f'Encoding failed: {e}')
+            return [0]
 
 # ── GptLIGAttributionAuditor ───────────────────────────────────────────────────
 

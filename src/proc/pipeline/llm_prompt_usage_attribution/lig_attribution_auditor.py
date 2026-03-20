@@ -16,21 +16,19 @@ Device strategy (matches reference script)
   CRITICAL: do NOT use device_map="auto". accelerate's AlignDevicesHook
   breaks Captum's interpolation loop and causes OOM on MPS. Load the model
   onto a single device with no offloading.
-
-Requirements
-------------
-  pip install dspy torch transformers captum
 """
 
 import logging
 import re
 import textwrap
+import time
 from collections import defaultdict
 from typing import Any
 
 import torch
-from captum.attr import LayerIntegratedGradients
+from captum.attr import LayerIntegratedGradients, IntegratedGradients
 from dspy.adapters import ChatAdapter
+from returns.pipeline import is_successful
 from returns.result import Result, Success, Failure
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -45,6 +43,7 @@ from proc.pipeline.llm_prompt_usage_attribution.contexts import LIGAttributionCo
 from proc.pipeline.llm_prompt_usage_attribution.models import LIGExampleResult, TokenSaliency, LayerProbe, \
     SegmentSaliency, LIGAttributionResult
 from proc.pipeline.output_result_auditor.score_extractor import ScoreExtractor, INVALID_SCORE
+from proc.base.timing import timed
 
 # ── Defaults ──────────────────────────────────────────────────────────────────
 
@@ -61,7 +60,6 @@ _TOP_TOKEN_COUNT: int = 20
 
 # Regex to split the rendered prompt into logical segments (matches reference Panel C)
 _SEGMENT_SPLIT_PATTERN: str = r"(<\|im_start\|>|<\|im_end\|>|\[\[.*?\]\]|\n{2,})"
-
 
 class LIGAttributionAuditor(ProcNode):
     """
@@ -94,6 +92,10 @@ class LIGAttributionAuditor(ProcNode):
 
     _SCORE: float = 1.0
 
+    # Minimum recommended ig_steps per decoder layer.
+    # Empirically: < 5 steps/layer → high convergence delta → unreliable attributions.
+    _MIN_IG_STEPS_PER_LAYER: int = 10
+
     def __init__(
         self,
         dataset: BaseDataset,
@@ -103,32 +105,87 @@ class LIGAttributionAuditor(ProcNode):
         ig_steps: int = _DEFAULT_IG_STEPS,
         internal_batch_size: int = _DEFAULT_INTERNAL_BATCH,
         attr_device: str = "cpu",
+        target_mode: str = "content",
     ) -> None:
+        """
+        Parameters
+        ----------
+        target_mode : str
+            Controls which token is used as the LIG attribution target.
+
+            "content" (Option 1, default) — skip format/whitespace tokens and
+            target the first semantically meaningful token the model generates
+            (e.g. '{' for JSON, a letter for structured text). This answers:
+            "what prompt sections drive the model to produce content?"
+
+            "top1" (Option 2) — use the model's raw top-1 predicted next token,
+            including format tokens like '[['. This answers: "what drove the model
+            to start responding in this format?" Useful for diagnosing whether the
+            model is format-driven vs content-driven.
+        """
         self._logger = logging.getLogger(__name__)
+        self._logger.info(f"Using HuggingFace model: {hf_model_name}")
+
+        if target_mode not in ("content", "top1"):
+            raise ValueError(f"target_mode must be 'content' or 'top1', got {target_mode!r}")
+        self._target_mode = target_mode
+
         self._dataset = dataset
         self._llm = llm
         self._scorer = scorer
         self._hf_model_name = hf_model_name
         self._ig_steps = ig_steps
         self._internal_batch_size = internal_batch_size
-        self._attr_device = torch.device(attr_device)
 
-        # Best available device for fast inference (logit lens)
-        # if torch.backends.mps.is_available():
-        #     self._inference_device = torch.device("mps")
-        # elif torch.cuda.is_available():
-        #     self._inference_device = torch.device("cuda")
-        # else:
-        #     self._inference_device = torch.device("cpu")
-
-        # Single device for all passes — no switching between MPS and CPU.
-        # Moving the model between devices requires holding both copies simultaneously
-        # (~2x model size), which exhausts RAM and triggers SIGKILL on Apple Silicon.
-        self._device = torch.device(attr_device)
+        # Device selection with MPS autograd validation.
+        # MPS (Apple Silicon GPU) gives 5-10x speedup for float16 forward passes.
+        # _validate_device tests MPS autograd at init time and falls back to CPU
+        # silently if MPS is unavailable or autograd is broken in this PyTorch build.
+        requested_device = torch.device(attr_device)
+        self._device = self._validate_device(requested_device)
         self._inference_device = self._device  # kept for compatibility
-        self._attr_device = self._device  # kept for compatibility
+        self._attr_device = self._device        # kept for compatibility
+        # _model_dtype is set in invoke() after the model is loaded.
+        # Storing it once prevents bugs where _logit_lens temporarily
+        # mutates lm_head dtype and next(model.parameters()) returns float32.
+        self._model_dtype: torch.dtype = torch.float16  # overwritten in invoke()
 
     # ── ProcNode entry point ───────────────────────────────────────────────────
+
+    # ── Device validation ─────────────────────────────────────────────────────
+
+    def _validate_device(self, requested: torch.device) -> torch.device:
+        """
+        Validate the requested device for Captum gradient computation.
+
+        MPS (Apple Silicon GPU) gives 5-10x speedup for float16 forward passes.
+        We smoke-test MPS autograd at init time and fall back to CPU silently if
+        it fails — avoids surprises after waiting minutes for compilation.
+        """
+        if requested.type != "mps":
+            self._logger.info(f"Attribution device: {requested}")
+            return requested
+
+        if not torch.backends.mps.is_available():
+            self._logger.warning("MPS requested but not available. Falling back to CPU.")
+            return torch.device("cpu")
+
+        try:
+            _t = torch.ones(4, 4, requires_grad=True, device="mps")
+            _loss = (_t * _t).sum()
+            _loss.backward()
+            del _t, _loss
+            torch.mps.empty_cache()
+            self._logger.info(
+                "MPS autograd validated — using MPS for attribution. "
+                "Expected speedup: 5-10x over CPU for float16 forward passes."
+            )
+            return requested
+        except Exception as e:
+            self._logger.warning(
+                f"MPS autograd validation failed ({e}). Falling back to CPU."
+            )
+            return torch.device("cpu")
 
     def invoke(self) -> Result[ProcScore, ProcError]:
         predictors = self._llm.predictors()
@@ -146,11 +203,42 @@ class LIGAttributionAuditor(ProcNode):
             f"attr_device={self._attr_device}"
         )
 
-        load_result = self._load_model()
-        if isinstance(load_result, Failure):
+        with timed("_load_model", logger=self._logger):
+            load_result = self._load_model()
+        if not is_successful(load_result):
             return load_result
 
         hf_model, tokenizer = load_result.unwrap()
+
+        # Move model to target device immediately after loading.
+        # HuggingFace always loads onto CPU; without this, tensors sent to MPS
+        # mismatch the CPU model → "Placeholder storage has not been allocated
+        # on MPS device!"
+        self._logger.info(f"Moving model to {self._device}")
+        hf_model.to(self._device)
+
+        # Store model dtype ONCE here — before _logit_lens temporarily mutates
+        # lm_head to float32 for the logit projection. If we query
+        # next(model.parameters()).dtype later, we may get float32 by mistake.
+        self._model_dtype = next(hf_model.parameters()).dtype
+        self._logger.info(f"Model dtype: {self._model_dtype}")
+
+        # MPS JIT warmup — triggers Metal kernel compilation before timed passes.
+        # Without this, the first real forward pass triggers compilation and can
+        # take 3-5 minutes. After warmup, all subsequent passes use cached kernels.
+        if self._device.type == "mps":
+            self._logger.info(
+                "MPS warmup — compiling Metal kernels (one-time cost, ~30-60s)..."
+            )
+            _wt0 = time.perf_counter()
+            with torch.no_grad():
+                _dummy = torch.zeros((1, 16), dtype=torch.long, device=self._device)
+                _ = hf_model(input_ids=_dummy)
+            torch.mps.empty_cache()
+            self._logger.info(
+                f"MPS warmup complete in {time.perf_counter() - _wt0:.1f}s — "
+                "subsequent forward passes will be fast."
+            )
 
         # Locate embed_tokens layer ────────────────────────────────────────────
         embed_layer = self._get_embed_layer(hf_model)
@@ -167,19 +255,40 @@ class LIGAttributionAuditor(ProcNode):
                 f"Cannot find decoder layers in {self._hf_model_name}."
             ))
 
+        # Validate ig_steps against model depth ───────────────────────────────
+        n_layers = len(decoder_layers)
+        recommended_ig_steps = n_layers * self._MIN_IG_STEPS_PER_LAYER
+        if self._ig_steps < recommended_ig_steps:
+            self._logger.warning(
+                f"ig_steps={self._ig_steps} may be too low for a {n_layers}-layer model. "
+                f"Recommended minimum: {recommended_ig_steps} "
+                f"({self._MIN_IG_STEPS_PER_LAYER} steps × {n_layers} layers). "
+                f"Low ig_steps → high convergence delta → unreliable Panel A/C scores. "
+                f"Pass ig_steps={recommended_ig_steps} or higher for reliable results."
+            )
+        else:
+            self._logger.info(
+                f"ig_steps={self._ig_steps} sufficient for {n_layers}-layer model "
+                f"(recommended minimum: {recommended_ig_steps})"
+            )
+
         adapter = ChatAdapter()
         example_results: list[LIGExampleResult] = []
 
         for index, example in enumerate(self._dataset.load()):
-            self._logger.info(f"Processing example {index}")
+            self._logger.info(f"Processing example[{index}]")
+            _example_t0 = time.perf_counter()
 
             # Generate prediction via API LLM ──────────────────────────────────
-            with dspy.context(cache=False):
-                pred = self._llm(**example.inputs())
+            with timed(f"example[{index}] DSpy execution", logger=self._logger):
+                with dspy.context(cache=False):
+                    pred = self._llm(**example.inputs())
+                    self._logger.info(f"Result for example[{index}] is {pred}")
 
             score = self._scorer.extraction_metric(example, pred)
+            self._logger.info(f"Result score for example[{index}] is {score}")
             if score == INVALID_SCORE:
-                return Failure(ProcError(f"Cannot score example {index}"))
+                return Failure(ProcError(f"Cannot score example[{index}]"))
 
             # Render the compiled DSPy prompt (exact chat-template text) ───────
             dspy_msgs = adapter.format(
@@ -195,47 +304,54 @@ class LIGAttributionAuditor(ProcNode):
 
             # Tokenize ─────────────────────────────────────────────────────────
             inputs_enc = tokenizer(prompt_text, return_tensors="pt")
-
-            inputs_enc = tokenizer(prompt_text, return_tensors="pt")
             input_ids = inputs_enc["input_ids"]
-            input_ids = input_ids[:, -256:]  # crop to GPT block_size
+            self._logger.info(f"Prompt token count: {input_ids.shape[1]}")  # add this
 
             # Universal safe crop: match whatever the model will see
-            from proc.demos.meeting_invite.tuning.abe_gpt.gpt import block_size as _gpt_block_size
-            input_ids = input_ids[:, -_gpt_block_size:]
+            from proc.demos.meeting_invite.tuning.abe_gpt.gpt import block_size
+            shape_before = input_ids.shape
+            input_ids = input_ids[:, -block_size:]
+            shape_after = input_ids.shape
+            if shape_before != shape_after:
+                self._logger.warning(f"Data was truncated. Shape before: {shape_before}, Shape after: {shape_after}")
 
             tokens_str = [tokenizer.decode([t]) for t in input_ids[0]]
 
-            # Resolve attribution target token from prediction ──────────────────
-            target_text = self._pred_to_text(pred)
-            target_id, target_tok = self._resolve_target(
-                tokenizer, hf_model, input_ids, target_text
+            with timed(f"example[{index}] hf_model forward (target selection)", logger=self._logger):
+                target_id, target_tok = self._resolve_target_token(
+                    hf_model, tokenizer, input_ids
+                )
+            self._logger.info(
+                f"Attribution target: {repr(target_tok)} (id={target_id})  "
+                f"mode={self._target_mode}"
             )
 
             # Panel B — Logit lens (fast, on inference_device) ─────────────────
             hf_model.to(self._inference_device)
             input_ids_inf = input_ids.to(self._inference_device)
 
-            layer_probes, target_prob, target_rank = self._logit_lens(
-                hf_model, tokenizer, input_ids_inf,
-                target_id, decoder_layers,
-            )
+            with timed(f"example[{index}] _logit_lens", logger=self._logger):
+                layer_probes, target_prob, target_rank = self._logit_lens(
+                    hf_model, tokenizer, input_ids_inf,
+                    target_id, decoder_layers,
+                )
 
             # Panel A — Captum LIG (always on attr_device=CPU) ─────────────────
             hf_model.to(self._attr_device)
             input_ids_attr = input_ids.to(self._attr_device)
 
-            lig_result = self._run_lig(
-                hf_model, embed_layer, input_ids_attr, target_id
-            )
-            if isinstance(lig_result, Failure):
+            with timed(f"example[{index}] _run_lig", logger=self._logger, heartbeat_interval=0):
+                lig_result = self._run_lig(
+                    hf_model, embed_layer, input_ids_attr, target_id
+                )
+            if not is_successful(lig_result):
                 return lig_result
 
             token_attr_normalized, convergence_delta = lig_result.unwrap()
 
             # Panel C — Map token saliency → DSPy prompt segments ─────────────
             segment_labels = self._assign_segment_labels(
-                tokens_str, predictor, tokenizer
+                tokens_str, predictor, tokenizer, prompt_text=prompt_text
             )
             token_saliencies = [
                 TokenSaliency(
@@ -257,7 +373,7 @@ class LIGAttributionAuditor(ProcNode):
 
             example_result = LIGExampleResult(
                 example_index=index,
-                target_text=target_text,
+                target_text=f"{target_tok!r} (model top-1)",
                 target_token=target_tok,
                 target_prob=target_prob,
                 target_rank=target_rank,
@@ -268,6 +384,11 @@ class LIGAttributionAuditor(ProcNode):
                 segment_saliencies=segment_saliencies,
             )
             example_results.append(example_result)
+            self._logger.info(
+                "[timing] example[%d] total: %.3fs",
+                index,
+                time.perf_counter() - _example_t0,
+            )
             self._log_example(example_result)
 
         result = self._aggregate(example_results)
@@ -292,7 +413,8 @@ class LIGAttributionAuditor(ProcNode):
             )
             model = AutoModelForCausalLM.from_pretrained(
                 self._hf_model_name,
-                torch_dtype=torch.float32,   # float32 → stable gradients on CPU
+                # dtype=torch.float32,   # float32 → stable gradients on CPU
+                dtype=torch.float16,  # float32 → stable gradients on CPU
                 trust_remote_code=True,
                 # NO device_map="auto" — single device, no offloading
             )
@@ -356,8 +478,9 @@ class LIGAttributionAuditor(ProcNode):
         for i, layer in enumerate(decoder_layers):
             hook_handles.append(layer.register_forward_hook(make_hook(i)))
 
-        with torch.no_grad():
-            final_out = model(input_ids=input_ids)
+        with timed("_logit_lens hf_model forward", logger=self._logger):
+            with torch.no_grad():
+                final_out = model(input_ids=input_ids)
 
         for h in hook_handles:
             h.remove()
@@ -369,8 +492,13 @@ class LIGAttributionAuditor(ProcNode):
 
         # Project residuals through norm + lm_head on CPU
         # (avoids MPS float precision issues, matches reference)
-        lm_head_cpu = model.lm_head.to("cpu")
-        norm_cpu = model.model.norm.to("cpu") if hasattr(model.model, "norm") else None
+        # lm_head_cpu = model.lm_head.to("cpu")
+        # norm_cpu = model.model.norm.to("cpu") if hasattr(model.model, "norm") else None
+
+        # Cast to float32 explicitly — residuals are stored as float32 (.detach().float().cpu())
+        # but the model may be loaded in float16. Always project in float32 for numerical stability.
+        lm_head_cpu = model.lm_head.to("cpu").float()
+        norm_cpu = model.model.norm.to("cpu").float() if hasattr(model.model, "norm") else None
 
         probes: list[LayerProbe] = []
         seen_top1 = False
@@ -382,7 +510,7 @@ class LIGAttributionAuditor(ProcNode):
             else:
                 normed = resid.unsqueeze(0)
             logits_l = lm_head_cpu(normed).squeeze(0).float()
-            probs_l = logits_l.softmax(dim=-1)
+            probs_l = logits_l.softmax(dim=-1).detach()
             rank = int((probs_l > probs_l[target_id]).sum()) + 1
             prob = float(probs_l[target_id])
 
@@ -397,10 +525,13 @@ class LIGAttributionAuditor(ProcNode):
                 first_top1=is_first_top1,
             ))
 
-        # Restore lm_head + norm to inference_device
-        model.lm_head.to(self._inference_device)
+        # Restore lm_head + norm to inference device AND original dtype.
+        # Use self._model_dtype (stored once at load time) rather than querying
+        # next(model.parameters()).dtype which can return float32 if lm_head
+        # is listed first and was temporarily cast above.
+        model.lm_head.to(self._inference_device).to(self._model_dtype)
         if norm_cpu is not None:
-            model.model.norm.to(self._inference_device)
+            model.model.norm.to(self._inference_device).to(self._model_dtype)
 
         return probes, target_prob, target_rank
 
@@ -414,70 +545,357 @@ class LIGAttributionAuditor(ProcNode):
         target_id: int,
     ) -> Result[tuple[list[float], float], ProcError]:
         """
-        Run Captum LayerIntegratedGradients on CPU.
+        Run Captum IntegratedGradients in native model dtype (float16 on MPS/CPU).
 
-        baseline = zero-id tensor (all pad tokens)
+        STRATEGY — pure native dtype, zero conversions:
+          - Keep embeddings in self._model_dtype on self._device (MPS or CPU)
+          - Captum interpolates between baseline/actual embeddings in model dtype
+          - forward_fn passes embeddings directly to model — no dtype casting
+          - Only the scalar output is cast to float32 for Captum gradient stability
+          - Model stays on self._device throughout — no device switching
+
+        MODEL DTYPE:
+          Uses self._model_dtype stored once at load time. Never queries
+          next(model.parameters()).dtype at runtime because _logit_lens temporarily
+          casts lm_head to float32, which would return the wrong dtype here.
+
+        FALLBACK:
+          If MPS attribution fails mid-run (OOM or autograd error), retry the
+          entire example on CPU in float32 for guaranteed correctness.
+
         attribution = L2-norm of per-token embedding gradient, normalized to [0,1]
-
-        Matches the reference script exactly:
-            token_attr = attributions[0].float().norm(dim=-1)
-            token_attr = token_attr / (token_attr.max() + 1e-9)
         """
-        try:
-            def forward_fn(ids: torch.Tensor) -> torch.Tensor:
-                out = model(input_ids=ids)
-                return out.logits[0, -1, target_id].unsqueeze(0).float()
 
-            lig = LayerIntegratedGradients(forward_fn, embed_layer)
-            baseline_ids = torch.zeros_like(input_ids)
+        def _run_on_device(device: torch.device) -> tuple[list[float], float]:
+            """Run full IG attribution on the given device in native model dtype."""
+            total_calls = self._ig_steps + 1
+            call_counter = [0]
+            t0 = [time.perf_counter()]
 
-            attributions, delta = lig.attribute(
-                inputs=input_ids,
-                baselines=baseline_ids,
-                n_steps=self._ig_steps,
-                return_convergence_delta=True,
-                internal_batch_size=self._internal_batch_size,
+            model.to(device)
+            ids = input_ids.to(device)
+
+            # Use stored model dtype — reliable regardless of _logit_lens mutations
+            dtype = self._model_dtype if device == self._device else torch.float32
+
+            if device != self._device:
+                # CPU fallback: use float32 for numerical stability
+                model.float()
+                self._logger.info("CPU fallback: model cast to float32")
+
+            # Compute embeddings in model dtype — no float() cast.
+            # Captum interpolates between these in the same dtype.
+            with torch.no_grad():
+                input_embeds    = embed_layer(ids)                  # (1,T,C) dtype
+                baseline_embeds = embed_layer(torch.zeros_like(ids))  # (1,T,C) dtype
+
+            self._logger.info(
+                f"_run_lig: device={device.type}  "
+                f"dtype={dtype}  "
+                f"embed shape={input_embeds.shape}  "
+                f"n_steps={self._ig_steps}"
             )
 
+            def forward_fn(embeds: torch.Tensor) -> torch.Tensor:
+                """
+                embeds: (batch, T, C) in model dtype — Captum interpolated embeddings.
+                No dtype casting — model and embeddings share the same dtype.
+                Returns float32 scalar for Captum gradient stability.
+                """
+                call_counter[0] += 1
+                step = call_counter[0]
+
+                if step % max(1, total_calls // 20) == 0 or step == 1 or step == total_calls:
+                    elapsed = time.perf_counter() - t0[0]
+                    rate = step / elapsed if elapsed > 0 else 0.0
+                    remaining = (total_calls - step) / rate if rate > 0 else 0.0
+                    self._logger.info(
+                        f"    LIG step {step:>4d}/{total_calls}  "
+                        f"({step / total_calls * 100:5.1f}%)  "
+                        f"elapsed={elapsed:6.1f}s  eta={remaining:6.1f}s  "
+                        f"rate={rate:.2f} steps/s  "
+                        f"device={device.type}  dtype={dtype}"
+                    )
+
+                with timed(f"forward_fn (step={step}/{total_calls})", logger=self._logger):
+                    out = model(inputs_embeds=embeds)
+                # Cast scalar output to float32 — Captum needs float32 for its
+                # internal gradient accumulation even when embeddings are float16
+                return out.logits[0, -1, target_id].unsqueeze(0).float()
+
+            ig = IntegratedGradients(forward_fn)
+
+            with timed(
+                f"_run_lig ig.attribute "
+                f"(n_steps={self._ig_steps}, device={device.type}, dtype={dtype})",
+                logger=self._logger,
+            ):
+                attributions, delta = ig.attribute(
+                    inputs=input_embeds,
+                    baselines=baseline_embeds,
+                    n_steps=self._ig_steps,
+                    return_convergence_delta=True,
+                    internal_batch_size=self._internal_batch_size,
+                )
+
+            # L2-norm over embedding dim, normalize to [0,1], move to CPU
             token_attr = attributions[0].float().norm(dim=-1).detach().cpu()
             token_attr = (token_attr / (token_attr.max() + 1e-9)).tolist()
+            return token_attr, float(delta.item())
 
-            return Success((token_attr, float(delta.item())))
+        try:
+            try:
+                token_attr, delta = _run_on_device(self._device)
+                return Success((token_attr, delta))
+
+            except Exception as primary_err:
+                if self._device.type == "cpu":
+                    raise  # already on CPU — no fallback
+
+                # MPS failed (OOM or autograd error) — fall back to CPU float32
+                self._logger.warning(
+                    f"Attribution on {self._device.type} failed: {primary_err}. "
+                    "Retrying on CPU with float32 — slower but guaranteed correct."
+                )
+                if torch.backends.mps.is_available():
+                    torch.mps.empty_cache()
+
+                token_attr, delta = _run_on_device(torch.device("cpu"))
+
+                # Restore model to original device + dtype after CPU fallback
+                model.to(self._device).to(self._model_dtype)
+                return Success((token_attr, delta))
 
         except Exception as e:
+            # Last-resort cleanup — ensure model is back on self._device
+            try:
+                model.to(self._device).to(self._model_dtype)
+            except Exception:
+                pass
             return Failure(ProcError(f"Captum LIG failed: {e}"))
 
     # ── Target token resolution ────────────────────────────────────────────────
 
-    def _resolve_target(
+    # Tokens that are pure format/structure and should be skipped in "content" mode.
+    # These are DSPy output format markers, whitespace, and common chat-template tokens.
+    _FORMAT_TOKENS: frozenset[str] = frozenset({
+        "[[", "]]", "##", " ##", "## ", " ", "\n", "\t", "",
+        "<|im_start|>", "<|im_end|>", "<|endoftext|>",
+    })
+
+    def _resolve_target_token(
         self,
-        tokenizer: Any,
         model: Any,
+        tokenizer: Any,
         input_ids: torch.Tensor,
-        target_text: str,
+        max_skip_steps: int = 3,
     ) -> tuple[int, str]:
         """
-        Resolve the first token of target_text as the attribution target.
-        Falls back to model top-1 if target_text doesn't tokenize cleanly.
-        Matches the reference script's candidate resolution logic.
-        """
-        # Try " {word}" first (leading space), then bare word
-        first_word = target_text.split()[0] if target_text.strip() else ""
-        for candidate in [f" {first_word}", first_word]:
-            enc = tokenizer.encode(candidate, add_special_tokens=False)
-            if enc:
-                return enc[0], tokenizer.decode([enc[0]])
+        Resolve the attribution target token.
 
-        # Fallback: model top-1
-        ids_inf = input_ids.to(self._inference_device)
+        target_mode="top1" (Option 2):
+            Return the model's raw top-1 predicted next token, including format
+            tokens like '[['. Answers: "what drove the model to start responding
+            in this format?"
+
+        target_mode="content" (Option 1):
+            Greedily decode up to max_skip_steps tokens, skipping pure format/
+            whitespace tokens, and return the first semantically meaningful token.
+            Answers: "what drove the model to produce actual content?"
+
+        The distinction matters when DSPy output format tokens like '[[' are
+        the top-1 prediction — they tell you about format compliance, not about
+        whether the model understood the email content.
+        """
+        ids = input_ids.to(self._inference_device)
+
         with torch.no_grad():
-            out = model(input_ids=ids_inf)
+            out = model(input_ids=ids)
             top1_id = int(out.logits[0, -1].argmax())
-        return top1_id, tokenizer.decode([top1_id])
+        top1_tok = tokenizer.decode([top1_id])
+
+        if self._target_mode == "top1":
+            return top1_id, top1_tok
+
+        # "content" mode — skip format/whitespace tokens
+        current_ids = ids
+        for step in range(max_skip_steps):
+            next_id = int(model(input_ids=current_ids).logits[0, -1].argmax())
+            next_tok = tokenizer.decode([next_id])
+
+            # Accept if not a pure format token
+            if next_tok.strip() and next_tok not in self._FORMAT_TOKENS:
+                self._logger.debug(
+                    f"content mode: skipped {step} format token(s), "
+                    f"settled on {repr(next_tok)} (id={next_id})"
+                )
+                return next_id, next_tok
+
+            # Extend context with the generated format token and try again
+            next_tensor = torch.tensor([[next_id]], device=self._inference_device)
+            current_ids = torch.cat([current_ids, next_tensor], dim=1)
+
+        # Fallback: top-1 of original prompt if all steps were format tokens
+        self._logger.warning(
+            f"content mode: all {max_skip_steps} generated tokens were format tokens, "
+            f"falling back to raw top-1 {repr(top1_tok)}"
+        )
+        return top1_id, top1_tok
 
     # ── Panel C — Segment label assignment ────────────────────────────────────
-
     def _assign_segment_labels(
+            self,
+            tokens_str: list[str],
+            predictor: Any,
+            tokenizer: Any,
+            prompt_text: str = "",
+    ) -> list[str]:
+        """
+        Assign fine-grained segment labels by finding known DSPy prompt
+        markers in prompt_text and labeling token ranges accordingly.
+
+        Supports two chat template formats:
+          - [SYSTEM] / [USER] / [ASSISTANT]  (AbeGPT/custom adapter)
+          - <|im_start|>system / <|im_start|>user  (Qwen/OpenAI chat template)
+
+        Segments produced:
+            system_wrapper   — role tags ([SYSTEM], <|im_start|>system, etc.)
+            instruction      — the task instructions / rules / JSON schema
+            field_label      — [[ ## field_name ## ]] markers
+            email_from       — sender address value
+            email_to         — recipient address value
+            email_body       — the email body value (most important for task)
+            current_date     — the date value
+            demo_N           — bootstrapped few-shot examples
+            input            — anything not matched by the above
+        """
+        import re as _re
+        from collections import Counter as _Counter
+
+        labels = ["unknown"] * len(tokens_str)
+
+        if not prompt_text:
+            return ["input"] * len(tokens_str)
+
+        # Build per-token character start offsets from tokens_str.
+        token_char_starts = []
+        pos = 0
+        for tok in tokens_str:
+            token_char_starts.append(pos)
+            pos += len(tok)
+        token_char_starts.append(pos)  # sentinel
+
+        def char_to_token(char_pos: int) -> int:
+            lo, hi = 0, len(token_char_starts) - 1
+            while lo < hi:
+                mid = (lo + hi) // 2
+                if token_char_starts[mid] <= char_pos:
+                    lo = mid + 1
+                else:
+                    hi = mid
+            return max(0, lo - 1)
+
+        def label_span(start_char: int, end_char: int, label: str) -> None:
+            t_start = char_to_token(start_char)
+            t_end = char_to_token(end_char)
+            for i in range(t_start, min(t_end + 1, len(labels))):
+                labels[i] = label
+
+        def find_and_label(text: str, label: str, use_rfind: bool = False) -> bool:
+            """Find text in prompt_text and label its token range."""
+            if not text:
+                return False
+            # Try exact match, then stripped
+            for candidate in [text, text.strip()]:
+                idx = prompt_text.rfind(candidate) if use_rfind else prompt_text.find(candidate)
+                if idx != -1:
+                    label_span(idx, idx + len(candidate), label)
+                    return True
+            return False
+
+        # ── 1. System/User/Assistant wrapper tags (both formats) ──────────────
+        wrapper_tags = [
+            "[SYSTEM]", "[USER]", "[ASSISTANT]",
+            "<|im_start|>system", "<|im_start|>user", "<|im_start|>assistant",
+            "<|im_start|>", "<|im_end|>",
+        ]
+        for tag in wrapper_tags:
+            start = 0
+            while True:
+                idx = prompt_text.find(tag, start)
+                if idx == -1:
+                    break
+                label_span(idx, idx + len(tag), "system_wrapper")
+                start = idx + len(tag)
+
+        # ── 2. Field label markers [[ ## name ## ]] ───────────────────────────
+        for m in _re.finditer(r'\[\[\s*##.*?##\s*\]\]', prompt_text, _re.DOTALL):
+            label_span(m.start(), m.end(), "field_label")
+
+        # ── 3. Task instruction block ─────────────────────────────────────────
+        instr_text = predictor.signature.instructions or ""
+        if instr_text and not find_and_label(instr_text, "instruction"):
+            # Try matching via first substantial line
+            first_line = next(
+                (l.strip() for l in instr_text.splitlines() if len(l.strip()) > 20),
+                ""
+            )
+            if first_line:
+                idx = prompt_text.find(first_line)
+                if idx != -1:
+                    instr_end = idx + len(instr_text.strip())
+                    label_span(idx, min(instr_end, len(prompt_text)), "instruction")
+                    self._logger.debug("instruction matched via first-line heuristic")
+                else:
+                    self._logger.warning(
+                        "instruction text not found in prompt — will be labeled as 'input'. "
+                        "Check that predictor.signature.instructions matches the rendered prompt."
+                    )
+
+        # ── 4. Input field values ─────────────────────────────────────────────
+        field_labels = {
+            "email_from":   "email_from",
+            "email_to":     "email_to",
+            "email_body":   "email_body",
+            "current_date": "current_date",
+        }
+        for field_name, seg_label in field_labels.items():
+            marker = f"[[ ## {field_name} ## ]]"
+            marker_idx = prompt_text.rfind(marker)
+            if marker_idx == -1:
+                continue
+            value_start = marker_idx + len(marker)
+            next_marker = _re.search(r'\[\[', prompt_text[value_start:])
+            value_end = value_start + next_marker.start() if next_marker else len(prompt_text)
+            value_text = prompt_text[value_start:value_end].strip()
+            if value_text:
+                find_and_label(value_text, seg_label, use_rfind=True)
+
+        # ── 5. Few-shot demos ─────────────────────────────────────────────────
+        for demo_idx, demo in enumerate(predictor.demos):
+            demo_text = self._demo_to_text(demo, predictor.signature)
+            find_and_label(demo_text, f"demo_{demo_idx}")
+
+        # ── 6. Fill remaining unknowns as input ──────────────────────────────
+        for i in range(len(labels)):
+            if labels[i] == "unknown":
+                labels[i] = "input"
+
+        # ── 7. Log labeling summary ───────────────────────────────────────────
+        label_counts = _Counter(labels)
+        self._logger.debug(
+            "segment label distribution: " +
+            ", ".join(f"{k}={v}" for k, v in sorted(label_counts.items()))
+        )
+        if label_counts.get("instruction", 0) == 0:
+            self._logger.warning(
+                "No tokens labeled as 'instruction'. "
+                "Panel C instruction saliency will be missing."
+            )
+
+        return labels
+
+    def _assign_segment_labels_old(
         self,
         tokens_str: list[str],
         predictor: Any,
@@ -630,46 +1048,165 @@ class LIGAttributionAuditor(ProcNode):
             example_results=example_results,
         )
 
-    # ── Prediction serialisation ───────────────────────────────────────────────
-
-    def _pred_to_text(self, pred: Any) -> str:
-        try:
-            keys = list(pred.keys())
-        except AttributeError:
-            keys = [k for k in vars(pred) if not k.startswith("_")]
-
-        for key in keys:
-            try:
-                val = pred[key]
-            except (KeyError, TypeError):
-                val = getattr(pred, key, None)
-            if val is None:
-                continue
-            text = str(val).strip()
-            if text:
-                return text
-        return ""
-
     # ── Logging ────────────────────────────────────────────────────────────────
-
     def _log_example(self, er: LIGExampleResult) -> None:
+        # Delta interpretation
+        delta = er.convergence_delta
+        if abs(delta) < 0.05:
+            delta_comment = "reliable"
+        elif abs(delta) < 0.5:
+            delta_comment = "borderline — consider increasing ig_steps"
+        else:
+            delta_comment = "unreliable — increase ig_steps to 200+"
+
         self._logger.info(
             f"Example {er.example_index} — target='{er.target_token}'  "
             f"rank=#{er.target_rank}  prob={er.target_prob:.4f}  "
-            f"delta={er.convergence_delta:.4f}  "
+            f"delta={er.convergence_delta:.4f} ({delta_comment})  "
             f"top1_layer={er.top1_reached_layer}"
         )
-        self._logger.info("  Panel A — Top-5 salient tokens:")
+
+        self._logger.info("\n  Panel A — Top-5 salient tokens:")
         for ts in er.top5_tokens:
             self._logger.info(
-                f"    [{ts.index:03d}] {repr(ts.token):20s}  "
+                f"    [{ts.index:04d}] {repr(ts.token):20s}  "
                 f"{ts.saliency:.3f}  ({ts.segment_label})"
             )
-        self._logger.info("  Panel C — Segment saliency (high → low):")
-        for seg in er.segment_saliencies:
+
+        # Panel B — Logit lens: per-layer rank trajectory
+        self._logger.info("\n  Panel B — Logit lens (rank of target token per layer):")
+        self._logger.info(
+            "    rank = position of target token in the vocabulary probability distribution"
+        )
+        self._logger.info(
+            "    rank=#1 means the model is most confident about this token at this layer."
+        )
+        self._logger.info(
+            "    Ideal pattern: rank starts high (uncertain) and drops to #1 in middle layers"
+        )
+        self._logger.info(
+            "    (reasoning happening). Committing at layer 0 = pattern matching, not reasoning."
+        )
+        self._logger.info(
+            f"    {'layer':>5s}  {'rank':>6s}  {'prob':>7s}  note"
+        )
+        self._logger.info(f"    {'-' * 60}")
+
+        n_layers = len(er.layer_probes)
+        for probe in er.layer_probes:
+            notes = []
+            if probe.first_top1:
+                if probe.layer_index == 0:
+                    notes.append("⚠ rank-1 at first layer — pattern matching, not reasoning")
+                elif probe.layer_index < n_layers // 2:
+                    notes.append("✓ rank-1 reached early — confident decision")
+                else:
+                    notes.append("~ rank-1 reached late — decision made in deep layers")
+            if probe.layer_index == n_layers - 1:
+                if probe.target_rank == 1:
+                    notes.append("✓ final layer confirms rank-1")
+                else:
+                    notes.append(f"⚠ final layer rank=#{probe.target_rank} — model uncertain at output")
+            # Flag if rank is getting worse (increasing) across layers
+            if probe.layer_index > 0:
+                prev = er.layer_probes[probe.layer_index - 1]
+                if probe.target_rank > prev.target_rank * 2:
+                    notes.append("↑ rank worsening — later layers hurt this prediction")
+
+            note_str = "  ".join(notes)
             self._logger.info(
-                f"    {seg.label:20s}  {seg.avg_saliency:.3f}  "
-                f"({seg.token_count} tokens)"
+                f"    {probe.layer_index:>5d}  {probe.target_rank:>6d}  "
+                f"{probe.target_prob:>7.4f}  {note_str}"
+            )
+
+        # Panel B story — interpret the overall trajectory
+        first_top1_layer = next((p.layer_index for p in er.layer_probes if p.first_top1), -1)
+        final_rank = er.layer_probes[-1].target_rank if er.layer_probes else -1
+        n_layers = len(er.layer_probes)
+
+        self._logger.info("  Panel B — Trajectory interpretation:")
+        if first_top1_layer == -1:
+            self._logger.info(
+                "    ✗ Target never reached rank-1 across all layers. "
+                "The model is uncertain about this token even at the final layer. "
+                "→ Prompt optimization tip: the model may not understand the output "
+                "format — consider adding clearer output examples or restructuring "
+                "the instruction to make the expected first token more explicit."
+            )
+        elif first_top1_layer == 0:
+            self._logger.info(
+                "    ⚠ Pattern matching detected: rank-1 achieved at layer 0. "
+                "The model commits to this token immediately from the embedding layer, "
+                "before any transformer reasoning occurs. This means the prediction "
+                "is driven by surface-level token co-occurrence, not by understanding "
+                "the prompt content. "
+                "→ Prompt optimization tip: reformulate the instruction to require "
+                "reasoning before outputting — e.g. add a 'think step by step' prefix "
+                "or require a reasoning field before the structured output."
+            )
+        elif first_top1_layer < n_layers // 3:
+            self._logger.info(
+                f"    ✓ Early commitment: rank-1 reached at layer {first_top1_layer}/{n_layers}. "
+                "The model resolves the target token in the early layers, suggesting "
+                "strong learned associations between prompt structure and output format. "
+                "This is healthy for format compliance but may indicate the model is "
+                "deciding output format before fully processing the email content."
+            )
+        elif first_top1_layer < (2 * n_layers) // 3:
+            self._logger.info(
+                f"    ✓ Ideal reasoning pattern: rank-1 reached at layer {first_top1_layer}/{n_layers}. "
+                "The model starts uncertain and resolves the target in the middle layers — "
+                "this is the signature of genuine semantic reasoning where later transformer "
+                "blocks integrate information from across the prompt. "
+                "→ This is the desired behavior for a well-prompted extraction task."
+            )
+        else:
+            self._logger.info(
+                f"    ~ Late commitment: rank-1 reached at layer {first_top1_layer}/{n_layers}. "
+                "The model only resolves the target in the final layers. This can mean "
+                "the task is genuinely hard for this model, or the prompt provides "
+                "conflicting signals that require deep processing to resolve. "
+                "→ Prompt optimization tip: if this is consistent across examples, "
+                "simplify the instruction or reduce the number of rules to reduce "
+                "the cognitive load on later layers."
+            )
+
+        self._logger.info("\n  Panel C — Segment saliency (high → low):")
+        self._logger.info(
+            f"    {'segment':<20s}  {'avg_sal':>7s}  {'tokens':>7s}  {'ratio':>8s}  comment"
+        )
+        self._logger.info(f"    {'-' * 75}")
+
+        _RATIO_HIGH = 0.003
+        _RATIO_MED = 0.001
+        _EXPECTED_HIGH = {"email_body", "instruction"}
+        _EXPECTED_LOW = {"system_wrapper", "field_label", "email_to", "email_from"}
+
+        for seg in er.segment_saliencies:
+            n = seg.token_count
+            ratio = seg.avg_saliency / n if n > 0 else 0.0
+
+            if ratio >= _RATIO_HIGH:
+                if seg.label in _EXPECTED_HIGH:
+                    comment = "✓ model reads this"
+                elif seg.label in _EXPECTED_LOW:
+                    comment = "⚠ over-weighted — should not dominate"
+                else:
+                    comment = "✓ active"
+            elif ratio >= _RATIO_MED:
+                if seg.label in _EXPECTED_HIGH:
+                    comment = "⚠ under-weighted — should be higher"
+                else:
+                    comment = "~ borderline"
+            else:
+                if seg.label in _EXPECTED_HIGH:
+                    comment = "✗ ignored — prompt optimization needed"
+                else:
+                    comment = "~ ignored (ok if not critical)"
+
+            self._logger.info(
+                f"    {seg.label:<20s}  {seg.avg_saliency:>7.4f}  {n:>7d}  "
+                f"{ratio:>8.5f}  {comment}"
             )
 
     def _log_summary(self, result: LIGAttributionResult) -> None:

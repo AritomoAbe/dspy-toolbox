@@ -1,0 +1,5999 @@
+<|email_start|>
+From: chris@hubspot.com
+To: alex@abe-health.com
+Date: 2024-01-08
+Hi Alex,
+
+Let's catch up on the retrospective. I can do Tuesday at lunchtime for 1 hour. (I'm on Paris time.)
+
+Cheers,
+Chris
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: sam@abe-health.com
+Date: 2024-01-15
+Dear Sam,
+
+Let's find time for the partnership discussion. Any slot soon works for me.
+
+Kind regards,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: claire@startup.ai
+To: dev@engineering.com
+Date: 2024-01-22
+Dear Riley,
+
+Do you have three quarters of an hour free 9am Beijing time to go over the team sync? I'm based in Shanghai, so I'm on Beijing time.
+
+Best wishes,
+Claire
+<|email_end|>
+
+<|email_start|>
+From: chris@hubspot.com
+To: dev@engineering.com
+Date: 2024-01-29
+Good day Riley,
+
+Let's catch up on the retrospective. I can do at evening for 45 minutes.
+
+Talk soon,
+Chris
+<|email_end|>
+
+<|email_start|>
+From: alice@acmecorp.com
+To: matt@abe-health.com
+Date: 2024-02-05
+Dear Matt,
+
+Could we find 15 minutes at your convenience to go over the product roadmap? I'm based in the East Coast, so I'm on NYC time.
+
+Kind regards,
+Alice
+<|email_end|>
+
+<|email_start|>
+From: quinn@marketing.biz
+To: alex@abe-health.com
+Date: 2024-02-12
+Hi Alex,
+
+Let's catch up on the Q4 planning. I can do at afternoon for half an hour. (I'm on GMT.)
+
+Kind regards,
+Quinn
+<|email_end|>
+
+<|email_start|>
+From: claire@startup.ai
+To: josh@abe-health.com
+Date: 2024-02-19
+Good day Josh,
+
+Looking to chat about the hiring strategy — does soon work for you? I'm based in Seattle, so I'm on PT.
+
+Best wishes,
+Claire
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: dev@engineering.com
+Date: 2024-02-26
+Hi Riley,
+
+Let's catch up on the technical deep dive. I can do 9:30am BRT for a quick 15-min chat. I'm based in São Paulo, so I'm on BRT.
+
+Cheers,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: josh@abe-health.com
+Date: 2024-03-04
+Hi Josh,
+
+Can we schedule 45 minutes for the customer feedback session? Tuesday at end of day or Friday at morning would work for me. (I'm on CST.)
+
+Thanks,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: alex@abe-health.com
+Date: 2024-03-11
+Hey Alex,
+
+Do you have 20 mins free Friday at evening, Monday at evening or Tuesday at 4:30pm Mountain time to go over the company board meeting?
+
+Best wishes,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: mia@biotech.org
+To: sales@biz.com
+Date: 2024-03-18
+Hello Morgan,
+
+Would you be available sometime this week for a 45 minutes Q3 review?
+
+Cheers,
+Mia
+<|email_end|>
+
+<|email_start|>
+From: chris@hubspot.com
+To: alex@abe-health.com
+Date: 2024-03-25
+Good day Alex,
+
+Could we find two hours when you're free to go over the Q3 review?
+
+Best,
+Chris
+<|email_end|>
+
+<|email_start|>
+From: matt@abe-health.com
+To: dev@engineering.com
+Date: 2024-04-01
+Good day Riley,
+
+Are you free for three quarters of an hour sometime to discuss the security audit? I'm based in Beijing, so I'm on Beijing time.
+
+Talk soon,
+Matt
+<|email_end|>
+
+<|email_start|>
+From: tom@amazon.com
+To: sam@abe-health.com
+Date: 2024-04-08
+Hi Sam,
+
+Are you free for an hour to discuss the investor update? I'm available Friday at 9am or Wednesday at afternoon.
+
+Thanks,
+Tom
+<|email_end|>
+
+<|email_start|>
+From: ellie@google.com
+To: matt@abe-health.com
+Date: 2024-04-15
+Hi Matt,
+
+Would love to sync on the hiring strategy — I'm available Monday at 2pm BST, Thursday at 10am BST or Friday at evening for a quick 15-min chat. I'm based in London, so I'm on BST.
+
+Best,
+Ellie
+<|email_end|>
+
+<|email_start|>
+From: bob@techventures.io
+To: sales@biz.com
+Date: 2024-04-22
+Hello Morgan,
+
+Are you free for a quick 15-min chat next week to discuss the team sync?
+
+Thanks,
+Bob
+<|email_end|>
+
+<|email_start|>
+From: liam@fintech.io
+To: matt@abe-health.com
+Date: 2024-05-06
+Hey Matt,
+
+Let's catch up on the pitch. I can do 10am PST for 15 min. I'm based in the West Coast, so I'm on PST.
+
+Best,
+Liam
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: ceo@startup.com
+Date: 2024-05-13
+Hey Jordan,
+
+Looking to chat about the company metrics — does sometime next week work for you? I'm based in Boston, so I'm on New York time.
+
+Thanks,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: paul@agency.co
+To: ceo@startup.com
+Date: 2024-05-20
+Hello Jordan,
+
+I'd love to schedule a user research debrief whenever works for you — do you have a quick 15-min chat free?
+
+Talk soon,
+Paul
+<|email_end|>
+
+<|email_start|>
+From: sarah@microsoft.com
+To: sam@abe-health.com
+Date: 2024-05-27
+Hello Sam,
+
+Do you have 20 minutes free 5pm São Paulo time to go over the 1:1? I'm based in Brazil, so I'm on São Paulo time.
+
+Best wishes,
+Sarah
+<|email_end|>
+
+<|email_start|>
+From: quinn@marketing.biz
+To: josh@abe-health.com
+Date: 2024-06-03
+Hey Josh,
+
+Looking to chat about the team sync — does this week work for you? I'm based in Denver, so I'm on Denver time.
+
+Best wishes,
+Quinn
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: dev@engineering.com
+Date: 2024-06-10
+Good day Riley,
+
+When are you free for a Q4 planning? Hoping to connect at your convenience. I'm based in São Paulo, so I'm on Brasilia time.
+
+Thanks,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: frank@logistics.de
+To: sam@abe-health.com
+Date: 2024-06-17
+Hey Sam,
+
+Could we find two hours next week for a security audit? I'm free 12pm London time.
+
+Best,
+Frank
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: alex@abe-health.com
+Date: 2024-06-24
+Dear Alex,
+
+Do you have 45 mins free at afternoon to go over the product roadmap? (I'm on Tokyo time.)
+
+Cheers,
+David
+<|email_end|>
+
+<|email_start|>
+From: quinn@marketing.biz
+To: matt@abe-health.com
+Date: 2024-07-01
+Hi Matt,
+
+Can we schedule 15 min for the design review? Thursday at 1pm Mountain time or Wednesday at afternoon would work for me. (I'm on Mountain time.)
+
+Kind regards,
+Quinn
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: alex@abe-health.com
+Date: 2024-07-08
+Hi Alex,
+
+Are you free for a couple of hours to discuss the technical deep dive? I'm available at evening. (I'm on EST.)
+
+Talk soon,
+David
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: sales@biz.com
+Date: 2024-07-15
+Dear Morgan,
+
+Let's catch up on the marketing strategy. I can do Monday at morning or Wednesday at lunchtime for 15 minutes.
+
+Kind regards,
+James
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: alex@abe-health.com
+Date: 2024-07-22
+Dear Alex,
+
+Could we find 30 minutes sometime this week for a retrospective? I'm free Tuesday at 11:30am CEST or Thursday at 5pm CEST. I'm based in France, so I'm on CEST.
+
+Best,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: sam@abe-health.com
+Date: 2024-01-08
+Good day Sam,
+
+Could we find 2 hours in the coming weeks to go over the customer feedback session? (I'm on AEDT.)
+
+Kind regards,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: serafin@abe-health.com
+To: pm@product.io
+Date: 2024-01-15
+Hey Taylor,
+
+Do you have two hours free 5:30pm IST to go over the retrospective? (I'm on IST.)
+
+Thanks,
+Serafin
+<|email_end|>
+
+<|email_start|>
+From: alice@acmecorp.com
+To: sam@abe-health.com
+Date: 2024-01-22
+Hey Sam,
+
+Are you free for 2 hours early next week to discuss the contract negotiation?
+
+Talk soon,
+Alice
+<|email_end|>
+
+<|email_start|>
+From: tara@analytics.com
+To: alex@abe-health.com
+Date: 2024-01-29
+Dear Alex,
+
+Are you free for an hour soon to discuss the board meeting? I'm based in Mumbai, so I'm on IST.
+
+Best,
+Tara
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: sales@biz.com
+Date: 2024-02-05
+Hi Morgan,
+
+Are you free for two hours to discuss the hiring strategy? I'm available at evening. (I'm on San Francisco time.)
+
+Best,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: pm@product.io
+Date: 2024-02-12
+Hello Taylor,
+
+Let's find time for the budget discussion. Any slot sometime works for me.
+
+Cheers,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: sarah@microsoft.com
+To: pm@product.io
+Date: 2024-02-19
+Hey Taylor,
+
+Do you have 20 minutes free 1pm Chicago time to go over the contract negotiation? (I'm on Chicago time.)
+
+Thanks,
+Sarah
+<|email_end|>
+
+<|email_start|>
+From: matt@abe-health.com
+To: alex@abe-health.com
+Date: 2024-02-26
+Hey Alex,
+
+Do you have an hour and a half free 9am India time to go over the budget discussion?
+
+Cheers,
+Matt
+<|email_end|>
+
+<|email_start|>
+From: sam@devshop.io
+To: sales@biz.com
+Date: 2024-03-04
+Hi Morgan,
+
+Can we schedule 20 mins for the Q3 review? 9:30am Los Angeles time would work for me.
+
+Best,
+Sam
+<|email_end|>
+
+<|email_start|>
+From: sarah@microsoft.com
+To: dev@engineering.com
+Date: 2024-03-11
+Hey Riley,
+
+Would you be available soon for a 15 minutes pitch? I'm based in France, so I'm on Central European time.
+
+Kind regards,
+Sarah
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: josh@abe-health.com
+Date: 2024-03-18
+Hello Josh,
+
+I'd love to schedule a Q3 review whenever works for you — do you have 20 mins free? I'm based in Paris, so I'm on CEST.
+
+Talk soon,
+David
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: alex@abe-health.com
+Date: 2024-03-25
+Hello Alex,
+
+Can we schedule 20 mins for the performance review? at end of day would work for me. I'm based in San Francisco, so I'm on PDT.
+
+Best wishes,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: sales@biz.com
+Date: 2024-04-01
+Hello Morgan,
+
+Could we find 15 min next week to go over the coffee chat? I'm based in Chicago, so I'm on CST.
+
+Best wishes,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: paul@agency.co
+To: josh@abe-health.com
+Date: 2024-04-08
+Hey Josh,
+
+Would love to sync on the security audit — I'm available Thursday at evening or Monday at 2:30pm JST for 2 hours. I'm based in Tokyo, so I'm on JST.
+
+Cheers,
+Paul
+<|email_end|>
+
+<|email_start|>
+From: zoe@operations.com
+To: sales@biz.com
+Date: 2024-04-15
+Good day Morgan,
+
+Do you have one hour free Monday at 2pm BST to go over the Q2 planning?
+
+Kind regards,
+Zoe
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: dev@engineering.com
+Date: 2024-04-22
+Dear Riley,
+
+I'd love to schedule a board meeting in the next few days — do you have 45 minutes free?
+
+Best wishes,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: josh@abe-health.com
+Date: 2024-05-06
+Hey Josh,
+
+Are you free for 20 minutes at your convenience to discuss the sales pipeline review?
+
+Thanks,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: sam@abe-health.com
+Date: 2024-05-13
+Hello Sam,
+
+Let's catch up on the Q3 review. I can do Thursday at 5pm AEST for a quick call. (I'm on AEST.)
+
+Cheers,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: dev@engineering.com
+Date: 2024-05-20
+Dear Riley,
+
+Would love to sync on the budget discussion — I'm available Friday at evening or Wednesday at evening for 20 mins. (I'm on ET.)
+
+Best wishes,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: wendy@retail.com
+To: alex@abe-health.com
+Date: 2024-05-27
+Hey Alex,
+
+Looking to chat about the security audit — does when you're free work for you? (I'm on Mumbai time.)
+
+Best,
+Wendy
+<|email_end|>
+
+<|email_start|>
+From: quinn@marketing.biz
+To: ceo@startup.com
+Date: 2024-06-03
+Hello Jordan,
+
+Can we schedule a couple of hours for the technical deep dive? Wednesday at lunchtime would work for me. (I'm on UK time.)
+
+Cheers,
+Quinn
+<|email_end|>
+
+<|email_start|>
+From: kate@media.com
+To: dev@engineering.com
+Date: 2024-06-10
+Hi Riley,
+
+Could we find a couple of hours early next week to go over the Q2 planning? I'm based in São Paulo, so I'm on Brasilia time.
+
+Cheers,
+Kate
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: sam@abe-health.com
+Date: 2024-06-17
+Good day Sam,
+
+Can we schedule three quarters of an hour for the Q2 planning? 3:30pm PT would work for me. (I'm on PT.)
+
+Kind regards,
+James
+<|email_end|>
+
+<|email_start|>
+From: zoe@operations.com
+To: alex@abe-health.com
+Date: 2024-06-24
+Hello Alex,
+
+Do you have half-an-hour free at morning to go over the sales pipeline review? I'm based in Tokyo, so I'm on Japan time.
+
+Best,
+Zoe
+<|email_end|>
+
+<|email_start|>
+From: liam@fintech.io
+To: sam@abe-health.com
+Date: 2024-07-01
+Hey Sam,
+
+Let's catch up on the catchup. I can do Monday at 10am AEST for 90 minutes. I'm based in Melbourne, so I'm on AEST.
+
+Talk soon,
+Liam
+<|email_end|>
+
+<|email_start|>
+From: olivia@ngo.net
+To: dev@engineering.com
+Date: 2024-07-08
+Good day Riley,
+
+I'd like to set up a onboarding session. Are you around 4:30pm Berlin time for a quick call? I'm based in Germany, so I'm on Berlin time.
+
+Kind regards,
+Olivia
+<|email_end|>
+
+<|email_start|>
+From: paul@agency.co
+To: ceo@startup.com
+Date: 2024-07-15
+Hello Jordan,
+
+Are you free for a quick 15-min chat to discuss the marketing strategy? I'm available 12pm AEDT. I'm based in Sydney, so I'm on AEDT.
+
+Best wishes,
+Paul
+<|email_end|>
+
+<|email_start|>
+From: wendy@retail.com
+To: pm@product.io
+Date: 2024-07-22
+Dear Taylor,
+
+Could we find 90 minutes later today for a team sync? I'm free at lunchtime.
+
+Best wishes,
+Wendy
+<|email_end|>
+
+<|email_start|>
+From: sam@devshop.io
+To: sam@abe-health.com
+Date: 2024-01-08
+Good day Sam,
+
+Would you be available next week for a 60 minutes board meeting? I'm based in Australia, so I'm on Australian Eastern time.
+
+Thanks,
+Sam
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: alex@abe-health.com
+Date: 2024-01-15
+Hello Alex,
+
+Do you have 20 mins free Wednesday at 1:30pm Sydney time to go over the customer feedback session?
+
+Cheers,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: bob@techventures.io
+To: sales@biz.com
+Date: 2024-01-22
+Hey Morgan,
+
+Let's catch up on the architecture review. I can do Wednesday at 10am Denver time, Tuesday at evening or Thursday at lunchtime for a couple of hours.
+
+Cheers,
+Bob
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: pm@product.io
+Date: 2024-01-29
+Dear Taylor,
+
+Can we schedule 45 minutes for the retrospective? 10:30am AEDT would work for me. I'm based in Melbourne, so I'm on AEDT.
+
+Best,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: sales@biz.com
+Date: 2024-02-05
+Hey Morgan,
+
+Would love to sync on the performance review — I'm available at end of day for an hour. (I'm on CET.)
+
+Best,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: quinn@marketing.biz
+To: alex@abe-health.com
+Date: 2024-02-12
+Good day Alex,
+
+Would love to sync on the Q3 review — I'm available Wednesday at lunchtime for 20 mins.
+
+Talk soon,
+Quinn
+<|email_end|>
+
+<|email_start|>
+From: sarah@microsoft.com
+To: pm@product.io
+Date: 2024-02-19
+Hey Taylor,
+
+Let's find time for the security audit. Any slot this week works for me.
+
+Thanks,
+Sarah
+<|email_end|>
+
+<|email_start|>
+From: serafin@abe-health.com
+To: alex@abe-health.com
+Date: 2024-02-26
+Hi Alex,
+
+Are you free for three quarters of an hour to discuss the sprint planning? I'm available at morning. I'm based in Boston, so I'm on Eastern time.
+
+Best,
+Serafin
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: ceo@startup.com
+Date: 2024-03-04
+Dear Jordan,
+
+Can we schedule 20 minutes for the 1:1? Thursday at end of day or Wednesday at 10am Japan time would work for me. I'm based in Tokyo, so I'm on Japan time.
+
+Best,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: sam@abe-health.com
+Date: 2024-03-11
+Hey Sam,
+
+Could we find a couple of hours sometime next week for a Google Cloud usage? I'm free Wednesday at evening.
+
+Best,
+James
+<|email_end|>
+
+<|email_start|>
+From: mike@bigcorp.com
+To: pm@product.io
+Date: 2024-03-18
+Hi Taylor,
+
+Let's catch up on the Q4 planning. I can do at afternoon for 90 minutes.
+
+Talk soon,
+Mike
+<|email_end|>
+
+<|email_start|>
+From: liam@fintech.io
+To: sales@biz.com
+Date: 2024-03-25
+Hi Morgan,
+
+Are you free for a quick 15-min chat whenever works for you to discuss the budget discussion? I'm based in London, so I'm on London time.
+
+Cheers,
+Liam
+<|email_end|>
+
+<|email_start|>
+From: matt@abe-health.com
+To: alex@abe-health.com
+Date: 2024-04-01
+Hello Alex,
+
+Would love to sync on the intro call — I'm available at morning for 30 mins. I'm based in Melbourne, so I'm on AEST.
+
+Cheers,
+Matt
+<|email_end|>
+
+<|email_start|>
+From: victor@manufacturing.com
+To: sales@biz.com
+Date: 2024-04-08
+Hey Morgan,
+
+Looking to chat about the sales pipeline review — does soon work for you?
+
+Best wishes,
+Victor
+<|email_end|>
+
+<|email_start|>
+From: henry@lawfirm.com
+To: josh@abe-health.com
+Date: 2024-04-15
+Good day Josh,
+
+When are you free for a intro call? Hoping to connect in the coming weeks. I'm based in Berlin, so I'm on German time.
+
+Kind regards,
+Henry
+<|email_end|>
+
+<|email_start|>
+From: sarah@microsoft.com
+To: josh@abe-health.com
+Date: 2024-04-22
+Good day Josh,
+
+Let's catch up on the sprint planning. I can do at end of day for 15 mins.
+
+Best wishes,
+Sarah
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: dev@engineering.com
+Date: 2024-05-06
+Good day Riley,
+
+Looking to chat about the architecture review — does soon work for you? (I'm on AEST.)
+
+Talk soon,
+David
+<|email_end|>
+
+<|email_start|>
+From: mike@bigcorp.com
+To: sales@biz.com
+Date: 2024-05-13
+Good day Morgan,
+
+Are you free for a quick call to discuss the design review? I'm available at morning. I'm based in Chicago, so I'm on CST.
+
+Thanks,
+Mike
+<|email_end|>
+
+<|email_start|>
+From: ellie@google.com
+To: sales@biz.com
+Date: 2024-05-20
+Hi Morgan,
+
+Are you free for 15 min to discuss the team sync? I'm available at 4pm.
+
+Best,
+Ellie
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: matt@abe-health.com
+Date: 2024-05-27
+Hi Matt,
+
+Can we schedule 60 mins for the company board meeting? Thursday at evening would work for me.
+
+Thanks,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: uma@research.edu
+To: sales@biz.com
+Date: 2024-06-03
+Good day Morgan,
+
+Can we schedule a quick 15-min chat for the marketing strategy? at evening would work for me. I'm based in New York, so I'm on EST.
+
+Talk soon,
+Uma
+<|email_end|>
+
+<|email_start|>
+From: frank@logistics.de
+To: dev@engineering.com
+Date: 2024-06-10
+Hello Riley,
+
+I'd like to set up a product roadmap. Are you around 11am Eastern time for 20 mins?
+
+Best,
+Frank
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: sales@biz.com
+Date: 2024-06-17
+Good day Morgan,
+
+I'd like to set up a 1:1. Are you around Friday at end of day or Thursday at afternoon for three quarters of an hour? I'm based in Japan, so I'm on Japan time.
+
+Thanks,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: victor@manufacturing.com
+To: dev@engineering.com
+Date: 2024-06-24
+Hey Riley,
+
+Would love to sync on the security audit — I'm available at lunchtime for half-an-hour.
+
+Thanks,
+Victor
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: pm@product.io
+Date: 2024-07-01
+Hey Taylor,
+
+I'd like to set up a onboarding session. Are you around at afternoon for 20 mins? I'm based in Brazil, so I'm on São Paulo time.
+
+Talk soon,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: mike@bigcorp.com
+To: dev@engineering.com
+Date: 2024-07-08
+Hi Riley,
+
+Looking to chat about the 1:1 — does soon work for you? (I'm on Sydney time.)
+
+Kind regards,
+Mike
+<|email_end|>
+
+<|email_start|>
+From: henry@lawfirm.com
+To: ceo@startup.com
+Date: 2024-07-15
+Good day Jordan,
+
+I'd like to set up a Q2 planning. Are you around Tuesday at morning or Thursday at morning for a couple of hours?
+
+Best wishes,
+Henry
+<|email_end|>
+
+<|email_start|>
+From: victor@manufacturing.com
+To: sam@abe-health.com
+Date: 2024-07-22
+Hi Sam,
+
+Do you have 45 mins free at morning to go over the architecture review?
+
+Best wishes,
+Victor
+<|email_end|>
+
+<|email_start|>
+From: zoe@operations.com
+To: sam@abe-health.com
+Date: 2024-01-08
+Hey Sam,
+
+Can we schedule a couple of hours for the performance review? 9am Sydney time would work for me. I'm based in Sydney, so I'm on Sydney time.
+
+Thanks,
+Zoe
+<|email_end|>
+
+<|email_start|>
+From: olivia@ngo.net
+To: ceo@startup.com
+Date: 2024-01-15
+Hello Jordan,
+
+Could we find a quick 15-min chat next week for a marketing strategy? I'm free Tuesday at 1:30pm CDT or Monday at end of day. (I'm on CDT.)
+
+Kind regards,
+Olivia
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: josh@abe-health.com
+Date: 2024-01-22
+Hey Josh,
+
+I'd like to set up a planning session. Are you around Monday at 11am or Thursday at 1pm for three quarters of an hour?
+
+Talk soon,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: joey@abe-health.com
+To: josh@abe-health.com
+Date: 2024-01-29
+Hello Josh,
+
+Would you be available at your convenience for a 20 minutes design review? I'm based in Australia, so I'm on Sydney time.
+
+Kind regards,
+Joey
+<|email_end|>
+
+<|email_start|>
+From: serafin@abe-health.com
+To: pm@product.io
+Date: 2024-02-05
+Hello Taylor,
+
+I'd love to schedule a kickoff meeting soon — do you have 15 minutes free? I'm based in China, so I'm on China time.
+
+Talk soon,
+Serafin
+<|email_end|>
+
+<|email_start|>
+From: joey@abe-health.com
+To: josh@abe-health.com
+Date: 2024-02-12
+Good day Josh,
+
+Let's find time for the budget discussion. Any slot at your convenience works for me.
+
+Best wishes,
+Joey
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: matt@abe-health.com
+Date: 2024-02-19
+Hi Matt,
+
+Would you be available early next week for a a quick 15-min chat Q4 planning? I'm based in Tokyo, so I'm on Japan time.
+
+Thanks,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: xander@crypto.io
+To: dev@engineering.com
+Date: 2024-02-26
+Dear Riley,
+
+Looking to chat about the investor update — does in the coming weeks work for you? I'm based in Tokyo, so I'm on Japan time.
+
+Best wishes,
+Xander
+<|email_end|>
+
+<|email_start|>
+From: matt@abe-health.com
+To: josh@abe-health.com
+Date: 2024-03-04
+Hey Josh,
+
+Would love to sync on the board meeting — I'm available Monday at 3:30pm Central European time, Friday at 8am Central European time or Wednesday at 11:30am Central European time for half-an-hour. I'm based in Paris, so I'm on Central European time.
+
+Best wishes,
+Matt
+<|email_end|>
+
+<|email_start|>
+From: uma@research.edu
+To: matt@abe-health.com
+Date: 2024-03-11
+Hey Matt,
+
+Are you free for 15 mins to discuss the 1:1? I'm available Friday at 5pm Shanghai time, Monday at 2pm Shanghai time or Tuesday at 4:30pm Shanghai time. (I'm on Shanghai time.)
+
+Thanks,
+Uma
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: matt@abe-health.com
+Date: 2024-03-18
+Hello Matt,
+
+Are you free for 90 minutes when you're free to discuss the company board meeting?
+
+Best wishes,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: sales@biz.com
+Date: 2024-03-25
+Good day Morgan,
+
+Would love to sync on the design review — I'm available Wednesday at 11am Paris time or Thursday at 1:30pm Paris time for an hour and a half.
+
+Best wishes,
+James
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: dev@engineering.com
+Date: 2024-04-01
+Hey Riley,
+
+Do you have 20 mins free 2pm CST to go over the technical deep dive? I'm based in the Midwest, so I'm on CST.
+
+Best wishes,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: quinn@marketing.biz
+To: sales@biz.com
+Date: 2024-04-08
+Hi Morgan,
+
+I'd like to set up a Q4 planning. Are you around Tuesday at afternoon or Thursday at morning for 1.5 hours? I'm based in China, so I'm on CST.
+
+Best,
+Quinn
+<|email_end|>
+
+<|email_start|>
+From: wendy@retail.com
+To: sam@abe-health.com
+Date: 2024-04-15
+Hello Sam,
+
+I'd like to set up a partnership discussion. Are you around 5:30pm Los Angeles time for an hour and a half? (I'm on Los Angeles time.)
+
+Thanks,
+Wendy
+<|email_end|>
+
+<|email_start|>
+From: joey@abe-health.com
+To: sam@abe-health.com
+Date: 2024-04-22
+Hello Sam,
+
+Could we find two hours sometime this week for a company metrics? I'm free Thursday at 5:30pm or Tuesday at lunchtime.
+
+Best,
+Joey
+<|email_end|>
+
+<|email_start|>
+From: bob@techventures.io
+To: ceo@startup.com
+Date: 2024-05-06
+Hi Jordan,
+
+Do you have 1.5 hours free 3:30pm CEST to go over the onboarding session? I'm based in France, so I'm on CEST.
+
+Best,
+Bob
+<|email_end|>
+
+<|email_start|>
+From: noah@edu.org
+To: alex@abe-health.com
+Date: 2024-05-13
+Dear Alex,
+
+When are you free for a Q3 review? Hoping to connect at your convenience. I'm based in Germany, so I'm on German time.
+
+Thanks,
+Noah
+<|email_end|>
+
+<|email_start|>
+From: mike@bigcorp.com
+To: matt@abe-health.com
+Date: 2024-05-20
+Good day Matt,
+
+Would you be available sometime for a 20 mins technical deep dive? I'm based in Shanghai, so I'm on Shanghai time.
+
+Best wishes,
+Mike
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: sam@abe-health.com
+Date: 2024-05-27
+Good day Sam,
+
+I'd like to set up a pitch. Are you around Tuesday at 3pm Berlin time or Monday at 10am Berlin time for 45 minutes? (I'm on Berlin time.)
+
+Talk soon,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: matt@abe-health.com
+Date: 2024-06-03
+Dear Matt,
+
+Do you have 1 hour free Wednesday at afternoon or Friday at 4pm Central time to go over the security audit?
+
+Thanks,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: ceo@startup.com
+Date: 2024-06-10
+Dear Jordan,
+
+Looking to chat about the Q3 review — does soon work for you? I'm based in the Midwest, so I'm on Central time.
+
+Kind regards,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: josh@abe-health.com
+Date: 2024-06-17
+Good day Josh,
+
+Would love to sync on the planning session — I'm available 10am CT for two hours.
+
+Talk soon,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: matt@abe-health.com
+To: dev@engineering.com
+Date: 2024-06-24
+Hey Riley,
+
+I'd love to schedule a budget discussion sometime — do you have half-an-hour free? (I'm on MT.)
+
+Cheers,
+Matt
+<|email_end|>
+
+<|email_start|>
+From: chris@hubspot.com
+To: dev@engineering.com
+Date: 2024-07-01
+Hello Riley,
+
+Would love to sync on the 1:1 — I'm available 11am BST for an hour and a half. I'm based in the UK, so I'm on BST.
+
+Kind regards,
+Chris
+<|email_end|>
+
+<|email_start|>
+From: chris@hubspot.com
+To: dev@engineering.com
+Date: 2024-07-08
+Dear Riley,
+
+Would love to sync on the security audit — I'm available Thursday at 5pm India time for an hour and a half. (I'm on India time.)
+
+Thanks,
+Chris
+<|email_end|>
+
+<|email_start|>
+From: tara@analytics.com
+To: dev@engineering.com
+Date: 2024-07-15
+Good day Riley,
+
+Let's catch up on the technical deep dive. I can do Tuesday at 4:30pm BRT or Friday at end of day for 1.5 hours. I'm based in Brazil, so I'm on BRT.
+
+Best wishes,
+Tara
+<|email_end|>
+
+<|email_start|>
+From: joey@abe-health.com
+To: josh@abe-health.com
+Date: 2024-07-22
+Hey Josh,
+
+When are you free for a Q3 review? Hoping to connect in the coming weeks. I'm based in the Midwest, so I'm on CT.
+
+Cheers,
+Joey
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: ceo@startup.com
+Date: 2024-01-08
+Hello Jordan,
+
+I'd like to set up a contract negotiation. Are you around 4:30pm São Paulo time for two hours?
+
+Thanks,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: henry@lawfirm.com
+To: matt@abe-health.com
+Date: 2024-01-15
+Dear Matt,
+
+Are you free for 20 minutes to discuss the Q4 planning? I'm available 2:30pm CEST. I'm based in Paris, so I'm on CEST.
+
+Talk soon,
+Henry
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: ceo@startup.com
+Date: 2024-01-22
+Good day Jordan,
+
+When are you free for a retrospective? Hoping to connect sometime next week. (I'm on São Paulo time.)
+
+Thanks,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: tom@amazon.com
+To: josh@abe-health.com
+Date: 2024-01-29
+Good day Josh,
+
+Can we schedule 30 mins for the product roadmap? Friday at end of day or Wednesday at lunchtime would work for me.
+
+Kind regards,
+Tom
+<|email_end|>
+
+<|email_start|>
+From: serafin@abe-health.com
+To: sales@biz.com
+Date: 2024-02-05
+Hello Morgan,
+
+I'd like to set up a technical deep dive. Are you around Tuesday at lunchtime, Thursday at 8am Eastern time or Friday at afternoon for 45 mins? (I'm on Eastern time.)
+
+Best,
+Serafin
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: sales@biz.com
+Date: 2024-02-12
+Hey Morgan,
+
+Could we find 1 hour this week to go over the retrospective?
+
+Kind regards,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: liam@fintech.io
+To: sam@abe-health.com
+Date: 2024-02-19
+Hi Sam,
+
+Looking to chat about the budget discussion — does early next week work for you? I'm based in Denver, so I'm on Denver time.
+
+Best wishes,
+Liam
+<|email_end|>
+
+<|email_start|>
+From: mike@bigcorp.com
+To: pm@product.io
+Date: 2024-02-26
+Hello Taylor,
+
+Do you have 1 hour free 4:30pm India time to go over the retrospective? I'm based in India, so I'm on India time.
+
+Kind regards,
+Mike
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: sales@biz.com
+Date: 2024-03-04
+Dear Morgan,
+
+Can we schedule three quarters of an hour for the contract negotiation? at end of day would work for me. I'm based in Shanghai, so I'm on CST.
+
+Cheers,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: pm@product.io
+Date: 2024-03-11
+Hey Taylor,
+
+Could we find 20 mins sometime next week for a company board meeting? I'm free Tuesday at 1:30pm Central European time or Thursday at 3pm Central European time. (I'm on Central European time.)
+
+Kind regards,
+David
+<|email_end|>
+
+<|email_start|>
+From: frank@logistics.de
+To: sam@abe-health.com
+Date: 2024-03-18
+Dear Sam,
+
+Do you have two hours free Thursday at 10am NYC time or Friday at afternoon to go over the design review?
+
+Kind regards,
+Frank
+<|email_end|>
+
+<|email_start|>
+From: sarah@microsoft.com
+To: ceo@startup.com
+Date: 2024-03-25
+Hey Jordan,
+
+Would you be available whenever works for you for a 15 min sales pipeline review? I'm based in the UK, so I'm on GMT.
+
+Cheers,
+Sarah
+<|email_end|>
+
+<|email_start|>
+From: uma@research.edu
+To: pm@product.io
+Date: 2024-04-01
+Hello Taylor,
+
+Could we find 15 mins early next week to go over the catchup?
+
+Best wishes,
+Uma
+<|email_end|>
+
+<|email_start|>
+From: paul@agency.co
+To: pm@product.io
+Date: 2024-04-08
+Dear Taylor,
+
+Could we find 2 hours at your convenience to go over the intro call? (I'm on Central European time.)
+
+Talk soon,
+Paul
+<|email_end|>
+
+<|email_start|>
+From: sam@devshop.io
+To: dev@engineering.com
+Date: 2024-04-15
+Hello Riley,
+
+Can we schedule a quick 15-min chat for the sales pipeline review? Tuesday at 1pm Australian Eastern time or Thursday at 2:30pm Australian Eastern time would work for me.
+
+Kind regards,
+Sam
+<|email_end|>
+
+<|email_start|>
+From: henry@lawfirm.com
+To: alex@abe-health.com
+Date: 2024-04-22
+Hey Alex,
+
+I'd love to schedule a sprint planning this week — do you have an hour and a half free? I'm based in the West Coast, so I'm on Pacific time.
+
+Thanks,
+Henry
+<|email_end|>
+
+<|email_start|>
+From: alice@acmecorp.com
+To: matt@abe-health.com
+Date: 2024-05-06
+Hello Matt,
+
+Let's find time for the Q4 planning. Any slot soon works for me.
+
+Talk soon,
+Alice
+<|email_end|>
+
+<|email_start|>
+From: victor@manufacturing.com
+To: ceo@startup.com
+Date: 2024-05-13
+Hi Jordan,
+
+Do you have 45 mins free Friday at morning to go over the hiring strategy?
+
+Best wishes,
+Victor
+<|email_end|>
+
+<|email_start|>
+From: chris@hubspot.com
+To: ceo@startup.com
+Date: 2024-05-20
+Hello Jordan,
+
+Can we schedule an hour and a half for the planning session? Friday at 5:30pm China time or Thursday at 5pm China time would work for me. I'm based in Shanghai, so I'm on China time.
+
+Cheers,
+Chris
+<|email_end|>
+
+<|email_start|>
+From: quinn@marketing.biz
+To: pm@product.io
+Date: 2024-05-27
+Hi Taylor,
+
+Do you have half-an-hour free Friday at afternoon or Wednesday at 5pm Berlin time to go over the 1:1? I'm based in Germany, so I'm on Berlin time.
+
+Best wishes,
+Quinn
+<|email_end|>
+
+<|email_start|>
+From: paul@agency.co
+To: sam@abe-health.com
+Date: 2024-06-03
+Dear Sam,
+
+Let's catch up on the user research debrief. I can do at lunchtime for 1 hour.
+
+Thanks,
+Paul
+<|email_end|>
+
+<|email_start|>
+From: victor@manufacturing.com
+To: dev@engineering.com
+Date: 2024-06-10
+Hey Riley,
+
+Would love to sync on the design review — I'm available Friday at evening, Wednesday at 5pm Mountain time or Tuesday at 9am Mountain time for 45 mins.
+
+Thanks,
+Victor
+<|email_end|>
+
+<|email_start|>
+From: sarah@microsoft.com
+To: sam@abe-health.com
+Date: 2024-06-17
+Hi Sam,
+
+Would love to sync on the planning session — I'm available Tuesday at evening or Thursday at 3:30pm CET for 15 minutes. I'm based in Paris, so I'm on CET.
+
+Thanks,
+Sarah
+<|email_end|>
+
+<|email_start|>
+From: xander@crypto.io
+To: ceo@startup.com
+Date: 2024-06-24
+Hello Jordan,
+
+Would you be available soon for a 30 mins demo?
+
+Best,
+Xander
+<|email_end|>
+
+<|email_start|>
+From: wendy@retail.com
+To: josh@abe-health.com
+Date: 2024-07-01
+Hey Josh,
+
+I'd like to set up a sprint planning. Are you around Monday at 11:30am China time or Friday at lunchtime for 20 minutes? I'm based in Shanghai, so I'm on China time.
+
+Best wishes,
+Wendy
+<|email_end|>
+
+<|email_start|>
+From: kate@media.com
+To: sales@biz.com
+Date: 2024-07-08
+Dear Morgan,
+
+Do you have half an hour free Friday at 12pm German time to go over the sales pipeline review? I'm based in Berlin, so I'm on German time.
+
+Best wishes,
+Kate
+<|email_end|>
+
+<|email_start|>
+From: kate@media.com
+To: josh@abe-health.com
+Date: 2024-07-15
+Hey Josh,
+
+I'd like to set up a sales pipeline review. Are you around 2:30pm MT for 15 minutes?
+
+Best,
+Kate
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: pm@product.io
+Date: 2024-07-22
+Good day Taylor,
+
+Could we find 20 minutes sometime this week for a sales pipeline review? I'm free Monday at evening or Tuesday at 10am.
+
+Best,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: pm@product.io
+Date: 2024-01-08
+Dear Taylor,
+
+Would you be available sometime for a 1.5 hours performance review?
+
+Cheers,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: matt@abe-health.com
+To: sales@biz.com
+Date: 2024-01-15
+Hello Morgan,
+
+Do you have 60 mins free Friday at 2pm Brasilia time to go over the team sync?
+
+Best wishes,
+Matt
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: alex@abe-health.com
+Date: 2024-01-22
+Good day Alex,
+
+Let's catch up on the kickoff meeting. I can do Friday at 8am New York time or Thursday at morning for three quarters of an hour. I'm based in New York, so I'm on New York time.
+
+Cheers,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: chris@hubspot.com
+To: dev@engineering.com
+Date: 2024-01-29
+Good day Riley,
+
+I'd love to schedule a company board meeting at your convenience — do you have 2 hours free? (I'm on Denver time.)
+
+Cheers,
+Chris
+<|email_end|>
+
+<|email_start|>
+From: bob@techventures.io
+To: matt@abe-health.com
+Date: 2024-02-05
+Dear Matt,
+
+Are you free for 20 mins to discuss the budget discussion? I'm available 5:30pm CDT.
+
+Best wishes,
+Bob
+<|email_end|>
+
+<|email_start|>
+From: uma@research.edu
+To: sam@abe-health.com
+Date: 2024-02-12
+Hello Sam,
+
+Let's catch up on the onboarding session. I can do Thursday at morning, Friday at morning or Tuesday at 3pm Mumbai time for 15 minutes. I'm based in Mumbai, so I'm on Mumbai time.
+
+Best wishes,
+Uma
+<|email_end|>
+
+<|email_start|>
+From: bob@techventures.io
+To: ceo@startup.com
+Date: 2024-02-19
+Hi Jordan,
+
+Can we schedule a quick 15-min chat for the technical deep dive? Thursday at 4:30pm EDT, Tuesday at 10:30am EDT or Friday at lunchtime would work for me. I'm based in the East Coast, so I'm on EDT.
+
+Best wishes,
+Bob
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: alex@abe-health.com
+Date: 2024-02-26
+Hello Alex,
+
+Can we schedule 60 mins for the security audit? Tuesday at 3:30pm or Thursday at end of day would work for me.
+
+Cheers,
+David
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: sam@abe-health.com
+Date: 2024-03-04
+Dear Sam,
+
+I'd like to set up a company board meeting. Are you around 3:30pm Mumbai time for 45 minutes? I'm based in Bangalore, so I'm on Mumbai time.
+
+Kind regards,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: serafin@abe-health.com
+To: alex@abe-health.com
+Date: 2024-03-11
+Hello Alex,
+
+Could we find 20 minutes sometime next week for a onboarding session? I'm free Monday at evening or Wednesday at 3:30pm GMT. I'm based in London, so I'm on GMT.
+
+Thanks,
+Serafin
+<|email_end|>
+
+<|email_start|>
+From: noah@edu.org
+To: ceo@startup.com
+Date: 2024-03-18
+Hello Jordan,
+
+I'd love to schedule a onboarding session at your convenience — do you have 1 hour free?
+
+Kind regards,
+Noah
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: ceo@startup.com
+Date: 2024-03-25
+Hey Jordan,
+
+Let's catch up on the Q2 planning. I can do Wednesday at lunchtime or Friday at morning for a couple of hours.
+
+Best wishes,
+David
+<|email_end|>
+
+<|email_start|>
+From: victor@manufacturing.com
+To: matt@abe-health.com
+Date: 2024-04-01
+Hey Matt,
+
+Are you free for 60 mins to discuss the partnership discussion? I'm available 11:30am GMT.
+
+Best,
+Victor
+<|email_end|>
+
+<|email_start|>
+From: liam@fintech.io
+To: dev@engineering.com
+Date: 2024-04-08
+Good day Riley,
+
+Can we schedule 20 minutes for the marketing strategy? Thursday at 8:30am UK time or Friday at 2:30pm UK time would work for me. I'm based in London, so I'm on UK time.
+
+Kind regards,
+Liam
+<|email_end|>
+
+<|email_start|>
+From: wendy@retail.com
+To: sam@abe-health.com
+Date: 2024-04-15
+Hi Sam,
+
+Would love to sync on the retrospective — I'm available 5:30pm Shanghai time for 15 min. I'm based in Shanghai, so I'm on Shanghai time.
+
+Best,
+Wendy
+<|email_end|>
+
+<|email_start|>
+From: tara@analytics.com
+To: matt@abe-health.com
+Date: 2024-04-22
+Hey Matt,
+
+Let's catch up on the customer feedback session. I can do Friday at 8:30am or Tuesday at 2pm for 20 minutes.
+
+Best wishes,
+Tara
+<|email_end|>
+
+<|email_start|>
+From: alice@acmecorp.com
+To: sam@abe-health.com
+Date: 2024-05-06
+Hello Sam,
+
+I'd like to set up a marketing strategy. Are you around Wednesday at 8am IST for 15 mins?
+
+Thanks,
+Alice
+<|email_end|>
+
+<|email_start|>
+From: mike@bigcorp.com
+To: alex@abe-health.com
+Date: 2024-05-13
+Hey Alex,
+
+Are you free for three quarters of an hour to discuss the Google Cloud usage? I'm available 1pm São Paulo time. I'm based in São Paulo, so I'm on São Paulo time.
+
+Best wishes,
+Mike
+<|email_end|>
+
+<|email_start|>
+From: victor@manufacturing.com
+To: ceo@startup.com
+Date: 2024-05-20
+Hey Jordan,
+
+Could we find 15 min in the next few days for a kickoff meeting? I'm free Thursday at 2:30pm Sydney time, Monday at lunchtime or Friday at 10:30am Sydney time. (I'm on Sydney time.)
+
+Talk soon,
+Victor
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: ceo@startup.com
+Date: 2024-05-27
+Hello Jordan,
+
+I'd love to schedule a sales pipeline review when you're free — do you have an hour and a half free? (I'm on CET time.)
+
+Best wishes,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: olivia@ngo.net
+To: matt@abe-health.com
+Date: 2024-06-03
+Hey Matt,
+
+When are you free for a project update? Hoping to connect at your convenience. (I'm on Sydney time.)
+
+Thanks,
+Olivia
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: sam@abe-health.com
+Date: 2024-06-10
+Hey Sam,
+
+Can we schedule three quarters of an hour for the board meeting? Thursday at 11am CET or Tuesday at 11am CET would work for me.
+
+Cheers,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: alex@abe-health.com
+Date: 2024-06-17
+Dear Alex,
+
+Let's catch up on the investor update. I can do Monday at lunchtime for 20 mins.
+
+Cheers,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: olivia@ngo.net
+To: alex@abe-health.com
+Date: 2024-06-24
+Hi Alex,
+
+I'd love to schedule a hiring strategy in the next few days — do you have a quick 15-min chat free?
+
+Talk soon,
+Olivia
+<|email_end|>
+
+<|email_start|>
+From: liam@fintech.io
+To: sam@abe-health.com
+Date: 2024-07-01
+Good day Sam,
+
+When are you free for a pitch? Hoping to connect early next week. (I'm on MST.)
+
+Talk soon,
+Liam
+<|email_end|>
+
+<|email_start|>
+From: sarah@microsoft.com
+To: sales@biz.com
+Date: 2024-07-08
+Hello Morgan,
+
+Could we find 20 minutes in the next few days for a Q1 review? I'm free at morning. (I'm on CDT.)
+
+Kind regards,
+Sarah
+<|email_end|>
+
+<|email_start|>
+From: bob@techventures.io
+To: alex@abe-health.com
+Date: 2024-07-15
+Dear Alex,
+
+Can we schedule 1.5 hours for the investor update? at lunchtime would work for me.
+
+Best,
+Bob
+<|email_end|>
+
+<|email_start|>
+From: chris@hubspot.com
+To: matt@abe-health.com
+Date: 2024-07-22
+Good day Matt,
+
+I'd love to schedule a Q1 review whenever works for you — do you have 45 mins free? I'm based in Beijing, so I'm on CST.
+
+Talk soon,
+Chris
+<|email_end|>
+
+<|email_start|>
+From: alice@acmecorp.com
+To: sam@abe-health.com
+Date: 2024-01-08
+Hey Sam,
+
+Could we find half an hour in the coming weeks to go over the kickoff meeting?
+
+Kind regards,
+Alice
+<|email_end|>
+
+<|email_start|>
+From: ellie@google.com
+To: sales@biz.com
+Date: 2024-01-15
+Hi Morgan,
+
+Can we schedule 20 mins for the planning session? Thursday at 3:30pm NYC time would work for me.
+
+Thanks,
+Ellie
+<|email_end|>
+
+<|email_start|>
+From: claire@startup.ai
+To: ceo@startup.com
+Date: 2024-01-22
+Good day Jordan,
+
+Let's catch up on the product roadmap. I can do Thursday at 9am CEST, Friday at end of day or Wednesday at lunchtime for 15 minutes.
+
+Kind regards,
+Claire
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: alex@abe-health.com
+Date: 2024-01-29
+Hi Alex,
+
+Can we schedule 45 minutes for the board meeting? 10:30am CDT would work for me. (I'm on CDT.)
+
+Thanks,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: sarah@microsoft.com
+To: sales@biz.com
+Date: 2024-02-05
+Hi Morgan,
+
+Let's catch up on the onboarding session. I can do 3:30pm CST for 20 minutes. (I'm on CST.)
+
+Talk soon,
+Sarah
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: sam@abe-health.com
+Date: 2024-02-12
+Hi Sam,
+
+I'd like to set up a customer feedback session. Are you around Tuesday at end of day or Thursday at 9am Pacific time for 15 min? I'm based in Seattle, so I'm on Pacific time.
+
+Best,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: alex@abe-health.com
+Date: 2024-02-19
+Hi Alex,
+
+Let's catch up on the Q4 planning. I can do 2:30pm Japan time for 15 minutes. I'm based in Tokyo, so I'm on Japan time.
+
+Kind regards,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: olivia@ngo.net
+To: pm@product.io
+Date: 2024-02-26
+Hi Taylor,
+
+Let's find time for the onboarding session. Any slot in the next few days works for me. (I'm on China time.)
+
+Talk soon,
+Olivia
+<|email_end|>
+
+<|email_start|>
+From: paul@agency.co
+To: dev@engineering.com
+Date: 2024-03-04
+Dear Riley,
+
+Could we find 1 hour early next week for a customer feedback session? I'm free Friday at 4:30pm India time. I'm based in Bangalore, so I'm on India time.
+
+Kind regards,
+Paul
+<|email_end|>
+
+<|email_start|>
+From: joey@abe-health.com
+To: josh@abe-health.com
+Date: 2024-03-11
+Hello Josh,
+
+Are you free for an hour and a half to discuss the onboarding session? I'm available Thursday at 1:30pm LA time, Wednesday at 11am LA time or Monday at 1pm LA time. (I'm on LA time.)
+
+Best,
+Joey
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: pm@product.io
+Date: 2024-03-18
+Dear Taylor,
+
+Do you have a couple of hours free at lunchtime to go over the contract negotiation? I'm based in France, so I'm on CET time.
+
+Best,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: chris@hubspot.com
+To: pm@product.io
+Date: 2024-03-25
+Good day Taylor,
+
+Do you have two hours free at evening to go over the Google Cloud usage? (I'm on Tokyo time.)
+
+Talk soon,
+Chris
+<|email_end|>
+
+<|email_start|>
+From: tara@analytics.com
+To: josh@abe-health.com
+Date: 2024-04-01
+Good day Josh,
+
+Would love to sync on the architecture review — I'm available 10:30am Central time for half an hour.
+
+Best,
+Tara
+<|email_end|>
+
+<|email_start|>
+From: xander@crypto.io
+To: josh@abe-health.com
+Date: 2024-04-08
+Good day Josh,
+
+Looking to chat about the board meeting — does next week work for you? I'm based in Tokyo, so I'm on JST.
+
+Cheers,
+Xander
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: josh@abe-health.com
+Date: 2024-04-15
+Good day Josh,
+
+I'd like to set up a pitch. Are you around 4pm Japan time for 2 hours? (I'm on Japan time.)
+
+Cheers,
+James
+<|email_end|>
+
+<|email_start|>
+From: frank@logistics.de
+To: sam@abe-health.com
+Date: 2024-04-22
+Hi Sam,
+
+Would you be available whenever works for you for a 45 minutes Google Cloud usage?
+
+Cheers,
+Frank
+<|email_end|>
+
+<|email_start|>
+From: ellie@google.com
+To: matt@abe-health.com
+Date: 2024-05-06
+Hello Matt,
+
+Could we find a quick 15-min chat sometime next week for a board meeting? I'm free Wednesday at 1pm New York time. (I'm on New York time.)
+
+Talk soon,
+Ellie
+<|email_end|>
+
+<|email_start|>
+From: olivia@ngo.net
+To: josh@abe-health.com
+Date: 2024-05-13
+Good day Josh,
+
+I'd like to set up a customer feedback session. Are you around 1pm PDT for 1 hour? I'm based in Seattle, so I'm on PDT.
+
+Thanks,
+Olivia
+<|email_end|>
+
+<|email_start|>
+From: zoe@operations.com
+To: matt@abe-health.com
+Date: 2024-05-20
+Dear Matt,
+
+I'd love to schedule a Q2 planning at your convenience — do you have 90 minutes free? I'm based in the Midwest, so I'm on CST.
+
+Best,
+Zoe
+<|email_end|>
+
+<|email_start|>
+From: tara@analytics.com
+To: ceo@startup.com
+Date: 2024-05-27
+Hey Jordan,
+
+Do you have 2 hours free Tuesday at 3:30pm CEST, Monday at 3:30pm CEST or Thursday at 11:30am CEST to go over the demo? I'm based in France, so I'm on CEST.
+
+Talk soon,
+Tara
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: sales@biz.com
+Date: 2024-06-03
+Good day Morgan,
+
+Would love to sync on the product roadmap — I'm available Thursday at 10:30am JST or Wednesday at end of day for three quarters of an hour. I'm based in Tokyo, so I'm on JST.
+
+Thanks,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: josh@abe-health.com
+Date: 2024-06-10
+Hi Josh,
+
+I'd like to set up a demo. Are you around Friday at 11:30am or Tuesday at lunchtime for 1 hour?
+
+Cheers,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: dev@engineering.com
+Date: 2024-06-17
+Hello Riley,
+
+Are you free for 20 minutes to discuss the Q3 review? I'm available 3:30pm India time. I'm based in Bangalore, so I'm on India time.
+
+Talk soon,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: dev@engineering.com
+Date: 2024-06-24
+Hey Riley,
+
+I'd like to set up a onboarding session. Are you around at morning for 15 mins? (I'm on CET time.)
+
+Best wishes,
+David
+<|email_end|>
+
+<|email_start|>
+From: zoe@operations.com
+To: sam@abe-health.com
+Date: 2024-07-01
+Dear Sam,
+
+Are you free for 60 minutes to discuss the board meeting? I'm available Wednesday at end of day or Monday at 4:30pm Mountain time. I'm based in Denver, so I'm on Mountain time.
+
+Thanks,
+Zoe
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: pm@product.io
+Date: 2024-07-08
+Hello Taylor,
+
+Could we find 2 hours sometime next week for a project update? I'm free Thursday at lunchtime. I'm based in the East Coast, so I'm on Boston time.
+
+Best wishes,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: sales@biz.com
+Date: 2024-07-15
+Hey Morgan,
+
+Let's find time for the user research debrief. Any slot sometime works for me. I'm based in Chicago, so I'm on CDT.
+
+Cheers,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: serafin@abe-health.com
+To: alex@abe-health.com
+Date: 2024-07-22
+Dear Alex,
+
+I'd love to schedule a Q4 planning in the coming weeks — do you have 20 mins free? I'm based in Brazil, so I'm on Brasilia time.
+
+Kind regards,
+Serafin
+<|email_end|>
+
+<|email_start|>
+From: zoe@operations.com
+To: dev@engineering.com
+Date: 2024-01-08
+Hello Riley,
+
+Are you free for 45 minutes to discuss the 1:1? I'm available Tuesday at evening or Friday at end of day. I'm based in France, so I'm on CEST.
+
+Best,
+Zoe
+<|email_end|>
+
+<|email_start|>
+From: mike@bigcorp.com
+To: josh@abe-health.com
+Date: 2024-01-15
+Hey Josh,
+
+Let's catch up on the Google Cloud usage. I can do Friday at morning for three quarters of an hour.
+
+Kind regards,
+Mike
+<|email_end|>
+
+<|email_start|>
+From: chris@hubspot.com
+To: ceo@startup.com
+Date: 2024-01-22
+Good day Jordan,
+
+Would love to sync on the 1:1 — I'm available 4pm IST for 60 minutes. I'm based in Bangalore, so I'm on IST.
+
+Best wishes,
+Chris
+<|email_end|>
+
+<|email_start|>
+From: henry@lawfirm.com
+To: matt@abe-health.com
+Date: 2024-01-29
+Hi Matt,
+
+Are you free for an hour and a half to discuss the sprint planning? I'm available Thursday at 5:30pm São Paulo time. (I'm on São Paulo time.)
+
+Best wishes,
+Henry
+<|email_end|>
+
+<|email_start|>
+From: frank@logistics.de
+To: josh@abe-health.com
+Date: 2024-02-05
+Hey Josh,
+
+Do you have half-an-hour free Wednesday at morning or Monday at 5:30pm to go over the hiring strategy?
+
+Best wishes,
+Frank
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: ceo@startup.com
+Date: 2024-02-12
+Hello Jordan,
+
+Looking to chat about the contract negotiation — does in the next few days work for you?
+
+Best,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: sales@biz.com
+Date: 2024-02-19
+Dear Morgan,
+
+Could we find a couple of hours sometime to go over the architecture review?
+
+Best wishes,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: tara@analytics.com
+To: matt@abe-health.com
+Date: 2024-02-26
+Dear Matt,
+
+Do you have 15 mins free Thursday at 4pm Sydney time or Tuesday at 2:30pm Sydney time to go over the sales pipeline review? (I'm on Sydney time.)
+
+Cheers,
+Tara
+<|email_end|>
+
+<|email_start|>
+From: zoe@operations.com
+To: dev@engineering.com
+Date: 2024-03-04
+Hello Riley,
+
+Can we schedule a quick 15-min chat for the planning session? 12pm Sydney time would work for me. I'm based in Australia, so I'm on Sydney time.
+
+Cheers,
+Zoe
+<|email_end|>
+
+<|email_start|>
+From: ellie@google.com
+To: sam@abe-health.com
+Date: 2024-03-11
+Hello Sam,
+
+Are you free for an hour in the next few days to discuss the marketing strategy? I'm based in São Paulo, so I'm on São Paulo time.
+
+Talk soon,
+Ellie
+<|email_end|>
+
+<|email_start|>
+From: xander@crypto.io
+To: josh@abe-health.com
+Date: 2024-03-18
+Hi Josh,
+
+Do you have 30 minutes free 8:30am CST to go over the technical deep dive?
+
+Talk soon,
+Xander
+<|email_end|>
+
+<|email_start|>
+From: kate@media.com
+To: josh@abe-health.com
+Date: 2024-03-25
+Hello Josh,
+
+Would love to sync on the hiring strategy — I'm available Friday at afternoon or Monday at evening for a couple of hours.
+
+Kind regards,
+Kate
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: pm@product.io
+Date: 2024-04-01
+Hey Taylor,
+
+Can we schedule 30 minutes for the Q2 planning? Thursday at 8:30am BST or Wednesday at evening would work for me. (I'm on BST.)
+
+Kind regards,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: sales@biz.com
+Date: 2024-04-08
+Hello Morgan,
+
+Would you be available soon for a 20 minutes budget discussion? I'm based in the East Coast, so I'm on EDT.
+
+Best,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: zoe@operations.com
+To: matt@abe-health.com
+Date: 2024-04-15
+Good day Matt,
+
+I'd like to set up a architecture review. Are you around at lunchtime for 15 min? I'm based in Tokyo, so I'm on JST.
+
+Best,
+Zoe
+<|email_end|>
+
+<|email_start|>
+From: liam@fintech.io
+To: matt@abe-health.com
+Date: 2024-04-22
+Dear Matt,
+
+Are you free for 15 minutes to discuss the planning session? I'm available 1pm German time.
+
+Best,
+Liam
+<|email_end|>
+
+<|email_start|>
+From: ellie@google.com
+To: ceo@startup.com
+Date: 2024-05-06
+Dear Jordan,
+
+Could we find 60 mins in the next few days for a Q1 review? I'm free Tuesday at 2:30pm AEST or Monday at 2pm AEST. I'm based in Sydney, so I'm on AEST.
+
+Best,
+Ellie
+<|email_end|>
+
+<|email_start|>
+From: serafin@abe-health.com
+To: sam@abe-health.com
+Date: 2024-05-13
+Dear Sam,
+
+Let's catch up on the planning session. I can do Wednesday at 3:30pm Tokyo time, Monday at 8:30am Tokyo time or Thursday at morning for two hours.
+
+Best,
+Serafin
+<|email_end|>
+
+<|email_start|>
+From: chris@hubspot.com
+To: alex@abe-health.com
+Date: 2024-05-20
+Dear Alex,
+
+Could we find 15 minutes sometime this week to go over the Q1 review?
+
+Best wishes,
+Chris
+<|email_end|>
+
+<|email_start|>
+From: frank@logistics.de
+To: matt@abe-health.com
+Date: 2024-05-27
+Hi Matt,
+
+Can we schedule a couple of hours for the budget discussion? Friday at 5:30pm CST or Monday at morning would work for me. I'm based in Chicago, so I'm on CST.
+
+Kind regards,
+Frank
+<|email_end|>
+
+<|email_start|>
+From: sam@devshop.io
+To: dev@engineering.com
+Date: 2024-06-03
+Hey Riley,
+
+I'd like to set up a onboarding session. Are you around Friday at 9am CET or Monday at 3pm CET for half an hour? I'm based in Paris, so I'm on CET.
+
+Best wishes,
+Sam
+<|email_end|>
+
+<|email_start|>
+From: matt@abe-health.com
+To: alex@abe-health.com
+Date: 2024-06-10
+Dear Alex,
+
+Let's find time for the sales pipeline review. Any slot soon works for me. I'm based in New York, so I'm on Boston time.
+
+Best,
+Matt
+<|email_end|>
+
+<|email_start|>
+From: paul@agency.co
+To: dev@engineering.com
+Date: 2024-06-17
+Good day Riley,
+
+Do you have 20 mins free Friday at 11:30am Brasilia time or Tuesday at 8:30am Brasilia time to go over the partnership discussion?
+
+Thanks,
+Paul
+<|email_end|>
+
+<|email_start|>
+From: quinn@marketing.biz
+To: pm@product.io
+Date: 2024-06-24
+Good day Taylor,
+
+Would you be available sometime this week for a 20 minutes product roadmap?
+
+Cheers,
+Quinn
+<|email_end|>
+
+<|email_start|>
+From: alice@acmecorp.com
+To: sam@abe-health.com
+Date: 2024-07-01
+Hey Sam,
+
+Can we schedule an hour and a half for the pitch? Tuesday at 8:30am Boston time or Monday at 1pm Boston time would work for me.
+
+Kind regards,
+Alice
+<|email_end|>
+
+<|email_start|>
+From: matt@abe-health.com
+To: josh@abe-health.com
+Date: 2024-07-08
+Dear Josh,
+
+Are you free for 20 mins to discuss the project update? I'm available Friday at 11:30am BRT or Thursday at 1:30pm BRT. (I'm on BRT.)
+
+Thanks,
+Matt
+<|email_end|>
+
+<|email_start|>
+From: mia@biotech.org
+To: dev@engineering.com
+Date: 2024-07-15
+Hey Riley,
+
+Can we schedule 15 min for the pitch? 3pm MT would work for me. I'm based in Denver, so I'm on MT.
+
+Thanks,
+Mia
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: pm@product.io
+Date: 2024-07-22
+Hello Taylor,
+
+Looking to chat about the Q1 review — does sometime next week work for you? I'm based in London, so I'm on BST.
+
+Thanks,
+James
+<|email_end|>
+
+<|email_start|>
+From: sam@devshop.io
+To: sam@abe-health.com
+Date: 2024-01-08
+Good day Sam,
+
+Let's catch up on the company board meeting. I can do Monday at 4:30pm BST or Friday at afternoon for 60 mins. I'm based in the UK, so I'm on BST.
+
+Kind regards,
+Sam
+<|email_end|>
+
+<|email_start|>
+From: mia@biotech.org
+To: sam@abe-health.com
+Date: 2024-01-15
+Dear Sam,
+
+When are you free for a partnership discussion? Hoping to connect sometime this week.
+
+Best,
+Mia
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: dev@engineering.com
+Date: 2024-01-22
+Dear Riley,
+
+Are you free for 45 minutes to discuss the team sync? I'm available Monday at 8am Japan time. I'm based in Tokyo, so I'm on Japan time.
+
+Thanks,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: mike@bigcorp.com
+To: ceo@startup.com
+Date: 2024-01-29
+Dear Jordan,
+
+Let's catch up on the demo. I can do 2pm CT for three quarters of an hour. (I'm on CT.)
+
+Best wishes,
+Mike
+<|email_end|>
+
+<|email_start|>
+From: sam@devshop.io
+To: matt@abe-health.com
+Date: 2024-02-05
+Hi Matt,
+
+Would love to sync on the planning session — I'm available Monday at 1:30pm UK time for 1.5 hours. (I'm on UK time.)
+
+Talk soon,
+Sam
+<|email_end|>
+
+<|email_start|>
+From: ellie@google.com
+To: matt@abe-health.com
+Date: 2024-02-12
+Good day Matt,
+
+Do you have 1.5 hours free Friday at afternoon or Tuesday at afternoon to go over the company board meeting?
+
+Best,
+Ellie
+<|email_end|>
+
+<|email_start|>
+From: kate@media.com
+To: sam@abe-health.com
+Date: 2024-02-19
+Hi Sam,
+
+Can we schedule one hour for the coffee chat? Monday at 2pm Paris time or Friday at 4:30pm Paris time would work for me.
+
+Kind regards,
+Kate
+<|email_end|>
+
+<|email_start|>
+From: uma@research.edu
+To: josh@abe-health.com
+Date: 2024-02-26
+Hi Josh,
+
+Do you have a quick 15-min chat free Wednesday at morning to go over the security audit?
+
+Thanks,
+Uma
+<|email_end|>
+
+<|email_start|>
+From: kate@media.com
+To: matt@abe-health.com
+Date: 2024-03-04
+Hey Matt,
+
+Let's catch up on the customer feedback session. I can do Thursday at morning or Wednesday at 8am UK time for three quarters of an hour. I'm based in the UK, so I'm on UK time.
+
+Talk soon,
+Kate
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: sales@biz.com
+Date: 2024-03-11
+Hello Morgan,
+
+Looking to chat about the board meeting — does sometime work for you? I'm based in Bangalore, so I'm on Mumbai time.
+
+Thanks,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: alice@acmecorp.com
+To: alex@abe-health.com
+Date: 2024-03-18
+Hey Alex,
+
+I'd like to set up a sales pipeline review. Are you around 10:30am Paris time for 20 minutes? I'm based in France, so I'm on Paris time.
+
+Thanks,
+Alice
+<|email_end|>
+
+<|email_start|>
+From: frank@logistics.de
+To: sales@biz.com
+Date: 2024-03-25
+Good day Morgan,
+
+Do you have 20 minutes free Wednesday at afternoon or Thursday at 10:30am London time to go over the company board meeting? I'm based in the UK, so I'm on London time.
+
+Cheers,
+Frank
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: sales@biz.com
+Date: 2024-04-01
+Good day Morgan,
+
+Would love to sync on the planning session — I'm available 1pm CEST for 90 minutes.
+
+Best wishes,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: sales@biz.com
+Date: 2024-04-08
+Good day Morgan,
+
+Do you have 30 mins free Friday at lunchtime or Wednesday at 8:30am Pacific time to go over the project update?
+
+Best wishes,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: olivia@ngo.net
+To: sam@abe-health.com
+Date: 2024-04-15
+Good day Sam,
+
+Could we find 1.5 hours soon for a Q4 planning? I'm free 1:30pm PDT. (I'm on PDT.)
+
+Talk soon,
+Olivia
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: pm@product.io
+Date: 2024-04-22
+Hi Taylor,
+
+Would love to sync on the customer feedback session — I'm available at end of day for half-an-hour.
+
+Thanks,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: henry@lawfirm.com
+To: dev@engineering.com
+Date: 2024-05-06
+Dear Riley,
+
+Could we find two hours sometime this week for a Q4 planning? I'm free Tuesday at 4:30pm Brasilia time or Thursday at 5:30pm Brasilia time. (I'm on Brasilia time.)
+
+Best,
+Henry
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: sales@biz.com
+Date: 2024-05-13
+Dear Morgan,
+
+Could we find 20 mins this week for a contract negotiation? I'm free Wednesday at 8:30am São Paulo time or Thursday at evening. I'm based in São Paulo, so I'm on São Paulo time.
+
+Talk soon,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: noah@edu.org
+To: ceo@startup.com
+Date: 2024-05-20
+Dear Jordan,
+
+I'd like to set up a kickoff meeting. Are you around Tuesday at 11:30am Australian Eastern time or Monday at 12pm Australian Eastern time for 1.5 hours? I'm based in Melbourne, so I'm on Australian Eastern time.
+
+Best,
+Noah
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: ceo@startup.com
+Date: 2024-05-27
+Hello Jordan,
+
+Would love to sync on the company metrics — I'm available Friday at 12pm Australian Eastern time, Tuesday at 10am Australian Eastern time or Wednesday at 10am Australian Eastern time for 30 minutes. I'm based in Australia, so I'm on Australian Eastern time.
+
+Thanks,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: alice@acmecorp.com
+To: ceo@startup.com
+Date: 2024-06-03
+Good day Jordan,
+
+Let's find time for the contract negotiation. Any slot sometime this week works for me.
+
+Thanks,
+Alice
+<|email_end|>
+
+<|email_start|>
+From: quinn@marketing.biz
+To: ceo@startup.com
+Date: 2024-06-10
+Hello Jordan,
+
+Could we find 60 mins sometime this week for a customer feedback session? I'm free Monday at 1pm Sydney time. (I'm on Sydney time.)
+
+Kind regards,
+Quinn
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: sam@abe-health.com
+Date: 2024-06-17
+Dear Sam,
+
+I'd like to set up a demo. Are you around Monday at morning for 45 mins? I'm based in the Mountain region, so I'm on Denver time.
+
+Cheers,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: pm@product.io
+Date: 2024-06-24
+Hey Taylor,
+
+Can we schedule 90 minutes for the product roadmap? at afternoon would work for me. I'm based in Chicago, so I'm on Central time.
+
+Cheers,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: josh@abe-health.com
+Date: 2024-07-01
+Hi Josh,
+
+Are you free for 15 minutes at your convenience to discuss the performance review? I'm based in Seattle, so I'm on LA time.
+
+Best wishes,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: bob@techventures.io
+To: ceo@startup.com
+Date: 2024-07-08
+Good day Jordan,
+
+I'd like to set up a product roadmap. Are you around Tuesday at 11am AEDT, Wednesday at morning or Monday at 12pm AEDT for 2 hours?
+
+Cheers,
+Bob
+<|email_end|>
+
+<|email_start|>
+From: mia@biotech.org
+To: josh@abe-health.com
+Date: 2024-07-15
+Hi Josh,
+
+Can we schedule an hour for the onboarding session? 5pm Boston time would work for me.
+
+Best wishes,
+Mia
+<|email_end|>
+
+<|email_start|>
+From: uma@research.edu
+To: alex@abe-health.com
+Date: 2024-07-22
+Hi Alex,
+
+Let's catch up on the customer feedback session. I can do Thursday at 11:30am Japan time or Friday at 1:30pm Japan time for 20 minutes. I'm based in Japan, so I'm on Japan time.
+
+Kind regards,
+Uma
+<|email_end|>
+
+<|email_start|>
+From: paul@agency.co
+To: matt@abe-health.com
+Date: 2024-01-08
+Dear Matt,
+
+Do you have 15 min free 1pm Eastern time to go over the architecture review?
+
+Thanks,
+Paul
+<|email_end|>
+
+<|email_start|>
+From: bob@techventures.io
+To: sales@biz.com
+Date: 2024-01-15
+Good day Morgan,
+
+Would love to sync on the team sync — I'm available Thursday at 9am Sydney time or Monday at 2:30pm Sydney time for 15 mins. I'm based in Sydney, so I'm on Sydney time.
+
+Best,
+Bob
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: dev@engineering.com
+Date: 2024-01-22
+Good day Riley,
+
+Let's find time for the team sync. Any slot whenever works for you works for me. (I'm on EDT.)
+
+Talk soon,
+James
+<|email_end|>
+
+<|email_start|>
+From: wendy@retail.com
+To: sales@biz.com
+Date: 2024-01-29
+Hi Morgan,
+
+Are you free for a couple of hours to discuss the demo? I'm available Monday at 4pm Beijing time or Wednesday at 10am Beijing time.
+
+Best,
+Wendy
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: dev@engineering.com
+Date: 2024-02-05
+Hi Riley,
+
+When are you free for a board meeting? Hoping to connect sometime next week. I'm based in India, so I'm on Mumbai time.
+
+Best wishes,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: sarah@microsoft.com
+To: ceo@startup.com
+Date: 2024-02-12
+Dear Jordan,
+
+Let's catch up on the Q1 review. I can do 1:30pm Beijing time for 2 hours. I'm based in China, so I'm on Beijing time.
+
+Kind regards,
+Sarah
+<|email_end|>
+
+<|email_start|>
+From: quinn@marketing.biz
+To: alex@abe-health.com
+Date: 2024-02-19
+Good day Alex,
+
+I'd like to set up a architecture review. Are you around Monday at 4pm Tokyo time or Friday at 10:30am Tokyo time for half-an-hour? I'm based in Japan, so I'm on Tokyo time.
+
+Best,
+Quinn
+<|email_end|>
+
+<|email_start|>
+From: tara@analytics.com
+To: ceo@startup.com
+Date: 2024-02-26
+Hi Jordan,
+
+Would love to sync on the Q1 review — I'm available 5:30pm CET for 60 minutes. I'm based in France, so I'm on CET.
+
+Best wishes,
+Tara
+<|email_end|>
+
+<|email_start|>
+From: xander@crypto.io
+To: pm@product.io
+Date: 2024-03-04
+Hi Taylor,
+
+Are you free for 20 minutes sometime this week to discuss the board meeting? I'm based in Seattle, so I'm on PT.
+
+Cheers,
+Xander
+<|email_end|>
+
+<|email_start|>
+From: ellie@google.com
+To: dev@engineering.com
+Date: 2024-03-11
+Good day Riley,
+
+Are you free for half an hour at your convenience to discuss the project update? (I'm on Mumbai time.)
+
+Best,
+Ellie
+<|email_end|>
+
+<|email_start|>
+From: sarah@microsoft.com
+To: josh@abe-health.com
+Date: 2024-03-18
+Hello Josh,
+
+Are you free for 30 mins to discuss the team sync? I'm available 1pm São Paulo time.
+
+Kind regards,
+Sarah
+<|email_end|>
+
+<|email_start|>
+From: chris@hubspot.com
+To: sam@abe-health.com
+Date: 2024-03-25
+Good day Sam,
+
+Can we schedule a quick call for the security audit? at morning would work for me. I'm based in the UK, so I'm on London time.
+
+Best,
+Chris
+<|email_end|>
+
+<|email_start|>
+From: kate@media.com
+To: pm@product.io
+Date: 2024-04-01
+Good day Taylor,
+
+Let's catch up on the board meeting. I can do Wednesday at 5pm, Thursday at 2:30pm or Tuesday at 3:30pm for 90 minutes.
+
+Thanks,
+Kate
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: alex@abe-health.com
+Date: 2024-04-08
+Good day Alex,
+
+Would love to sync on the demo — I'm available at end of day for 1.5 hours.
+
+Kind regards,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: ellie@google.com
+To: alex@abe-health.com
+Date: 2024-04-15
+Hello Alex,
+
+Could we find two hours sometime next week for a coffee chat? I'm free Wednesday at morning or Tuesday at evening. (I'm on MDT.)
+
+Best wishes,
+Ellie
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: alex@abe-health.com
+Date: 2024-04-22
+Dear Alex,
+
+Are you free for two hours to discuss the board meeting? I'm available 3pm MST. I'm based in Denver, so I'm on MST.
+
+Best wishes,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: noah@edu.org
+To: ceo@startup.com
+Date: 2024-05-06
+Hello Jordan,
+
+Would love to sync on the team sync — I'm available at morning for an hour and a half.
+
+Talk soon,
+Noah
+<|email_end|>
+
+<|email_start|>
+From: claire@startup.ai
+To: dev@engineering.com
+Date: 2024-05-13
+Good day Riley,
+
+Are you free for a quick 15-min chat sometime this week to discuss the company metrics? (I'm on BRT.)
+
+Best wishes,
+Claire
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: pm@product.io
+Date: 2024-05-20
+Hey Taylor,
+
+When are you free for a design review? Hoping to connect sometime. I'm based in Bangalore, so I'm on Mumbai time.
+
+Thanks,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: xander@crypto.io
+To: ceo@startup.com
+Date: 2024-05-27
+Hello Jordan,
+
+Looking to chat about the user research debrief — does at your convenience work for you?
+
+Talk soon,
+Xander
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: pm@product.io
+Date: 2024-06-03
+Good day Taylor,
+
+Looking to chat about the board meeting — does early next week work for you? (I'm on Japan time.)
+
+Best,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: mia@biotech.org
+To: ceo@startup.com
+Date: 2024-06-10
+Dear Jordan,
+
+Would love to sync on the user research debrief — I'm available Friday at lunchtime for an hour and a half. I'm based in Shanghai, so I'm on China time.
+
+Best,
+Mia
+<|email_end|>
+
+<|email_start|>
+From: kate@media.com
+To: alex@abe-health.com
+Date: 2024-06-17
+Hello Alex,
+
+Would you be available sometime next week for a 2 hours catchup?
+
+Best,
+Kate
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: josh@abe-health.com
+Date: 2024-06-24
+Hi Josh,
+
+Are you free for 30 mins to discuss the catchup? I'm available Friday at lunchtime, Monday at afternoon or Thursday at 10am Central time. I'm based in Chicago, so I'm on Central time.
+
+Kind regards,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: henry@lawfirm.com
+To: sam@abe-health.com
+Date: 2024-07-01
+Dear Sam,
+
+Looking to chat about the investor update — does when you're free work for you? I'm based in China, so I'm on Shanghai time.
+
+Best wishes,
+Henry
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: ceo@startup.com
+Date: 2024-07-08
+Dear Jordan,
+
+Let's find time for the contract negotiation. Any slot soon works for me.
+
+Talk soon,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: liam@fintech.io
+To: josh@abe-health.com
+Date: 2024-07-15
+Hey Josh,
+
+Let's catch up on the sales pipeline review. I can do Thursday at 12pm JST for an hour and a half. (I'm on JST.)
+
+Best,
+Liam
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: dev@engineering.com
+Date: 2024-07-22
+Hey Riley,
+
+Looking to chat about the team sync — does sometime work for you?
+
+Best wishes,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: olivia@ngo.net
+To: ceo@startup.com
+Date: 2024-01-08
+Good day Jordan,
+
+When are you free for a coffee chat? Hoping to connect whenever works for you.
+
+Thanks,
+Olivia
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: matt@abe-health.com
+Date: 2024-01-15
+Hello Matt,
+
+Looking to chat about the intro call — does this week work for you? I'm based in London, so I'm on London time.
+
+Talk soon,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: dev@engineering.com
+Date: 2024-01-22
+Hi Riley,
+
+When are you free for a coffee chat? Hoping to connect soon. I'm based in Sydney, so I'm on AEST.
+
+Best,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: tara@analytics.com
+To: matt@abe-health.com
+Date: 2024-01-29
+Hey Matt,
+
+I'd love to schedule a security audit in the coming weeks — do you have 30 minutes free? I'm based in Los Angeles, so I'm on Los Angeles time.
+
+Talk soon,
+Tara
+<|email_end|>
+
+<|email_start|>
+From: sarah@microsoft.com
+To: pm@product.io
+Date: 2024-02-05
+Hello Taylor,
+
+I'd like to set up a Google Cloud usage. Are you around Tuesday at 1:30pm JST or Monday at lunchtime for half an hour? I'm based in Japan, so I'm on JST.
+
+Best wishes,
+Sarah
+<|email_end|>
+
+<|email_start|>
+From: noah@edu.org
+To: pm@product.io
+Date: 2024-02-12
+Good day Taylor,
+
+Are you free for 1.5 hours sometime next week to discuss the team sync? I'm based in Berlin, so I'm on CET.
+
+Best wishes,
+Noah
+<|email_end|>
+
+<|email_start|>
+From: liam@fintech.io
+To: alex@abe-health.com
+Date: 2024-02-19
+Dear Alex,
+
+Are you free for 20 mins to discuss the demo? I'm available Monday at lunchtime or Tuesday at 5pm LA time.
+
+Kind regards,
+Liam
+<|email_end|>
+
+<|email_start|>
+From: tara@analytics.com
+To: josh@abe-health.com
+Date: 2024-02-26
+Good day Josh,
+
+Can we schedule two hours for the sales pipeline review? Friday at end of day or Tuesday at 8am Mountain time would work for me. (I'm on Mountain time.)
+
+Talk soon,
+Tara
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: pm@product.io
+Date: 2024-03-04
+Good day Taylor,
+
+Can we schedule 45 minutes for the user research debrief? Monday at afternoon, Tuesday at 4pm Los Angeles time or Thursday at 12pm Los Angeles time would work for me.
+
+Best wishes,
+David
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: alex@abe-health.com
+Date: 2024-03-11
+Hi Alex,
+
+Are you free for half an hour to discuss the Q2 planning? I'm available Friday at lunchtime. I'm based in the Mountain region, so I'm on MST.
+
+Kind regards,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: serafin@abe-health.com
+To: sam@abe-health.com
+Date: 2024-03-18
+Hello Sam,
+
+Let's find time for the partnership discussion. Any slot whenever works for you works for me. (I'm on CT.)
+
+Kind regards,
+Serafin
+<|email_end|>
+
+<|email_start|>
+From: frank@logistics.de
+To: pm@product.io
+Date: 2024-03-25
+Dear Taylor,
+
+Do you have one hour free 2:30pm AEDT to go over the performance review? I'm based in Melbourne, so I'm on AEDT.
+
+Cheers,
+Frank
+<|email_end|>
+
+<|email_start|>
+From: uma@research.edu
+To: alex@abe-health.com
+Date: 2024-04-01
+Dear Alex,
+
+When are you free for a Q1 review? Hoping to connect whenever works for you. (I'm on German time.)
+
+Best wishes,
+Uma
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: josh@abe-health.com
+Date: 2024-04-08
+Hey Josh,
+
+Are you free for a quick 15-min chat sometime to discuss the pitch? (I'm on UK time.)
+
+Thanks,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: josh@abe-health.com
+Date: 2024-04-15
+Good day Josh,
+
+Are you free for 45 mins when you're free to discuss the budget discussion?
+
+Cheers,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: sales@biz.com
+Date: 2024-04-22
+Hello Morgan,
+
+Would you be available whenever works for you for a 15 min Q4 planning? I'm based in the Midwest, so I'm on CDT.
+
+Cheers,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: sam@abe-health.com
+Date: 2024-05-06
+Dear Sam,
+
+Can we schedule 2 hours for the budget discussion? Friday at 2:30pm CST or Monday at 4pm CST would work for me.
+
+Best wishes,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: quinn@marketing.biz
+To: pm@product.io
+Date: 2024-05-13
+Hey Taylor,
+
+Let's find time for the board meeting. Any slot sometime works for me. I'm based in São Paulo, so I'm on São Paulo time.
+
+Thanks,
+Quinn
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: matt@abe-health.com
+Date: 2024-05-20
+Hi Matt,
+
+Can we schedule 90 minutes for the design review? Friday at 1pm MT or Thursday at 3pm MT would work for me.
+
+Best,
+James
+<|email_end|>
+
+<|email_start|>
+From: mike@bigcorp.com
+To: matt@abe-health.com
+Date: 2024-05-27
+Hi Matt,
+
+I'd like to set up a kickoff meeting. Are you around 8am Japan time for 20 mins?
+
+Best wishes,
+Mike
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: ceo@startup.com
+Date: 2024-06-03
+Hey Jordan,
+
+I'd love to schedule a company metrics in the coming weeks — do you have 45 minutes free? I'm based in Seattle, so I'm on LA time.
+
+Best wishes,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: bob@techventures.io
+To: ceo@startup.com
+Date: 2024-06-10
+Hi Jordan,
+
+Can we schedule a quick 15-min chat for the team sync? 3pm Australian Eastern time would work for me. I'm based in Melbourne, so I'm on Australian Eastern time.
+
+Thanks,
+Bob
+<|email_end|>
+
+<|email_start|>
+From: liam@fintech.io
+To: sam@abe-health.com
+Date: 2024-06-17
+Hello Sam,
+
+Let's find time for the demo. Any slot sometime next week works for me.
+
+Best wishes,
+Liam
+<|email_end|>
+
+<|email_start|>
+From: uma@research.edu
+To: sales@biz.com
+Date: 2024-06-24
+Hi Morgan,
+
+Could we find 60 mins sometime this week for a onboarding session? I'm free Monday at afternoon or Wednesday at 4pm.
+
+Kind regards,
+Uma
+<|email_end|>
+
+<|email_start|>
+From: kate@media.com
+To: matt@abe-health.com
+Date: 2024-07-01
+Hello Matt,
+
+Can we schedule 30 minutes for the sales pipeline review? Friday at 9am San Francisco time would work for me. I'm based in Los Angeles, so I'm on San Francisco time.
+
+Kind regards,
+Kate
+<|email_end|>
+
+<|email_start|>
+From: noah@edu.org
+To: pm@product.io
+Date: 2024-07-08
+Good day Taylor,
+
+Are you free for two hours to discuss the Q1 review? I'm available at end of day.
+
+Best wishes,
+Noah
+<|email_end|>
+
+<|email_start|>
+From: zoe@operations.com
+To: sales@biz.com
+Date: 2024-07-15
+Good day Morgan,
+
+Let's catch up on the budget discussion. I can do Monday at 10:30am, Tuesday at evening or Wednesday at lunchtime for 15 minutes.
+
+Kind regards,
+Zoe
+<|email_end|>
+
+<|email_start|>
+From: uma@research.edu
+To: pm@product.io
+Date: 2024-07-22
+Hey Taylor,
+
+Would you be available sometime this week for a 45 mins catchup? (I'm on CST.)
+
+Kind regards,
+Uma
+<|email_end|>
+
+<|email_start|>
+From: xander@crypto.io
+To: pm@product.io
+Date: 2024-01-08
+Good day Taylor,
+
+Let's catch up on the Google Cloud usage. I can do Tuesday at 3pm AEST or Friday at lunchtime for 2 hours. I'm based in Sydney, so I'm on AEST.
+
+Best wishes,
+Xander
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: josh@abe-health.com
+Date: 2024-01-15
+Hey Josh,
+
+I'd like to set up a sales pipeline review. Are you around 8:30am Eastern time for 45 minutes?
+
+Talk soon,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: paul@agency.co
+To: dev@engineering.com
+Date: 2024-01-22
+Hey Riley,
+
+Do you have 1.5 hours free Monday at end of day or Wednesday at lunchtime to go over the investor update?
+
+Talk soon,
+Paul
+<|email_end|>
+
+<|email_start|>
+From: wendy@retail.com
+To: sam@abe-health.com
+Date: 2024-01-29
+Hello Sam,
+
+Do you have an hour free 5pm GMT to go over the marketing strategy?
+
+Thanks,
+Wendy
+<|email_end|>
+
+<|email_start|>
+From: henry@lawfirm.com
+To: matt@abe-health.com
+Date: 2024-02-05
+Hi Matt,
+
+Do you have 2 hours free at morning to go over the board meeting? (I'm on Los Angeles time.)
+
+Cheers,
+Henry
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: sales@biz.com
+Date: 2024-02-12
+Hello Morgan,
+
+Let's find time for the design review. Any slot whenever works for you works for me.
+
+Cheers,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: frank@logistics.de
+To: dev@engineering.com
+Date: 2024-02-19
+Dear Riley,
+
+Let's catch up on the Google Cloud usage. I can do Tuesday at evening, Friday at 3pm Shanghai time or Wednesday at 8:30am Shanghai time for half-an-hour. I'm based in Beijing, so I'm on Shanghai time.
+
+Thanks,
+Frank
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: dev@engineering.com
+Date: 2024-02-26
+Dear Riley,
+
+Could we find a couple of hours at your convenience to go over the sprint planning?
+
+Kind regards,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: alex@abe-health.com
+Date: 2024-03-04
+Hey Alex,
+
+Would you be available soon for a 20 mins company metrics?
+
+Kind regards,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: dev@engineering.com
+Date: 2024-03-11
+Good day Riley,
+
+Would you be available sometime next week for a an hour kickoff meeting? I'm based in Boston, so I'm on EST.
+
+Thanks,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: paul@agency.co
+To: sales@biz.com
+Date: 2024-03-18
+Hi Morgan,
+
+Can we schedule a couple of hours for the catchup? Wednesday at afternoon or Tuesday at lunchtime would work for me. I'm based in San Francisco, so I'm on Pacific time.
+
+Best,
+Paul
+<|email_end|>
+
+<|email_start|>
+From: mike@bigcorp.com
+To: ceo@startup.com
+Date: 2024-03-25
+Hey Jordan,
+
+Let's catch up on the architecture review. I can do at end of day for a couple of hours. I'm based in Bangalore, so I'm on India time.
+
+Thanks,
+Mike
+<|email_end|>
+
+<|email_start|>
+From: zoe@operations.com
+To: alex@abe-health.com
+Date: 2024-04-01
+Hello Alex,
+
+Do you have two hours free Tuesday at evening or Monday at lunchtime to go over the catchup?
+
+Best wishes,
+Zoe
+<|email_end|>
+
+<|email_start|>
+From: quinn@marketing.biz
+To: josh@abe-health.com
+Date: 2024-04-08
+Good day Josh,
+
+Let's find time for the planning session. Any slot sometime this week works for me. (I'm on AEDT.)
+
+Talk soon,
+Quinn
+<|email_end|>
+
+<|email_start|>
+From: chris@hubspot.com
+To: alex@abe-health.com
+Date: 2024-04-15
+Good day Alex,
+
+Are you free for 20 mins sometime this week to discuss the intro call?
+
+Talk soon,
+Chris
+<|email_end|>
+
+<|email_start|>
+From: sam@devshop.io
+To: dev@engineering.com
+Date: 2024-04-22
+Hi Riley,
+
+Do you have two hours free 9:30am CT to go over the Google Cloud usage? I'm based in the Midwest, so I'm on CT.
+
+Talk soon,
+Sam
+<|email_end|>
+
+<|email_start|>
+From: claire@startup.ai
+To: alex@abe-health.com
+Date: 2024-05-06
+Dear Alex,
+
+Are you free for a quick 15-min chat to discuss the investor update? I'm available Monday at evening or Friday at 10am UK time.
+
+Cheers,
+Claire
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: sam@abe-health.com
+Date: 2024-05-13
+Hi Sam,
+
+Can we schedule 45 mins for the company metrics? at evening would work for me.
+
+Cheers,
+James
+<|email_end|>
+
+<|email_start|>
+From: bob@techventures.io
+To: sales@biz.com
+Date: 2024-05-20
+Hey Morgan,
+
+Looking to chat about the retrospective — does sometime this week work for you?
+
+Talk soon,
+Bob
+<|email_end|>
+
+<|email_start|>
+From: tom@amazon.com
+To: sam@abe-health.com
+Date: 2024-05-27
+Good day Sam,
+
+Are you free for 30 mins to discuss the planning session? I'm available Tuesday at 3pm or Friday at 3:30pm.
+
+Cheers,
+Tom
+<|email_end|>
+
+<|email_start|>
+From: mike@bigcorp.com
+To: ceo@startup.com
+Date: 2024-06-03
+Hi Jordan,
+
+When are you free for a onboarding session? Hoping to connect in the coming weeks. I'm based in Mumbai, so I'm on India time.
+
+Thanks,
+Mike
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: alex@abe-health.com
+Date: 2024-06-10
+Hello Alex,
+
+Let's catch up on the onboarding session. I can do Wednesday at 3:30pm São Paulo time or Thursday at 1:30pm São Paulo time for 45 mins. I'm based in São Paulo, so I'm on São Paulo time.
+
+Thanks,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: joey@abe-health.com
+To: sales@biz.com
+Date: 2024-06-17
+Hi Morgan,
+
+Do you have 45 mins free Thursday at 9am PST or Monday at lunchtime to go over the company board meeting? I'm based in Los Angeles, so I'm on PST.
+
+Cheers,
+Joey
+<|email_end|>
+
+<|email_start|>
+From: joey@abe-health.com
+To: josh@abe-health.com
+Date: 2024-06-24
+Hi Josh,
+
+Looking to chat about the 1:1 — does in the next few days work for you? I'm based in Tokyo, so I'm on Tokyo time.
+
+Cheers,
+Joey
+<|email_end|>
+
+<|email_start|>
+From: quinn@marketing.biz
+To: sam@abe-health.com
+Date: 2024-07-01
+Hey Sam,
+
+I'd like to set up a retrospective. Are you around at end of day for 15 mins? I'm based in the Mountain region, so I'm on MT.
+
+Best,
+Quinn
+<|email_end|>
+
+<|email_start|>
+From: tom@amazon.com
+To: sales@biz.com
+Date: 2024-07-08
+Good day Morgan,
+
+I'd love to schedule a contract negotiation this week — do you have 1.5 hours free? I'm based in Chicago, so I'm on Chicago time.
+
+Thanks,
+Tom
+<|email_end|>
+
+<|email_start|>
+From: olivia@ngo.net
+To: sam@abe-health.com
+Date: 2024-07-15
+Hello Sam,
+
+I'd like to set up a company board meeting. Are you around Monday at morning or Thursday at 3pm AEDT for 1.5 hours? I'm based in Melbourne, so I'm on AEDT.
+
+Best,
+Olivia
+<|email_end|>
+
+<|email_start|>
+From: matt@abe-health.com
+To: sam@abe-health.com
+Date: 2024-07-22
+Hi Sam,
+
+Let's find time for the intro call. Any slot when you're free works for me. I'm based in San Francisco, so I'm on Los Angeles time.
+
+Kind regards,
+Matt
+<|email_end|>
+
+<|email_start|>
+From: liam@fintech.io
+To: dev@engineering.com
+Date: 2024-01-08
+Hi Riley,
+
+Would love to sync on the marketing strategy — I'm available 9:30am EDT for 20 mins.
+
+Kind regards,
+Liam
+<|email_end|>
+
+<|email_start|>
+From: noah@edu.org
+To: sam@abe-health.com
+Date: 2024-01-15
+Hi Sam,
+
+I'd like to set up a Q2 planning. Are you around 11:30am ET for a quick call?
+
+Talk soon,
+Noah
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: josh@abe-health.com
+Date: 2024-01-22
+Hi Josh,
+
+Are you free for 30 minutes when you're free to discuss the Q3 review?
+
+Kind regards,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: alice@acmecorp.com
+To: matt@abe-health.com
+Date: 2024-01-29
+Good day Matt,
+
+I'd love to schedule a catchup at your convenience — do you have 15 minutes free? I'm based in the UK, so I'm on UK time.
+
+Best wishes,
+Alice
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: pm@product.io
+Date: 2024-02-05
+Hi Taylor,
+
+Looking to chat about the marketing strategy — does in the coming weeks work for you?
+
+Best,
+David
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: alex@abe-health.com
+Date: 2024-02-12
+Hi Alex,
+
+Let's catch up on the pitch. I can do 10am Sydney time for 45 minutes.
+
+Best,
+James
+<|email_end|>
+
+<|email_start|>
+From: tara@analytics.com
+To: ceo@startup.com
+Date: 2024-02-19
+Hi Jordan,
+
+Let's catch up on the pitch. I can do Friday at 2pm Mumbai time or Monday at 10am Mumbai time for 20 minutes. I'm based in Mumbai, so I'm on Mumbai time.
+
+Thanks,
+Tara
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: josh@abe-health.com
+Date: 2024-02-26
+Hello Josh,
+
+Can we schedule an hour and a half for the demo? at end of day would work for me. I'm based in Paris, so I'm on CEST.
+
+Talk soon,
+James
+<|email_end|>
+
+<|email_start|>
+From: matt@abe-health.com
+To: sales@biz.com
+Date: 2024-03-04
+Dear Morgan,
+
+Could we find an hour and a half in the next few days for a technical deep dive? I'm free 11:30am MST. I'm based in the Mountain region, so I'm on MST.
+
+Best wishes,
+Matt
+<|email_end|>
+
+<|email_start|>
+From: joey@abe-health.com
+To: pm@product.io
+Date: 2024-03-11
+Hey Taylor,
+
+Would you be available next week for a 15 min company board meeting?
+
+Cheers,
+Joey
+<|email_end|>
+
+<|email_start|>
+From: matt@abe-health.com
+To: sam@abe-health.com
+Date: 2024-03-18
+Hello Sam,
+
+Would love to sync on the sprint planning — I'm available Wednesday at afternoon or Tuesday at 10:30am Mountain time for 20 minutes. I'm based in Denver, so I'm on Mountain time.
+
+Best,
+Matt
+<|email_end|>
+
+<|email_start|>
+From: kate@media.com
+To: ceo@startup.com
+Date: 2024-03-25
+Good day Jordan,
+
+Could we find 2 hours early next week to go over the user research debrief? I'm based in Tokyo, so I'm on JST.
+
+Talk soon,
+Kate
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: sam@abe-health.com
+Date: 2024-04-01
+Hi Sam,
+
+Could we find a quick call next week to go over the coffee chat? (I'm on China time.)
+
+Talk soon,
+James
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: sam@abe-health.com
+Date: 2024-04-08
+Good day Sam,
+
+Let's catch up on the company metrics. I can do Tuesday at lunchtime or Monday at 2:30pm Los Angeles time for 2 hours. I'm based in Seattle, so I'm on Los Angeles time.
+
+Cheers,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: uma@research.edu
+To: sales@biz.com
+Date: 2024-04-15
+Hey Morgan,
+
+Would you be available at your convenience for a 30 mins security audit? (I'm on Brasilia time.)
+
+Thanks,
+Uma
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: dev@engineering.com
+Date: 2024-04-22
+Hey Riley,
+
+Are you free for half an hour sometime next week to discuss the company board meeting? (I'm on IST.)
+
+Best,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: ellie@google.com
+To: pm@product.io
+Date: 2024-05-06
+Hello Taylor,
+
+Let's catch up on the catchup. I can do at evening for 45 minutes. I'm based in Germany, so I'm on Berlin time.
+
+Kind regards,
+Ellie
+<|email_end|>
+
+<|email_start|>
+From: bob@techventures.io
+To: pm@product.io
+Date: 2024-05-13
+Hi Taylor,
+
+Would love to sync on the retrospective — I'm available Monday at 2pm Eastern time for two hours. I'm based in Boston, so I'm on Eastern time.
+
+Talk soon,
+Bob
+<|email_end|>
+
+<|email_start|>
+From: quinn@marketing.biz
+To: ceo@startup.com
+Date: 2024-05-20
+Dear Jordan,
+
+Do you have a couple of hours free Monday at evening or Thursday at lunchtime to go over the planning session? I'm based in Denver, so I'm on Denver time.
+
+Talk soon,
+Quinn
+<|email_end|>
+
+<|email_start|>
+From: wendy@retail.com
+To: sam@abe-health.com
+Date: 2024-05-27
+Hello Sam,
+
+Could we find 20 mins sometime for a Google Cloud usage? I'm free at lunchtime. I'm based in the Mountain region, so I'm on MDT.
+
+Best,
+Wendy
+<|email_end|>
+
+<|email_start|>
+From: zoe@operations.com
+To: sales@biz.com
+Date: 2024-06-03
+Dear Morgan,
+
+Let's catch up on the hiring strategy. I can do at morning for 20 mins. I'm based in Beijing, so I'm on CST.
+
+Best wishes,
+Zoe
+<|email_end|>
+
+<|email_start|>
+From: wendy@retail.com
+To: ceo@startup.com
+Date: 2024-06-10
+Good day Jordan,
+
+Can we schedule one hour for the Q1 review? at evening would work for me. (I'm on Central European time.)
+
+Best wishes,
+Wendy
+<|email_end|>
+
+<|email_start|>
+From: kate@media.com
+To: dev@engineering.com
+Date: 2024-06-17
+Hello Riley,
+
+Are you free for 20 mins whenever works for you to discuss the pitch? (I'm on New York time.)
+
+Talk soon,
+Kate
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: alex@abe-health.com
+Date: 2024-06-24
+Hello Alex,
+
+Could we find 20 minutes this afternoon for a performance review? I'm free 11:30am LA time. I'm based in San Francisco, so I'm on LA time.
+
+Best wishes,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: dev@engineering.com
+Date: 2024-07-01
+Hello Riley,
+
+I'd like to set up a planning session. Are you around Thursday at lunchtime or Tuesday at 11am CET for 20 mins?
+
+Kind regards,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: sales@biz.com
+Date: 2024-07-08
+Good day Morgan,
+
+Let's catch up on the intro call. I can do 11:30am BST for 20 mins. I'm based in London, so I'm on BST.
+
+Cheers,
+James
+<|email_end|>
+
+<|email_start|>
+From: claire@startup.ai
+To: ceo@startup.com
+Date: 2024-07-15
+Dear Jordan,
+
+Let's catch up on the board meeting. I can do 10:30am Australian Eastern time for 90 minutes.
+
+Thanks,
+Claire
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: josh@abe-health.com
+Date: 2024-07-22
+Hey Josh,
+
+Are you free for 20 mins to discuss the sales pipeline review? I'm available 9am German time. I'm based in Germany, so I'm on German time.
+
+Kind regards,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: pm@product.io
+Date: 2024-01-08
+Hey Taylor,
+
+Would love to sync on the onboarding session — I'm available Thursday at 3:30pm Berlin time or Friday at 2:30pm Berlin time for 30 minutes. I'm based in Berlin, so I'm on Berlin time.
+
+Kind regards,
+David
+<|email_end|>
+
+<|email_start|>
+From: ellie@google.com
+To: sales@biz.com
+Date: 2024-01-15
+Hi Morgan,
+
+Let's catch up on the design review. I can do Thursday at 12pm JST, Tuesday at 8am JST or Friday at 1pm JST for 60 mins. I'm based in Tokyo, so I'm on JST.
+
+Talk soon,
+Ellie
+<|email_end|>
+
+<|email_start|>
+From: olivia@ngo.net
+To: alex@abe-health.com
+Date: 2024-01-22
+Dear Alex,
+
+Could we find 20 minutes this week for a Q1 review? I'm free Thursday at end of day or Monday at 1pm Tokyo time.
+
+Best,
+Olivia
+<|email_end|>
+
+<|email_start|>
+From: uma@research.edu
+To: sam@abe-health.com
+Date: 2024-01-29
+Hey Sam,
+
+I'd like to set up a project update. Are you around at morning for three quarters of an hour? (I'm on MST.)
+
+Best,
+Uma
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: pm@product.io
+Date: 2024-02-05
+Hey Taylor,
+
+Can we schedule an hour for the onboarding session? at morning would work for me. I'm based in Paris, so I'm on Central European time.
+
+Thanks,
+David
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: matt@abe-health.com
+Date: 2024-02-12
+Hi Matt,
+
+Are you free for 20 minutes to discuss the Q3 review? I'm available 2pm CET. I'm based in Germany, so I'm on CET.
+
+Best,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: chris@hubspot.com
+To: alex@abe-health.com
+Date: 2024-02-19
+Hello Alex,
+
+Are you free for 1.5 hours early next week to discuss the architecture review? I'm based in the UK, so I'm on GMT.
+
+Thanks,
+Chris
+<|email_end|>
+
+<|email_start|>
+From: sam@devshop.io
+To: matt@abe-health.com
+Date: 2024-02-26
+Good day Matt,
+
+Looking to chat about the company metrics — does soon work for you? I'm based in India, so I'm on Mumbai time.
+
+Talk soon,
+Sam
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: ceo@startup.com
+Date: 2024-03-04
+Hey Jordan,
+
+Could we find 60 mins sometime this week to go over the Q4 planning? I'm based in the Mountain region, so I'm on MT.
+
+Cheers,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: matt@abe-health.com
+To: sam@abe-health.com
+Date: 2024-03-11
+Hello Sam,
+
+Let's find time for the marketing strategy. Any slot soon works for me.
+
+Cheers,
+Matt
+<|email_end|>
+
+<|email_start|>
+From: paul@agency.co
+To: matt@abe-health.com
+Date: 2024-03-18
+Hey Matt,
+
+Could we find 20 minutes early next week to go over the onboarding session?
+
+Best wishes,
+Paul
+<|email_end|>
+
+<|email_start|>
+From: zoe@operations.com
+To: matt@abe-health.com
+Date: 2024-03-25
+Hey Matt,
+
+Looking to chat about the performance review — does soon work for you? I'm based in the East Coast, so I'm on Boston time.
+
+Thanks,
+Zoe
+<|email_end|>
+
+<|email_start|>
+From: kate@media.com
+To: sam@abe-health.com
+Date: 2024-04-01
+Hey Sam,
+
+Could we find 90 minutes sometime to go over the demo? I'm based in China, so I'm on CST.
+
+Best wishes,
+Kate
+<|email_end|>
+
+<|email_start|>
+From: quinn@marketing.biz
+To: ceo@startup.com
+Date: 2024-04-08
+Hello Jordan,
+
+I'd love to schedule a pitch this week — do you have half-an-hour free? I'm based in Bangalore, so I'm on India time.
+
+Kind regards,
+Quinn
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: alex@abe-health.com
+Date: 2024-04-15
+Good day Alex,
+
+Let's catch up on the architecture review. I can do at evening for 15 mins.
+
+Talk soon,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: ceo@startup.com
+Date: 2024-04-22
+Hey Jordan,
+
+Can we schedule 45 minutes for the kickoff meeting? Friday at 9am Berlin time or Wednesday at 4pm Berlin time would work for me. I'm based in Germany, so I'm on Berlin time.
+
+Thanks,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: wendy@retail.com
+To: dev@engineering.com
+Date: 2024-05-06
+Hi Riley,
+
+Could we find 45 minutes next week for a team sync? I'm free 5:30pm German time. I'm based in Berlin, so I'm on German time.
+
+Kind regards,
+Wendy
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: ceo@startup.com
+Date: 2024-05-13
+Dear Jordan,
+
+Can we schedule 1 hour for the team sync? at lunchtime would work for me.
+
+Best wishes,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: matt@abe-health.com
+To: pm@product.io
+Date: 2024-05-20
+Dear Taylor,
+
+Can we schedule a quick call for the demo? Wednesday at 5:30pm AEDT or Tuesday at 9am AEDT would work for me. (I'm on AEDT.)
+
+Kind regards,
+Matt
+<|email_end|>
+
+<|email_start|>
+From: henry@lawfirm.com
+To: dev@engineering.com
+Date: 2024-05-27
+Hi Riley,
+
+Could we find one hour when you're free to go over the board meeting? (I'm on London time.)
+
+Best,
+Henry
+<|email_end|>
+
+<|email_start|>
+From: wendy@retail.com
+To: ceo@startup.com
+Date: 2024-06-03
+Dear Jordan,
+
+Could we find 15 min whenever works for you to go over the budget discussion? I'm based in the West Coast, so I'm on Pacific time.
+
+Talk soon,
+Wendy
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: pm@product.io
+Date: 2024-06-10
+Dear Taylor,
+
+Looking to chat about the contract negotiation — does this week work for you? I'm based in Chicago, so I'm on CDT.
+
+Talk soon,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: ceo@startup.com
+Date: 2024-06-17
+Hello Jordan,
+
+Let's catch up on the sales pipeline review. I can do Wednesday at 9:30am Berlin time for 2 hours.
+
+Best,
+James
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: matt@abe-health.com
+Date: 2024-06-24
+Dear Matt,
+
+Would love to sync on the Q1 review — I'm available 8am Los Angeles time for 1.5 hours.
+
+Talk soon,
+David
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: pm@product.io
+Date: 2024-07-01
+Good day Taylor,
+
+Do you have 2 hours free at lunchtime to go over the design review? (I'm on Paris time.)
+
+Best,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: wendy@retail.com
+To: alex@abe-health.com
+Date: 2024-07-08
+Hello Alex,
+
+Let's catch up on the design review. I can do Thursday at 4pm PDT or Friday at morning for 1.5 hours.
+
+Best,
+Wendy
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: sales@biz.com
+Date: 2024-07-15
+Hi Morgan,
+
+Do you have 45 mins free 4pm Denver time to go over the Q4 planning?
+
+Best wishes,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: matt@abe-health.com
+Date: 2024-07-22
+Hey Matt,
+
+Let's catch up on the company board meeting. I can do Tuesday at morning or Friday at afternoon for 30 mins. (I'm on CT.)
+
+Thanks,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: serafin@abe-health.com
+To: alex@abe-health.com
+Date: 2024-01-08
+Hey Alex,
+
+Let's catch up on the sprint planning. I can do Monday at end of day or Friday at 1:30pm CET time for 20 minutes. I'm based in France, so I'm on CET time.
+
+Talk soon,
+Serafin
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: dev@engineering.com
+Date: 2024-01-15
+Hello Riley,
+
+Would you be available this week for a 20 minutes sprint planning?
+
+Best,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: josh@abe-health.com
+Date: 2024-01-22
+Dear Josh,
+
+Could we find 2 hours sometime this week for a investor update? I'm free Friday at evening or Monday at 11am India time.
+
+Kind regards,
+James
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: sam@abe-health.com
+Date: 2024-01-29
+Hey Sam,
+
+Let's catch up on the demo. I can do at evening for 60 mins. (I'm on ET.)
+
+Kind regards,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: matt@abe-health.com
+To: pm@product.io
+Date: 2024-02-05
+Hi Taylor,
+
+Let's catch up on the pitch. I can do Thursday at 2:30pm GMT for two hours. I'm based in London, so I'm on GMT.
+
+Cheers,
+Matt
+<|email_end|>
+
+<|email_start|>
+From: alice@acmecorp.com
+To: alex@abe-health.com
+Date: 2024-02-12
+Good day Alex,
+
+Looking to chat about the sales pipeline review — does at your convenience work for you?
+
+Kind regards,
+Alice
+<|email_end|>
+
+<|email_start|>
+From: wendy@retail.com
+To: dev@engineering.com
+Date: 2024-02-19
+Dear Riley,
+
+Can we schedule 30 mins for the performance review? Monday at 5:30pm New York time or Tuesday at evening would work for me. I'm based in the East Coast, so I'm on New York time.
+
+Best wishes,
+Wendy
+<|email_end|>
+
+<|email_start|>
+From: paul@agency.co
+To: alex@abe-health.com
+Date: 2024-02-26
+Hi Alex,
+
+Do you have 90 minutes free at end of day to go over the 1:1?
+
+Best wishes,
+Paul
+<|email_end|>
+
+<|email_start|>
+From: henry@lawfirm.com
+To: matt@abe-health.com
+Date: 2024-03-04
+Good day Matt,
+
+Let's find time for the Q2 planning. Any slot in the coming weeks works for me. I'm based in New York, so I'm on Eastern time.
+
+Best wishes,
+Henry
+<|email_end|>
+
+<|email_start|>
+From: wendy@retail.com
+To: sam@abe-health.com
+Date: 2024-03-11
+Dear Sam,
+
+Do you have three quarters of an hour free at afternoon to go over the team sync? I'm based in the West Coast, so I'm on PDT.
+
+Best wishes,
+Wendy
+<|email_end|>
+
+<|email_start|>
+From: victor@manufacturing.com
+To: ceo@startup.com
+Date: 2024-03-18
+Hi Jordan,
+
+Are you free for 15 min early next week to discuss the product roadmap?
+
+Best,
+Victor
+<|email_end|>
+
+<|email_start|>
+From: mike@bigcorp.com
+To: ceo@startup.com
+Date: 2024-03-25
+Hello Jordan,
+
+Can we schedule a couple of hours for the contract negotiation? Thursday at lunchtime or Wednesday at 9:30am São Paulo time would work for me. I'm based in São Paulo, so I'm on São Paulo time.
+
+Best,
+Mike
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: sales@biz.com
+Date: 2024-04-01
+Hey Morgan,
+
+Are you free for two hours to discuss the onboarding session? I'm available Monday at 10:30am New York time, Tuesday at 1:30pm New York time or Wednesday at 5:30pm New York time.
+
+Best wishes,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: claire@startup.ai
+To: josh@abe-health.com
+Date: 2024-04-08
+Hey Josh,
+
+I'd like to set up a sales pipeline review. Are you around at morning for an hour? (I'm on Beijing time.)
+
+Cheers,
+Claire
+<|email_end|>
+
+<|email_start|>
+From: zoe@operations.com
+To: alex@abe-health.com
+Date: 2024-04-15
+Hi Alex,
+
+Would you be available next week for a an hour customer feedback session? I'm based in Mumbai, so I'm on India time.
+
+Best wishes,
+Zoe
+<|email_end|>
+
+<|email_start|>
+From: kate@media.com
+To: alex@abe-health.com
+Date: 2024-04-22
+Hi Alex,
+
+Can we schedule 60 minutes for the customer feedback session? 3pm Mumbai time would work for me. I'm based in Mumbai, so I'm on Mumbai time.
+
+Talk soon,
+Kate
+<|email_end|>
+
+<|email_start|>
+From: ellie@google.com
+To: josh@abe-health.com
+Date: 2024-05-06
+Good day Josh,
+
+Can we schedule 60 mins for the onboarding session? Wednesday at afternoon or Thursday at 4:30pm UK time would work for me. I'm based in the UK, so I'm on UK time.
+
+Thanks,
+Ellie
+<|email_end|>
+
+<|email_start|>
+From: serafin@abe-health.com
+To: sam@abe-health.com
+Date: 2024-05-13
+Hello Sam,
+
+Are you free for an hour to discuss the product roadmap? I'm available Friday at 1:30pm Eastern time, Monday at 1:30pm Eastern time or Wednesday at 11:30am Eastern time. (I'm on Eastern time.)
+
+Best,
+Serafin
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: alex@abe-health.com
+Date: 2024-05-20
+Good day Alex,
+
+Could we find 15 minutes soon for a Google Cloud usage? I'm free at evening. I'm based in Beijing, so I'm on Beijing time.
+
+Cheers,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: tara@analytics.com
+To: dev@engineering.com
+Date: 2024-05-27
+Hey Riley,
+
+Would love to sync on the 1:1 — I'm available Tuesday at 5:30pm Japan time or Thursday at 2pm Japan time for a quick call. (I'm on Japan time.)
+
+Best wishes,
+Tara
+<|email_end|>
+
+<|email_start|>
+From: ellie@google.com
+To: ceo@startup.com
+Date: 2024-06-03
+Hi Jordan,
+
+Could we find 30 minutes this week for a Q4 planning? I'm free 1:30pm UK time.
+
+Best wishes,
+Ellie
+<|email_end|>
+
+<|email_start|>
+From: alice@acmecorp.com
+To: josh@abe-health.com
+Date: 2024-06-10
+Dear Josh,
+
+Let's catch up on the 1:1. I can do at afternoon for a couple of hours.
+
+Kind regards,
+Alice
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: dev@engineering.com
+Date: 2024-06-17
+Good day Riley,
+
+Do you have 1.5 hours free at end of day to go over the coffee chat?
+
+Best,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: anna@stripe.com
+To: sam@abe-health.com
+Date: 2024-06-24
+Dear Sam,
+
+Let's catch up on the hiring strategy. I can do at lunchtime for two hours. (I'm on CST.)
+
+Kind regards,
+Anna
+<|email_end|>
+
+<|email_start|>
+From: mia@biotech.org
+To: josh@abe-health.com
+Date: 2024-07-01
+Hi Josh,
+
+Let's find time for the sprint planning. Any slot at your convenience works for me. I'm based in the UK, so I'm on London time.
+
+Best wishes,
+Mia
+<|email_end|>
+
+<|email_start|>
+From: tom@amazon.com
+To: matt@abe-health.com
+Date: 2024-07-08
+Good day Matt,
+
+Would you be available when you're free for a a quick 15-min chat customer feedback session? I'm based in Tokyo, so I'm on Japan time.
+
+Kind regards,
+Tom
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: dev@engineering.com
+Date: 2024-07-15
+Dear Riley,
+
+Could we find 45 mins this week for a team sync? I'm free Monday at 10am CET. I'm based in France, so I'm on CET.
+
+Best,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: mike@bigcorp.com
+To: dev@engineering.com
+Date: 2024-07-22
+Dear Riley,
+
+Do you have 45 minutes free 3:30pm Paris time to go over the contract negotiation? (I'm on Paris time.)
+
+Thanks,
+Mike
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: josh@abe-health.com
+Date: 2024-01-08
+Hey Josh,
+
+Do you have 20 mins free at afternoon to go over the security audit? I'm based in the Mountain region, so I'm on Mountain time.
+
+Kind regards,
+James
+<|email_end|>
+
+<|email_start|>
+From: frank@logistics.de
+To: pm@product.io
+Date: 2024-01-15
+Hi Taylor,
+
+Could we find an hour sometime to go over the architecture review?
+
+Best,
+Frank
+<|email_end|>
+
+<|email_start|>
+From: tara@analytics.com
+To: matt@abe-health.com
+Date: 2024-01-22
+Dear Matt,
+
+Can we schedule a quick 15-min chat for the marketing strategy? at morning would work for me.
+
+Kind regards,
+Tara
+<|email_end|>
+
+<|email_start|>
+From: claire@startup.ai
+To: dev@engineering.com
+Date: 2024-01-29
+Dear Riley,
+
+Let's catch up on the company metrics. I can do Tuesday at 9:30am Denver time or Thursday at afternoon for an hour and a half. (I'm on Denver time.)
+
+Thanks,
+Claire
+<|email_end|>
+
+<|email_start|>
+From: tom@amazon.com
+To: alex@abe-health.com
+Date: 2024-02-05
+Hi Alex,
+
+Could we find 20 mins sometime this week for a product roadmap? I'm free Thursday at 11am Denver time or Tuesday at 11am Denver time.
+
+Best,
+Tom
+<|email_end|>
+
+<|email_start|>
+From: liam@fintech.io
+To: pm@product.io
+Date: 2024-02-12
+Hello Taylor,
+
+Could we find 60 mins today for a coffee chat? I'm free 2pm Berlin time. I'm based in Berlin, so I'm on Berlin time.
+
+Cheers,
+Liam
+<|email_end|>
+
+<|email_start|>
+From: matt@abe-health.com
+To: pm@product.io
+Date: 2024-02-19
+Hello Taylor,
+
+Let's catch up on the budget discussion. I can do 4pm Mountain time for half an hour. I'm based in Denver, so I'm on Mountain time.
+
+Cheers,
+Matt
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: alex@abe-health.com
+Date: 2024-02-26
+Hey Alex,
+
+Let's catch up on the Google Cloud usage. I can do 12pm Paris time for an hour and a half. (I'm on Paris time.)
+
+Talk soon,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: matt@abe-health.com
+Date: 2024-03-04
+Hi Matt,
+
+Could we find 20 mins sometime this week to go over the intro call?
+
+Talk soon,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: chris@hubspot.com
+To: alex@abe-health.com
+Date: 2024-03-11
+Hello Alex,
+
+Are you free for 45 mins to discuss the company board meeting? I'm available at end of day.
+
+Cheers,
+Chris
+<|email_end|>
+
+<|email_start|>
+From: mike@bigcorp.com
+To: dev@engineering.com
+Date: 2024-03-18
+Dear Riley,
+
+Do you have one hour free Wednesday at 5:30pm CST or Monday at afternoon to go over the retrospective? (I'm on CST.)
+
+Kind regards,
+Mike
+<|email_end|>
+
+<|email_start|>
+From: tom@amazon.com
+To: dev@engineering.com
+Date: 2024-03-25
+Hey Riley,
+
+Are you free for 1 hour in the coming weeks to discuss the retrospective? I'm based in China, so I'm on China time.
+
+Best,
+Tom
+<|email_end|>
+
+<|email_start|>
+From: tom@amazon.com
+To: sales@biz.com
+Date: 2024-04-01
+Hello Morgan,
+
+Could we find a couple of hours next week for a technical deep dive? I'm free Wednesday at 10:30am Beijing time or Tuesday at 11:30am Beijing time. (I'm on Beijing time.)
+
+Best,
+Tom
+<|email_end|>
+
+<|email_start|>
+From: olivia@ngo.net
+To: matt@abe-health.com
+Date: 2024-04-08
+Hello Matt,
+
+I'd love to schedule a product roadmap sometime this week — do you have one hour free? I'm based in Australia, so I'm on AEST.
+
+Best wishes,
+Olivia
+<|email_end|>
+
+<|email_start|>
+From: noah@edu.org
+To: alex@abe-health.com
+Date: 2024-04-15
+Hey Alex,
+
+Do you have 30 minutes free Wednesday at 12pm German time to go over the Q2 planning?
+
+Cheers,
+Noah
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: dev@engineering.com
+Date: 2024-04-22
+Hello Riley,
+
+When are you free for a intro call? Hoping to connect in the next few days.
+
+Cheers,
+David
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: sales@biz.com
+Date: 2024-05-06
+Dear Morgan,
+
+I'd love to schedule a pitch next week — do you have 20 mins free? (I'm on MT.)
+
+Thanks,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: sarah@microsoft.com
+To: alex@abe-health.com
+Date: 2024-05-13
+Hi Alex,
+
+Can we schedule 30 minutes for the sales pipeline review? at afternoon would work for me. I'm based in Australia, so I'm on Sydney time.
+
+Thanks,
+Sarah
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: alex@abe-health.com
+Date: 2024-05-20
+Hey Alex,
+
+Do you have 45 minutes free Monday at morning to go over the architecture review? I'm based in São Paulo, so I'm on BRT.
+
+Thanks,
+David
+<|email_end|>
+
+<|email_start|>
+From: joey@abe-health.com
+To: josh@abe-health.com
+Date: 2024-05-27
+Hey Josh,
+
+Are you free for 20 mins to discuss the hiring strategy? I'm available Friday at afternoon or Wednesday at 10am Beijing time. (I'm on Beijing time.)
+
+Best,
+Joey
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: ceo@startup.com
+Date: 2024-06-03
+Hi Jordan,
+
+Would you be available at your convenience for a 20 mins 1:1? I'm based in the East Coast, so I'm on New York time.
+
+Thanks,
+David
+<|email_end|>
+
+<|email_start|>
+From: liam@fintech.io
+To: dev@engineering.com
+Date: 2024-06-10
+Hi Riley,
+
+Are you free for 20 mins soon to discuss the product roadmap? (I'm on AEDT.)
+
+Cheers,
+Liam
+<|email_end|>
+
+<|email_start|>
+From: matt@abe-health.com
+To: alex@abe-health.com
+Date: 2024-06-17
+Good day Alex,
+
+Let's catch up on the contract negotiation. I can do 1pm CT for 60 minutes. I'm based in the Midwest, so I'm on CT.
+
+Cheers,
+Matt
+<|email_end|>
+
+<|email_start|>
+From: uma@research.edu
+To: ceo@startup.com
+Date: 2024-06-24
+Dear Jordan,
+
+Are you free for 2 hours to discuss the 1:1? I'm available Tuesday at 2:30pm.
+
+Best wishes,
+Uma
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: ceo@startup.com
+Date: 2024-07-01
+Dear Jordan,
+
+Do you have 20 mins free 4pm CST to go over the contract negotiation? (I'm on CST.)
+
+Kind regards,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: mia@biotech.org
+To: dev@engineering.com
+Date: 2024-07-08
+Dear Riley,
+
+Let's catch up on the planning session. I can do 11:30am German time for one hour. I'm based in Berlin, so I'm on German time.
+
+Best,
+Mia
+<|email_end|>
+
+<|email_start|>
+From: claire@startup.ai
+To: sam@abe-health.com
+Date: 2024-07-15
+Hi Sam,
+
+Do you have 2 hours free 10am CET to go over the project update?
+
+Best,
+Claire
+<|email_end|>
+
+<|email_start|>
+From: frank@logistics.de
+To: ceo@startup.com
+Date: 2024-07-22
+Hi Jordan,
+
+When are you free for a onboarding session? Hoping to connect soon.
+
+Best wishes,
+Frank
+<|email_end|>
+
+<|email_start|>
+From: serafin@abe-health.com
+To: dev@engineering.com
+Date: 2024-01-08
+Hey Riley,
+
+Do you have 90 minutes free Friday at morning or Tuesday at 9am CET to go over the Q3 review?
+
+Best,
+Serafin
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: sales@biz.com
+Date: 2024-01-15
+Hi Morgan,
+
+Do you have 45 minutes free Thursday at morning or Wednesday at 8:30am BRT to go over the catchup? I'm based in Brazil, so I'm on BRT.
+
+Talk soon,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: sales@biz.com
+Date: 2024-01-22
+Hey Morgan,
+
+Do you have 1.5 hours free Tuesday at 9am Beijing time or Friday at afternoon to go over the technical deep dive? I'm based in Shanghai, so I'm on Beijing time.
+
+Kind regards,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: diana@salesforce.com
+To: josh@abe-health.com
+Date: 2024-01-29
+Dear Josh,
+
+I'd like to set up a security audit. Are you around 2pm Brasilia time for half an hour? I'm based in Brazil, so I'm on Brasilia time.
+
+Thanks,
+Diana
+<|email_end|>
+
+<|email_start|>
+From: sam@devshop.io
+To: matt@abe-health.com
+Date: 2024-02-05
+Hey Matt,
+
+Do you have an hour free Tuesday at 1pm Mountain time or Wednesday at 8:30am Mountain time to go over the budget discussion?
+
+Cheers,
+Sam
+<|email_end|>
+
+<|email_start|>
+From: mike@bigcorp.com
+To: matt@abe-health.com
+Date: 2024-02-12
+Hello Matt,
+
+I'd like to set up a 1:1. Are you around Wednesday at end of day or Tuesday at 2:30pm San Francisco time for 30 minutes? I'm based in San Francisco, so I'm on San Francisco time.
+
+Thanks,
+Mike
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: matt@abe-health.com
+Date: 2024-02-19
+Hi Matt,
+
+Do you have an hour free 3:30pm India time to go over the Q1 review? I'm based in Mumbai, so I'm on India time.
+
+Best wishes,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: alex@abe-health.com
+Date: 2024-02-26
+Hi Alex,
+
+I'd like to set up a hiring strategy. Are you around 3pm Beijing time for a couple of hours? I'm based in China, so I'm on Beijing time.
+
+Best wishes,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: bob@techventures.io
+To: alex@abe-health.com
+Date: 2024-03-04
+Hello Alex,
+
+Could we find 15 minutes at your convenience to go over the 1:1? I'm based in Bangalore, so I'm on Mumbai time.
+
+Talk soon,
+Bob
+<|email_end|>
+
+<|email_start|>
+From: paul@agency.co
+To: alex@abe-health.com
+Date: 2024-03-11
+Hey Alex,
+
+Looking to chat about the Q4 planning — does sometime next week work for you?
+
+Best wishes,
+Paul
+<|email_end|>
+
+<|email_start|>
+From: zoe@operations.com
+To: alex@abe-health.com
+Date: 2024-03-18
+Dear Alex,
+
+I'd like to set up a user research debrief. Are you around 10am New York time for a quick 15-min chat? I'm based in Boston, so I'm on New York time.
+
+Cheers,
+Zoe
+<|email_end|>
+
+<|email_start|>
+From: zoe@operations.com
+To: ceo@startup.com
+Date: 2024-03-25
+Dear Jordan,
+
+Do you have 1.5 hours free at evening to go over the design review? (I'm on AEDT.)
+
+Thanks,
+Zoe
+<|email_end|>
+
+<|email_start|>
+From: ellie@google.com
+To: josh@abe-health.com
+Date: 2024-04-01
+Hi Josh,
+
+Would love to sync on the planning session — I'm available 10:30am CET time for an hour and a half. I'm based in Paris, so I'm on CET time.
+
+Kind regards,
+Ellie
+<|email_end|>
+
+<|email_start|>
+From: sam@devshop.io
+To: sales@biz.com
+Date: 2024-04-08
+Hey Morgan,
+
+Do you have 30 mins free Friday at 4pm MT to go over the demo?
+
+Best wishes,
+Sam
+<|email_end|>
+
+<|email_start|>
+From: victor@manufacturing.com
+To: matt@abe-health.com
+Date: 2024-04-15
+Hi Matt,
+
+Would love to sync on the coffee chat — I'm available at 11am for 2 hours.
+
+Best wishes,
+Victor
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: josh@abe-health.com
+Date: 2024-04-22
+Hey Josh,
+
+Could we find 45 minutes sometime next week for a Q4 planning? I'm free Thursday at end of day or Tuesday at evening. I'm based in the Midwest, so I'm on CST.
+
+Best,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: pm@product.io
+Date: 2024-05-06
+Dear Taylor,
+
+Would love to sync on the sales pipeline review — I'm available 5:30pm Berlin time for one hour. I'm based in Berlin, so I'm on Berlin time.
+
+Best,
+James
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: matt@abe-health.com
+Date: 2024-05-13
+Dear Matt,
+
+Can we schedule three quarters of an hour for the investor update? Thursday at 8am CT or Friday at afternoon would work for me. I'm based in Chicago, so I'm on CT.
+
+Best wishes,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: chris@hubspot.com
+To: alex@abe-health.com
+Date: 2024-05-20
+Good day Alex,
+
+I'd love to schedule a onboarding session sometime this week — do you have half an hour free? I'm based in Bangalore, so I'm on India time.
+
+Best,
+Chris
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: sales@biz.com
+Date: 2024-05-27
+Good day Morgan,
+
+When are you free for a customer feedback session? Hoping to connect when you're free. I'm based in Sydney, so I'm on Australian Eastern time.
+
+Kind regards,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: pm@product.io
+Date: 2024-06-03
+Hi Taylor,
+
+Are you free for an hour to discuss the coffee chat? I'm available Wednesday at lunchtime or Thursday at morning. I'm based in the Midwest, so I'm on Chicago time.
+
+Best,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: sarah@microsoft.com
+To: josh@abe-health.com
+Date: 2024-06-10
+Good day Josh,
+
+Would love to sync on the kickoff meeting — I'm available 3:30pm Australian Eastern time for 90 minutes.
+
+Kind regards,
+Sarah
+<|email_end|>
+
+<|email_start|>
+From: ellie@google.com
+To: dev@engineering.com
+Date: 2024-06-17
+Hello Riley,
+
+Are you free for 30 mins to discuss the technical deep dive? I'm available at evening.
+
+Kind regards,
+Ellie
+<|email_end|>
+
+<|email_start|>
+From: serafin@abe-health.com
+To: alex@abe-health.com
+Date: 2024-06-24
+Dear Alex,
+
+Could we find a couple of hours sometime next week for a Google Cloud usage? I'm free at 5:30pm.
+
+Thanks,
+Serafin
+<|email_end|>
+
+<|email_start|>
+From: wendy@retail.com
+To: matt@abe-health.com
+Date: 2024-07-01
+Dear Matt,
+
+Could we find 20 minutes at your convenience to go over the architecture review?
+
+Cheers,
+Wendy
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: alex@abe-health.com
+Date: 2024-07-08
+Hello Alex,
+
+Let's find time for the sprint planning. Any slot soon works for me. I'm based in Shanghai, so I'm on CST.
+
+Thanks,
+David
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: matt@abe-health.com
+Date: 2024-07-15
+Hey Matt,
+
+Let's catch up on the architecture review. I can do Tuesday at evening for 1 hour. I'm based in Mumbai, so I'm on Mumbai time.
+
+Thanks,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: victor@manufacturing.com
+To: ceo@startup.com
+Date: 2024-07-22
+Dear Jordan,
+
+Could we find 15 minutes next week for a partnership discussion? I'm free Friday at morning. I'm based in Melbourne, so I'm on AEDT.
+
+Talk soon,
+Victor
+<|email_end|>
+
+<|email_start|>
+From: claire@startup.ai
+To: josh@abe-health.com
+Date: 2024-01-08
+Hi Josh,
+
+Can we schedule three quarters of an hour for the budget discussion? at lunchtime would work for me. I'm based in Japan, so I'm on Tokyo time.
+
+Kind regards,
+Claire
+<|email_end|>
+
+<|email_start|>
+From: rachel@cloud.com
+To: sales@biz.com
+Date: 2024-01-15
+Hello Morgan,
+
+I'd like to set up a board meeting. Are you around Tuesday at end of day or Monday at 1:30pm for 20 minutes?
+
+Kind regards,
+Rachel
+<|email_end|>
+
+<|email_start|>
+From: noah@edu.org
+To: josh@abe-health.com
+Date: 2024-01-22
+Hey Josh,
+
+Would love to sync on the project update — I'm available at morning for 60 minutes. I'm based in Denver, so I'm on Denver time.
+
+Best,
+Noah
+<|email_end|>
+
+<|email_start|>
+From: olivia@ngo.net
+To: sales@biz.com
+Date: 2024-01-29
+Dear Morgan,
+
+Let's catch up on the company board meeting. I can do 4pm MST for an hour and a half. I'm based in Denver, so I'm on MST.
+
+Talk soon,
+Olivia
+<|email_end|>
+
+<|email_start|>
+From: olivia@ngo.net
+To: dev@engineering.com
+Date: 2024-02-05
+Hi Riley,
+
+Would love to sync on the onboarding session — I'm available Thursday at lunchtime or Wednesday at end of day for 20 mins. I'm based in Boston, so I'm on New York time.
+
+Talk soon,
+Olivia
+<|email_end|>
+
+<|email_start|>
+From: bob@techventures.io
+To: sales@biz.com
+Date: 2024-02-12
+Hey Morgan,
+
+Could we find 60 mins next week for a catchup? I'm free Friday at end of day or Wednesday at 9:30am CST. I'm based in Chicago, so I'm on CST.
+
+Cheers,
+Bob
+<|email_end|>
+
+<|email_start|>
+From: uma@research.edu
+To: pm@product.io
+Date: 2024-02-19
+Hello Taylor,
+
+Let's catch up on the investor update. I can do Monday at afternoon, Friday at 1:30pm Central time or Tuesday at 2:30pm Central time for 15 mins. I'm based in the Midwest, so I'm on Central time.
+
+Talk soon,
+Uma
+<|email_end|>
+
+<|email_start|>
+From: bob@techventures.io
+To: dev@engineering.com
+Date: 2024-02-26
+Hey Riley,
+
+When are you free for a investor update? Hoping to connect sometime next week. I'm based in Melbourne, so I'm on Australian Eastern time.
+
+Best,
+Bob
+<|email_end|>
+
+<|email_start|>
+From: emma@designco.uk
+To: josh@abe-health.com
+Date: 2024-03-04
+Good day Josh,
+
+Are you free for 60 minutes next week to discuss the architecture review?
+
+Best,
+Emma
+<|email_end|>
+
+<|email_start|>
+From: ellie@google.com
+To: ceo@startup.com
+Date: 2024-03-11
+Dear Jordan,
+
+Do you have 60 mins free 9am CT to go over the Google Cloud usage? I'm based in the Midwest, so I'm on CT.
+
+Best,
+Ellie
+<|email_end|>
+
+<|email_start|>
+From: tara@analytics.com
+To: dev@engineering.com
+Date: 2024-03-18
+Dear Riley,
+
+Could we find 45 minutes sometime next week for a Q2 planning? I'm free 3:30pm New York time. (I'm on New York time.)
+
+Best wishes,
+Tara
+<|email_end|>
+
+<|email_start|>
+From: alice@acmecorp.com
+To: matt@abe-health.com
+Date: 2024-03-25
+Hey Matt,
+
+I'd love to schedule a coffee chat early next week — do you have two hours free? (I'm on CST.)
+
+Best,
+Alice
+<|email_end|>
+
+<|email_start|>
+From: joey@abe-health.com
+To: matt@abe-health.com
+Date: 2024-04-01
+Hello Matt,
+
+Would love to sync on the board meeting — I'm available Wednesday at 2:30pm GMT for 15 mins. (I'm on GMT.)
+
+Best wishes,
+Joey
+<|email_end|>
+
+<|email_start|>
+From: grace@healthtech.ca
+To: dev@engineering.com
+Date: 2024-04-08
+Hello Riley,
+
+Let's catch up on the Google Cloud usage. I can do Friday at 4pm Australian Eastern time for 60 mins. I'm based in Melbourne, so I'm on Australian Eastern time.
+
+Cheers,
+Grace
+<|email_end|>
+
+<|email_start|>
+From: claire@startup.ai
+To: pm@product.io
+Date: 2024-04-15
+Dear Taylor,
+
+When are you free for a Q3 review? Hoping to connect this week.
+
+Best,
+Claire
+<|email_end|>
+
+<|email_start|>
+From: james@realstate.au
+To: sales@biz.com
+Date: 2024-04-22
+Dear Morgan,
+
+Could we find two hours in the next few days for a Google Cloud usage? I'm free at evening. I'm based in New York, so I'm on Eastern time.
+
+Best wishes,
+James
+<|email_end|>
+
+<|email_start|>
+From: uma@research.edu
+To: dev@engineering.com
+Date: 2024-05-06
+Hi Riley,
+
+I'd love to schedule a security audit this week — do you have 2 hours free?
+
+Cheers,
+Uma
+<|email_end|>
+
+<|email_start|>
+From: david@bigbank.com
+To: alex@abe-health.com
+Date: 2024-05-13
+Good day Alex,
+
+I'd like to set up a project update. Are you around Tuesday at 4pm JST or Friday at 9:30am JST for 20 mins? I'm based in Japan, so I'm on JST.
+
+Best,
+David
+<|email_end|>
+
+<|email_start|>
+From: yasmin@hr.com
+To: pm@product.io
+Date: 2024-05-20
+Hey Taylor,
+
+I'd like to set up a budget discussion. Are you around Thursday at lunchtime for 30 mins? I'm based in Seattle, so I'm on LA time.
+
+Cheers,
+Yasmin
+<|email_end|>
+
+<|email_start|>
+From: sarah@microsoft.com
+To: dev@engineering.com
+Date: 2024-05-27
+Good day Riley,
+
+I'd like to set up a design review. Are you around 8:30am NYC time for 90 minutes? (I'm on NYC time.)
+
+Cheers,
+Sarah
+<|email_end|>
+
+<|email_start|>
+From: wendy@retail.com
+To: dev@engineering.com
+Date: 2024-06-03
+Hello Riley,
+
+Are you free for an hour and a half to discuss the retrospective? I'm available 11am CET.
+
+Best wishes,
+Wendy
+<|email_end|>
+
+<|email_start|>
+From: iris@consulting.fr
+To: sales@biz.com
+Date: 2024-06-10
+Hey Morgan,
+
+Let's find time for the investor update. Any slot sometime this week works for me. I'm based in São Paulo, so I'm on Brasilia time.
+
+Thanks,
+Iris
+<|email_end|>
+
+<|email_start|>
+From: mike@bigcorp.com
+To: dev@engineering.com
+Date: 2024-06-17
+Dear Riley,
+
+Do you have 30 minutes free Monday at 4pm CET or Tuesday at 11:30am CET to go over the Q3 review?
+
+Best,
+Mike
+<|email_end|>
+
+<|email_start|>
+From: liam@fintech.io
+To: alex@abe-health.com
+Date: 2024-06-24
+Good day Alex,
+
+Would love to sync on the budget discussion — I'm available Wednesday at evening or Friday at 2pm for a couple of hours.
+
+Cheers,
+Liam
+<|email_end|>

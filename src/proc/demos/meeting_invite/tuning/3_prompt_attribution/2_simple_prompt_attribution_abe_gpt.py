@@ -12,7 +12,7 @@ from proc.base.proc_score import ProcScore
 from proc.base.test_suite import TestSuite
 from proc.demos.meeting_invite.meeting_invite_score_extractor import MeetingInviteScoreExtractor
 from proc.demos.meeting_invite.tuning.abe_gpt.dspy_gpt_test import MeetingInviteAbeGPT
-from proc.demos.meeting_invite.tuning.abe_gpt.gpt import GPTLanguageModel, encode, decode, vocab_size
+from proc.demos.meeting_invite.tuning.abe_gpt.gpt import GPTLanguageModel, encode, decode, vocab_size, VERSION_POST_FIX
 from proc.demos.meeting_invite.tuning.abe_gpt.gpt_hf_adapter import GptLIGAttributionAuditor
 from proc.pipeline.dataset.training_dataset import TrainingSetDataset
 
@@ -28,7 +28,7 @@ class PromptAttributionAbeGptTestSuite(TestSuite):
         llm = MeetingInviteAbeGPT(config=config)
         scorer = MeetingInviteScoreExtractor()
 
-        gpt_pt = Path(__file__).parent.parent / "abe_gpt" / "gpt.pt"
+        gpt_pt = Path(__file__).parent.parent / "abe_gpt" / f"gpt{VERSION_POST_FIX}.pt"
         gpt = GPTLanguageModel()  # type: ignore[no-untyped-call]
         gpt.load_state_dict(torch.load(str(gpt_pt), map_location="cpu"))
 

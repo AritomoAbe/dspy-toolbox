@@ -11,10 +11,6 @@ the OpenAI /v1/chat/completions format. DSPy can then connect to it via:
     )
     dspy.configure(lm=lm)
 
-Requirements
-------------
-    pip install fastapi uvicorn
-
 Run
 ---
     python gpt_server.py                         # starts on port 8000
@@ -22,35 +18,39 @@ Run
 """
 
 import argparse
+import logging
 import time
+from typing import Optional
+
+from proc.base.timing import timed
+
 import torch
-import torch.nn as nn
-from torch.nn import functional as F
+import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
-from typing import Optional
-import uvicorn
 
 # ── Import the GPT model definition ───────────────────────────────────────────
 # Adjust this import to match where gpt.py lives in your project.
 from gpt import (
     GPTLanguageModel,
-    encode, decode,
-    stoi,
+    decode,
     device,
-    block_size,
+    block_size, enc_dec,
 )
+
+LOGGER = logging.getLogger(__name__)
 
 # ── Load model ─────────────────────────────────────────────────────────────────
 
 def load_model(checkpoint_path: Optional[str] = None) -> GPTLanguageModel:
     model = GPTLanguageModel().to(device)
     if checkpoint_path:
-        state = torch.load(checkpoint_path, map_location=device)
-        model.load_state_dict(state)
-        print(f"Loaded checkpoint: {checkpoint_path}")
+        with timed(f"load_model checkpoint={checkpoint_path}", logger=LOGGER):
+            state = torch.load(checkpoint_path, map_location=device)
+            model.load_state_dict(state)
+        LOGGER.info(f"Loaded checkpoint: {checkpoint_path}")
     else:
-        print("No checkpoint — using randomly initialized weights (for testing only)")
+        LOGGER.info("No checkpoint — using randomly initialized weights (for testing only)")
     model.eval()
     return model
 
@@ -188,24 +188,27 @@ def chat_completions(request: ChatCompletionRequest) -> ChatCompletionResponse:
     # Flatten all messages into a single prompt
     prompt = "\n".join(m.content for m in request.messages)
 
-    # Safe encode — skip any character not in the training vocabulary.
-    # DSPy/litellm injects markdown formatting (backticks, curly braces, etc.)
-    # that may not appear in the training corpus. A KeyError here causes a 500.
-    ids = [stoi[c] for c in prompt if c in stoi]
+    ids = enc_dec.encode(prompt)
     if not ids:
+        LOGGER.error(f'Failed to encode prompt: {prompt}')
         ids = [0]   # fallback to first token
 
     context = torch.tensor([ids], dtype=torch.long, device=device)
 
+    shape_before = context.shape
     # Crop to model's context window
     context = context[:, -block_size:]
+    shape_after = context.shape
+    if shape_before != shape_after:
+        LOGGER.warning(f'Prompt context was truncated from {shape_before} to {shape_after}')
 
     # Generate
-    with torch.no_grad():
-        output_ids = _model.generate(
-            context,
-            max_new_tokens=request.max_tokens,
-        )
+    with timed(f"model.generate (max_new_tokens={request.max_tokens})", logger=LOGGER):
+        with torch.no_grad():
+            output_ids = _model.generate(
+                context,
+                max_new_tokens=request.max_tokens,
+            )
 
     # Decode only the newly generated tokens (skip the prompt)
     new_ids   = output_ids[0, context.shape[1]:].tolist()
