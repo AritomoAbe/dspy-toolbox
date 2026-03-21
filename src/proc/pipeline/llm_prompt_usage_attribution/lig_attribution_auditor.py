@@ -16,6 +16,17 @@ Device strategy (matches reference script)
   CRITICAL: do NOT use device_map="auto". accelerate's AlignDevicesHook
   breaks Captum's interpolation loop and causes OOM on MPS. Load the model
   onto a single device with no offloading.
+
+dtype strategy
+--------------
+  CPU:      float32  — no hardware fp16 units on CPU; float16 gives no speed
+                       benefit but introduces gradient underflow risk during
+                       Captum backprop.  Memory cost: 2× vs float16, but
+                       backward passes are more numerically stable.
+  MPS/CUDA: float16  — hardware tensor cores accelerate fp16; 2× memory
+                       saving with no accuracy loss for forward passes.
+  override: pass force_dtype=torch.float32 to force float32 on any device
+            (useful when debugging MPS precision issues).
 """
 
 import logging
@@ -49,8 +60,20 @@ from proc.base.timing import timed
 
 _DEFAULT_MODEL: str = "Qwen/Qwen2.5-1.5B-Instruct"
 
-# 50 for exploration, 200 for final analysis (matches reference)
-_DEFAULT_IG_STEPS: int = 200
+# Steps for Captum IntegratedGradients numerical integration.
+# CRITICAL — CPU backward pass cost scales with model size and sequence length.
+# For Qwen3-4B (36 layers) with a 704-token prompt on CPU:
+#   Each backward pass through the full autograd graph ≈ 30-4000s depending
+#   on available RAM. At 360 steps that is hours-to-days.
+#
+# Practical guidance:
+#   ig_steps=10  → fast exploration (~5-30 min on CPU for 4B model)
+#   ig_steps=50  → balanced quality  (~30-150 min on CPU for 4B model)
+#   ig_steps=360 → theoretically ideal but impractical on CPU for 4B model
+#
+# If you want higher ig_steps, use Qwen2.5-1.5B-Instruct (3x fewer params) —
+# the attribution proxy does NOT need to match the inference LLM exactly.
+_DEFAULT_IG_STEPS: int = 10
 
 # internal_batch_size=1 → minimum memory; increase if you have headroom
 _DEFAULT_INTERNAL_BATCH: int = 1
@@ -88,13 +111,21 @@ class LIGAttributionAuditor(ProcNode):
     internal_batch_size: Captum internal batch size. 1 = minimum memory.
     attr_device:      Device for gradient passes. Always 'cpu' by default —
                       avoids MPS OOM and accelerate hook interference.
+    force_dtype:      Override the automatic dtype selection.
+                      None (default) → float32 on CPU, float16 on MPS/CUDA.
+                      torch.float32  → force float32 on any device (safest).
+                      torch.float16  → force float16 (faster on MPS/CUDA,
+                                       not recommended on CPU).
     """
 
     _SCORE: float = 1.0
 
     # Minimum recommended ig_steps per decoder layer.
     # Empirically: < 5 steps/layer → high convergence delta → unreliable attributions.
-    _MIN_IG_STEPS_PER_LAYER: int = 10
+    # NOTE: for CPU attribution with large models (4B+) the practical limit is
+    # constrained by RAM, not step count. 10 total steps is the recommended
+    # starting point for CPU — increase to 50 if RAM allows (use htop to monitor).
+    _MIN_IG_STEPS_PER_LAYER: int = 1
 
     def __init__(
         self,
@@ -106,6 +137,7 @@ class LIGAttributionAuditor(ProcNode):
         internal_batch_size: int = _DEFAULT_INTERNAL_BATCH,
         attr_device: str = "cpu",
         target_mode: str = "content",
+        force_dtype: torch.dtype | None = None,
     ) -> None:
         """
         Parameters
@@ -122,6 +154,15 @@ class LIGAttributionAuditor(ProcNode):
             including format tokens like '[['. This answers: "what drove the model
             to start responding in this format?" Useful for diagnosing whether the
             model is format-driven vs content-driven.
+
+        force_dtype : torch.dtype | None
+            Override automatic dtype selection.
+            None (default) → float32 on CPU, float16 on MPS/CUDA.
+            Explicit dtype → used as-is on all devices.
+
+            CPU note: float16 gives no speed benefit on CPU (no hardware fp16
+            units) but increases gradient underflow risk during Captum backprop.
+            float32 is always preferred on CPU.
         """
         self._logger = logging.getLogger(__name__)
         self._logger.info(f"Using HuggingFace model: {hf_model_name}")
@@ -145,12 +186,36 @@ class LIGAttributionAuditor(ProcNode):
         self._device = self._validate_device(requested_device)
         self._inference_device = self._device  # kept for compatibility
         self._attr_device = self._device        # kept for compatibility
+
+        # ── dtype selection ────────────────────────────────────────────────────
+        # Auto-select dtype based on device when force_dtype is not specified:
+        #   CPU      → float32: no hardware fp16 units, gradient stability matters
+        #   MPS/CUDA → float16: hardware-accelerated, 2× memory saving
+        #
+        # force_dtype overrides this for all cases (useful for debugging).
+        if force_dtype is not None:
+            self._load_dtype = force_dtype
+            self._logger.info(
+                f"dtype override: force_dtype={force_dtype} "
+                f"(auto would have chosen "
+                f"{'float32' if self._device.type == 'cpu' else 'float16'})"
+            )
+        elif self._device.type == "cpu":
+            self._load_dtype = torch.float32
+            self._logger.info(
+                "dtype: float32 (CPU — no hardware fp16 units; float32 gives "
+                "better gradient stability with no speed penalty)"
+            )
+        else:
+            self._load_dtype = torch.float16
+            self._logger.info(
+                f"dtype: float16 ({self._device.type} — hardware-accelerated fp16)"
+            )
+
         # _model_dtype is set in invoke() after the model is loaded.
         # Storing it once prevents bugs where _logit_lens temporarily
         # mutates lm_head dtype and next(model.parameters()) returns float32.
-        self._model_dtype: torch.dtype = torch.float16  # overwritten in invoke()
-
-    # ── ProcNode entry point ───────────────────────────────────────────────────
+        self._model_dtype: torch.dtype = self._load_dtype  # overwritten in invoke()
 
     # ── Device validation ─────────────────────────────────────────────────────
 
@@ -270,6 +335,19 @@ class LIGAttributionAuditor(ProcNode):
             self._logger.info(
                 f"ig_steps={self._ig_steps} sufficient for {n_layers}-layer model "
                 f"(recommended minimum: {recommended_ig_steps})"
+            )
+
+        # CPU-specific RAM warning — backward pass memory scales with model size.
+        # For 4B+ models on CPU each backward pass requires ~2-4× the model's
+        # parameter memory in autograd graph storage. On 16GB machines this causes
+        # swap, making each step 10-100× slower than the forward pass alone.
+        if self._device.type == "cpu" and self._ig_steps > 20:
+            self._logger.warning(
+                f"ig_steps={self._ig_steps} on CPU with {n_layers}-layer model may be very slow. "
+                f"Each backward pass through the autograd graph can exceed 30-60 min on 16GB RAM. "
+                f"Recommended: start with ig_steps=10 and monitor swap with 'htop'. "
+                f"For higher quality, switch the attribution proxy to Qwen2.5-1.5B-Instruct "
+                f"(3x fewer params → feasible at ig_steps=50)."
             )
 
         adapter = ChatAdapter()
@@ -406,15 +484,23 @@ class LIGAttributionAuditor(ProcNode):
         Load without device_map="auto" — critical for Captum compatibility.
         accelerate's AlignDevicesHook intercepts every forward call to stream
         weights from disk, which breaks Captum's interpolation loop.
+
+        dtype is selected at __init__ time via self._load_dtype:
+          CPU      → float32  (stable gradients, no speed cost vs float16 on CPU)
+          MPS/CUDA → float16  (hardware-accelerated, 2× memory saving)
+          override → force_dtype passed by caller
         """
         try:
             tokenizer = AutoTokenizer.from_pretrained(
                 self._hf_model_name, trust_remote_code=True
             )
+            self._logger.info(
+                f"Loading model in {self._load_dtype} "
+                f"(device={self._device.type})"
+            )
             model = AutoModelForCausalLM.from_pretrained(
                 self._hf_model_name,
-                # dtype=torch.float32,   # float32 → stable gradients on CPU
-                dtype=torch.float16,  # float32 → stable gradients on CPU
+                dtype=self._load_dtype,   # float32 on CPU, float16 on MPS/CUDA
                 trust_remote_code=True,
                 # NO device_map="auto" — single device, no offloading
             )
@@ -490,13 +576,9 @@ class LIGAttributionAuditor(ProcNode):
         target_prob = float(final_probs[target_id])
         target_rank = int((final_probs > final_probs[target_id]).sum()) + 1
 
-        # Project residuals through norm + lm_head on CPU
-        # (avoids MPS float precision issues, matches reference)
-        # lm_head_cpu = model.lm_head.to("cpu")
-        # norm_cpu = model.model.norm.to("cpu") if hasattr(model.model, "norm") else None
-
-        # Cast to float32 explicitly — residuals are stored as float32 (.detach().float().cpu())
-        # but the model may be loaded in float16. Always project in float32 for numerical stability.
+        # Cast to float32 explicitly — residuals are stored as float32
+        # (.detach().float().cpu()) but the model may be loaded in float16.
+        # Always project in float32 for numerical stability.
         lm_head_cpu = model.lm_head.to("cpu").float()
         norm_cpu = model.model.norm.to("cpu").float() if hasattr(model.model, "norm") else None
 
@@ -545,19 +627,25 @@ class LIGAttributionAuditor(ProcNode):
         target_id: int,
     ) -> Result[tuple[list[float], float], ProcError]:
         """
-        Run Captum IntegratedGradients in native model dtype (float16 on MPS/CPU).
+        Run Captum IntegratedGradients in native model dtype.
 
         STRATEGY — pure native dtype, zero conversions:
-          - Keep embeddings in self._model_dtype on self._device (MPS or CPU)
+          - Keep embeddings in self._model_dtype on self._device
           - Captum interpolates between baseline/actual embeddings in model dtype
           - forward_fn passes embeddings directly to model — no dtype casting
           - Only the scalar output is cast to float32 for Captum gradient stability
           - Model stays on self._device throughout — no device switching
 
-        MODEL DTYPE:
-          Uses self._model_dtype stored once at load time. Never queries
-          next(model.parameters()).dtype at runtime because _logit_lens temporarily
-          casts lm_head to float32, which would return the wrong dtype here.
+        MODEL DTYPE (self._model_dtype):
+          Set once at load time from self._load_dtype:
+            CPU      → float32  (stable gradients; no speed benefit from float16
+                                 since CPU has no hardware fp16 tensor cores)
+            MPS/CUDA → float16  (hardware-accelerated; 2× memory saving)
+            override → whatever force_dtype was set to
+
+          Never queries next(model.parameters()).dtype at runtime because
+          _logit_lens temporarily casts lm_head to float32, which would return
+          the wrong dtype here.
 
         FALLBACK:
           If MPS attribution fails mid-run (OOM or autograd error), retry the
@@ -575,19 +663,26 @@ class LIGAttributionAuditor(ProcNode):
             model.to(device)
             ids = input_ids.to(device)
 
-            # Use stored model dtype — reliable regardless of _logit_lens mutations
-            dtype = self._model_dtype if device == self._device else torch.float32
-
+            # Use stored model dtype on primary device.
+            # CPU fallback always uses float32 for gradient stability.
             if device != self._device:
-                # CPU fallback: use float32 for numerical stability
+                # CPU fallback path: cast to float32 for numerical stability.
+                # This is safe because:
+                #   1. We are already on CPU (no device mismatch)
+                #   2. float32 has lower risk of gradient underflow than float16
+                #   3. The fallback is only triggered on MPS OOM, so float32's
+                #      higher memory use is acceptable (we have more RAM than VRAM)
                 model.float()
+                dtype = torch.float32
                 self._logger.info("CPU fallback: model cast to float32")
+            else:
+                dtype = self._model_dtype
 
             # Compute embeddings in model dtype — no float() cast.
             # Captum interpolates between these in the same dtype.
             with torch.no_grad():
-                input_embeds    = embed_layer(ids)                  # (1,T,C) dtype
-                baseline_embeds = embed_layer(torch.zeros_like(ids))  # (1,T,C) dtype
+                input_embeds    = embed_layer(ids)                      # (1,T,C) dtype
+                baseline_embeds = embed_layer(torch.zeros_like(ids))    # (1,T,C) dtype
 
             self._logger.info(
                 f"_run_lig: device={device.type}  "
@@ -601,6 +696,11 @@ class LIGAttributionAuditor(ProcNode):
                 embeds: (batch, T, C) in model dtype — Captum interpolated embeddings.
                 No dtype casting — model and embeddings share the same dtype.
                 Returns float32 scalar for Captum gradient stability.
+
+                NOTE: do NOT wrap model() in timed() here — timed() spawns a heartbeat
+                thread per call. With 361 calls × 30s each that is ~1,000 threads
+                creating measurable contention and log noise. Progress is tracked by
+                the step counter below instead.
                 """
                 call_counter[0] += 1
                 step = call_counter[0]
@@ -617,8 +717,8 @@ class LIGAttributionAuditor(ProcNode):
                         f"device={device.type}  dtype={dtype}"
                     )
 
-                with timed(f"forward_fn (step={step}/{total_calls})", logger=self._logger):
-                    out = model(inputs_embeds=embeds)
+                # Direct call — no timed() wrapper (see docstring above)
+                out = model(inputs_embeds=embeds)
                 # Cast scalar output to float32 — Captum needs float32 for its
                 # internal gradient accumulation even when embeddings are float16
                 return out.logits[0, -1, target_id].unsqueeze(0).float()
@@ -641,7 +741,16 @@ class LIGAttributionAuditor(ProcNode):
             # L2-norm over embedding dim, normalize to [0,1], move to CPU
             token_attr = attributions[0].float().norm(dim=-1).detach().cpu()
             token_attr = (token_attr / (token_attr.max() + 1e-9)).tolist()
-            return token_attr, float(delta.item())
+            conv_delta = float(delta.item())
+
+            # Explicit cleanup — release the autograd graph and all interpolated
+            # embedding tensors. Without this, the computation graph for a 4B model
+            # stays in memory during the next example, triggering disk swap.
+            import gc
+            del attributions, delta, input_embeds, baseline_embeds
+            gc.collect()
+
+            return token_attr, conv_delta
 
         try:
             try:

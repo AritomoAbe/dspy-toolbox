@@ -1,7 +1,10 @@
 import logging
+import threading
 from pathlib import Path
 
 import dspy
+import psutil
+import torch
 from returns.result import Result
 
 from proc.base.base_llm import BaseLLMConfig, MainModelNames
@@ -27,27 +30,50 @@ class PromptAttributionTestSuite(TestSuite):
         llm = MeetingInviteLLM(config=config, optimized_path=optimized_path)
         scorer = MeetingInviteScoreExtractor()
 
-        h_model_name = "Qwen/Qwen3-4B-Instruct-2507"
+        # h_model_name = "Qwen/Qwen3-4B-Instruct-2507"
+        h_model_name = "Qwen/Qwen2.5-1.5B-Instruct"
         nodes: list[ProcNode] = [
             LIGAttributionAuditor(
                 dataset=dataset,
                 llm=llm,
                 scorer=scorer,
                 hf_model_name=h_model_name,
-                ig_steps=360,
-                attr_device="cpu"
+                ig_steps=36,
+                attr_device="cpu",
+                force_dtype=torch.float32,
             ),
         ]
 
         super().__init__(nodes)
 
     def run(self) -> Result[ProcScore, ProcError]:
+        stop = threading.Event()
+
+        def _watch_swap():
+            baseline = psutil.swap_memory().used
+            while not stop.is_set():
+                s = psutil.swap_memory()
+                v = psutil.virtual_memory()
+                delta = (s.used - baseline) / 1024 ** 2
+                if delta > 200:  # alert after 200 MB new swap
+                    logging.warning(
+                        f"SWAP +{delta:.0f} MB | "
+                        f"RAM free: {v.available / 1024 ** 2:.0f} MB | "
+                        f"RAM used: {v.percent:.0f}%"
+                    )
+                stop.wait(10)
+
+        watcher = threading.Thread(target=_watch_swap, daemon=True)
+        watcher.start()
+
         original_cache = dspy.settings.lm.cache
         dspy.settings.lm.cache = False
         try:  # noqa: WPS501
             return super().run()
         finally:
             dspy.settings.lm.cache = original_cache
+            stop.set()
+            watcher.join()
 
 
 def _main() -> None:
