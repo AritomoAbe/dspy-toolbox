@@ -827,7 +827,9 @@ class LIGAttributionAuditor(ProcNode):
             return top1_id, top1_tok
 
         # "content" mode — skip format/whitespace tokens
-        current_ids = ids
+        next_tensor = torch.tensor([[top1_id]], device=self._inference_device)
+        current_ids = torch.cat([ids, next_tensor], dim=1)
+
         for step in range(max_skip_steps):
             next_id = int(model(input_ids=current_ids).logits[0, -1].argmax())
             next_tok = tokenizer.decode([next_id])

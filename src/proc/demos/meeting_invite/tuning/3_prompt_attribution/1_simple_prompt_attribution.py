@@ -38,7 +38,7 @@ class PromptAttributionTestSuite(TestSuite):
                 llm=llm,
                 scorer=scorer,
                 hf_model_name=h_model_name,
-                ig_steps=36,
+                ig_steps=360,
                 attr_device="cpu",
                 force_dtype=torch.float32,
             ),
