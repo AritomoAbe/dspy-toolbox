@@ -39,7 +39,9 @@ pytest
 
 3. **Strict type annotations** — every function and method must have a complete type signature: all parameters annotated (including `self` is exempt, but all others must be typed) and a return type declared. No `def foo(x)` or `def foo() -> None` with untyped parameters. This is enforced by mypy (`disallow_untyped_defs = True`, `disallow_incomplete_defs = True`).
 
-4. **Instrument all slow operations with `timed`** — any call that is time- or resource-intensive must be wrapped with the `timed` context manager from `proc.base.timing`. This includes, but is not limited to:
+4. **f-strings for all string formatting** — use f-strings (`f"..."`) exclusively. Never use `%`-style (`"hello %s" % name`) or `str.format()` (`"hello {}".format(name)`). This applies to log messages, error strings, and all other string construction.
+
+5. **Instrument all slow operations with `timed`** — any call that is time- or resource-intensive must be wrapped with the `timed` context manager from `proc.base.timing`. This includes, but is not limited to:
    - LLM / model inference calls (e.g. `model(...)`, `model.generate(...)`, HuggingFace `forward` passes)
    - Captum attribution passes (`lig.attribute(...)`)
    - Model loading from disk (`torch.load`, `from_pretrained`, `load_state_dict`)

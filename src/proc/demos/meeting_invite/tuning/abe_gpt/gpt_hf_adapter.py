@@ -270,15 +270,15 @@ class GptLIGAttributionAuditor:
         vocab_size: int,
         **auditor_kwargs,
     ):
-        from proc.pipeline.llm_prompt_usage_attribution.lig_attribution_auditor import (
-            LIGAttributionAuditor,
+        from proc.pipeline.llm_prompt_usage_attribution.token_attribution_auditor import (
+            TokenAttributionAuditor,
         )
         from returns.result import Success
 
         hf_model     = GPTModelAdapter(gpt_model)
         hf_tokenizer = GPTTokenizerAdapter(encode_fn, decode_fn, vocab_size)
 
-        instance = LIGAttributionAuditor(
+        instance = TokenAttributionAuditor(
             hf_model_name="custom-gpt-abe",
             **auditor_kwargs,
         )

@@ -29,27 +29,38 @@ dtype strategy
             (useful when debugging MPS precision issues).
 """
 
-import logging
+import html
+import json
 import re
 import textwrap
 import time
 from collections import defaultdict
+from pathlib import Path
 from typing import Any
 
+import matplotlib
+
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
 import torch
-from captum.attr import LayerIntegratedGradients, IntegratedGradients
+from captum.attr import IntegratedGradients
 from dspy.adapters import ChatAdapter
 from returns.pipeline import is_successful
-from returns.result import Result, Success, Failure
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from returns.result import Failure, Result, Success
 
 import dspy
 
 from proc.base.dspy_llm import DSpyLLM
 from proc.base.proc_error import ProcError
-from proc.base.proc_node import ProcNode
 from proc.base.proc_score import ProcScore
 from proc.pipeline.dataset.base_dataset import BaseDataset
+from proc.pipeline.llm_prompt_usage_attribution._hf_attribution_base import (
+    HFAttributionBase,
+    _HF_DEFAULT_CHART_SCORE_THRESHOLD,
+    _HF_DEFAULT_INTERNAL_BATCH,
+    _HF_DEFAULT_MODEL,
+)
 from proc.pipeline.llm_prompt_usage_attribution.contexts import LIGAttributionContext
 from proc.pipeline.llm_prompt_usage_attribution.models import LIGExampleResult, TokenSaliency, LayerProbe, \
     SegmentSaliency, LIGAttributionResult
@@ -57,8 +68,6 @@ from proc.pipeline.output_result_auditor.score_extractor import ScoreExtractor, 
 from proc.base.timing import timed
 
 # ── Defaults ──────────────────────────────────────────────────────────────────
-
-_DEFAULT_MODEL: str = "Qwen/Qwen2.5-1.5B-Instruct"
 
 # Steps for Captum IntegratedGradients numerical integration.
 # CRITICAL — CPU backward pass cost scales with model size and sequence length.
@@ -75,16 +84,13 @@ _DEFAULT_MODEL: str = "Qwen/Qwen2.5-1.5B-Instruct"
 # the attribution proxy does NOT need to match the inference LLM exactly.
 _DEFAULT_IG_STEPS: int = 10
 
-# internal_batch_size=1 → minimum memory; increase if you have headroom
-_DEFAULT_INTERNAL_BATCH: int = 1
-
 # Top-N global tokens to surface in the aggregate result
 _TOP_TOKEN_COUNT: int = 20
 
 # Regex to split the rendered prompt into logical segments (matches reference Panel C)
 _SEGMENT_SPLIT_PATTERN: str = r"(<\|im_start\|>|<\|im_end\|>|\[\[.*?\]\]|\n{2,})"
 
-class LIGAttributionAuditor(ProcNode):
+class TokenAttributionAuditor(HFAttributionBase):
     """
     Stage 3 — Score How the LLM Uses the Prompt (Layer Integrated Gradients).
 
@@ -132,12 +138,16 @@ class LIGAttributionAuditor(ProcNode):
         dataset: BaseDataset,
         llm: DSpyLLM[Any, Any],
         scorer: ScoreExtractor,
-        hf_model_name: str = _DEFAULT_MODEL,
+        hf_model_name: str = _HF_DEFAULT_MODEL,
         ig_steps: int = _DEFAULT_IG_STEPS,
-        internal_batch_size: int = _DEFAULT_INTERNAL_BATCH,
-        attr_device: str = "cpu",
-        target_mode: str = "content",
+        internal_batch_size: int = _HF_DEFAULT_INTERNAL_BATCH,
+        attr_device: str = 'cpu',
+        target_mode: str = 'content',
         force_dtype: torch.dtype | None = None,
+        output_dir: str | Path = 'runs/token_attribution',
+        save_html: bool = True,
+        save_plots: bool = True,
+        chart_score_threshold: float = _HF_DEFAULT_CHART_SCORE_THRESHOLD,
     ) -> None:
         """
         Parameters
@@ -164,112 +174,48 @@ class LIGAttributionAuditor(ProcNode):
             units) but increases gradient underflow risk during Captum backprop.
             float32 is always preferred on CPU.
         """
-        self._logger = logging.getLogger(__name__)
-        self._logger.info(f"Using HuggingFace model: {hf_model_name}")
+        super().__init__(
+            dataset=dataset,
+            llm=llm,
+            scorer=scorer,
+            hf_model_name=hf_model_name,
+            internal_batch_size=internal_batch_size,
+            attr_device=attr_device,
+            force_dtype=force_dtype,
+            output_dir=output_dir,
+            save_html=save_html,
+            save_plots=save_plots,
+            chart_score_threshold=chart_score_threshold,
+        )
+        self._logger.info('Using HuggingFace model: %s', hf_model_name)
 
-        if target_mode not in ("content", "top1"):
+        if target_mode not in ('content', 'top1'):
             raise ValueError(f"target_mode must be 'content' or 'top1', got {target_mode!r}")
         self._target_mode = target_mode
-
-        self._dataset = dataset
-        self._llm = llm
-        self._scorer = scorer
-        self._hf_model_name = hf_model_name
         self._ig_steps = ig_steps
-        self._internal_batch_size = internal_batch_size
 
-        # Device selection with MPS autograd validation.
-        # MPS (Apple Silicon GPU) gives 5-10x speedup for float16 forward passes.
-        # _validate_device tests MPS autograd at init time and falls back to CPU
-        # silently if MPS is unavailable or autograd is broken in this PyTorch build.
-        requested_device = torch.device(attr_device)
-        self._device = self._validate_device(requested_device)
-        self._inference_device = self._device  # kept for compatibility
-        self._attr_device = self._device        # kept for compatibility
-
-        # ── dtype selection ────────────────────────────────────────────────────
-        # Auto-select dtype based on device when force_dtype is not specified:
-        #   CPU      → float32: no hardware fp16 units, gradient stability matters
-        #   MPS/CUDA → float16: hardware-accelerated, 2× memory saving
-        #
-        # force_dtype overrides this for all cases (useful for debugging).
-        if force_dtype is not None:
-            self._load_dtype = force_dtype
-            self._logger.info(
-                f"dtype override: force_dtype={force_dtype} "
-                f"(auto would have chosen "
-                f"{'float32' if self._device.type == 'cpu' else 'float16'})"
-            )
-        elif self._device.type == "cpu":
-            self._load_dtype = torch.float32
-            self._logger.info(
-                "dtype: float32 (CPU — no hardware fp16 units; float32 gives "
-                "better gradient stability with no speed penalty)"
-            )
-        else:
-            self._load_dtype = torch.float16
-            self._logger.info(
-                f"dtype: float16 ({self._device.type} — hardware-accelerated fp16)"
-            )
+        # Aliases kept for readability — both equal self._device (single-device strategy)
+        self._inference_device = self._device
+        self._attr_device = self._device
 
         # _model_dtype is set in invoke() after the model is loaded.
         # Storing it once prevents bugs where _logit_lens temporarily
         # mutates lm_head dtype and next(model.parameters()) returns float32.
         self._model_dtype: torch.dtype = self._load_dtype  # overwritten in invoke()
 
-    # ── Device validation ─────────────────────────────────────────────────────
-
-    def _validate_device(self, requested: torch.device) -> torch.device:
-        """
-        Validate the requested device for Captum gradient computation.
-
-        MPS (Apple Silicon GPU) gives 5-10x speedup for float16 forward passes.
-        We smoke-test MPS autograd at init time and fall back to CPU silently if
-        it fails — avoids surprises after waiting minutes for compilation.
-        """
-        if requested.type != "mps":
-            self._logger.info(f"Attribution device: {requested}")
-            return requested
-
-        if not torch.backends.mps.is_available():
-            self._logger.warning("MPS requested but not available. Falling back to CPU.")
-            return torch.device("cpu")
-
-        try:
-            _t = torch.ones(4, 4, requires_grad=True, device="mps")
-            _loss = (_t * _t).sum()
-            _loss.backward()
-            del _t, _loss
-            torch.mps.empty_cache()
-            self._logger.info(
-                "MPS autograd validated — using MPS for attribution. "
-                "Expected speedup: 5-10x over CPU for float16 forward passes."
-            )
-            return requested
-        except Exception as e:
-            self._logger.warning(
-                f"MPS autograd validation failed ({e}). Falling back to CPU."
-            )
-            return torch.device("cpu")
-
     def invoke(self) -> Result[ProcScore, ProcError]:
-        predictors = self._llm.predictors()
-        if not predictors:
-            return Failure(ProcError(
-                "No predictors found in LLM — cannot access compiled prompt structure"
-            ))
-
-        predictor = predictors[0]
+        predictor_result = self._get_predictor()
+        if not is_successful(predictor_result):
+            return predictor_result
+        predictor = predictor_result.unwrap()
 
         # Load HuggingFace proxy model ─────────────────────────────────────────
-        self._logger.info(f"Loading HuggingFace proxy: {self._hf_model_name}")
         self._logger.info(
-            f"inference_device={self._inference_device}  "
-            f"attr_device={self._attr_device}"
+            'Loading HuggingFace proxy: %s  inference_device=%s  attr_device=%s',
+            self._hf_model_name, self._inference_device, self._attr_device,
         )
 
-        with timed("_load_model", logger=self._logger):
-            load_result = self._load_model()
+        load_result = self._load_model()
         if not is_successful(load_result):
             return load_result
 
@@ -369,16 +315,7 @@ class LIGAttributionAuditor(ProcNode):
                 return Failure(ProcError(f"Cannot score example[{index}]"))
 
             # Render the compiled DSPy prompt (exact chat-template text) ───────
-            dspy_msgs = adapter.format(
-                signature=predictor.signature,
-                demos=list(predictor.demos),
-                inputs=example.inputs(),
-            )
-            prompt_text = tokenizer.apply_chat_template(
-                dspy_msgs,
-                tokenize=False,
-                add_generation_prompt=True,
-            )
+            prompt_text = self._render_prompt(adapter, predictor, example, tokenizer)
 
             # Tokenize ─────────────────────────────────────────────────────────
             inputs_enc = tokenizer(prompt_text, return_tensors="pt")
@@ -469,47 +406,106 @@ class LIGAttributionAuditor(ProcNode):
             )
             self._log_example(example_result)
 
+            example_dir = self._output_dir / f'example_{index:03d}'
+            example_dir.mkdir(parents=True, exist_ok=True)
+            self._save_lig_example_artifacts(example_dir, example_result)
+
         result = self._aggregate(example_results)
         self._log_summary(result)
+
+        summary_path = self._output_dir / 'summary.json'
+        with open(summary_path, 'w', encoding='utf-8') as fh:
+            json.dump(result.model_dump(), fh, ensure_ascii=False, indent=2)
+        self._logger.info(f'LIG attribution artifacts saved to {self._output_dir}')
 
         return Success(ProcScore(
             value=self._score(),
             context=LIGAttributionContext(result),
         ))
 
+    # ── Disk artifacts ────────────────────────────────────────────────────────
+
+    def _save_lig_example_artifacts(self, example_dir: Path, er: LIGExampleResult) -> None:
+        """Save JSON report, heatmap PNG, and HTML report for one example."""
+        report_path = example_dir / 'report.json'
+        with open(report_path, 'w', encoding='utf-8') as fh:
+            json.dump(er.model_dump(), fh, ensure_ascii=False, indent=2)
+
+        if self._save_plots:
+            self._plot_lig_heatmap(er, example_dir / 'prompt_heatmap.png')
+
+        if self._save_html:
+            self._write_lig_html_report(er, example_dir / 'report.html')
+
+    def _plot_lig_heatmap(self, er: LIGExampleResult, out_path: Path) -> None:
+        """Plot per-token saliency as a 1-D heatmap, filtered by chart_score_threshold."""
+        scores = torch.tensor([ts.saliency for ts in er.token_saliencies], dtype=torch.float32)
+        max_abs = float(scores.abs().max().item()) if scores.numel() else 1.0
+        keep = self._apply_chart_threshold(scores)
+        if not keep:
+            self._logger.warning(f'_plot_lig_heatmap: all tokens filtered by threshold={self._chart_score_threshold}, skipping')
+            return
+        filtered_scores = scores[keep].unsqueeze(0)
+        filtered_labels = [er.token_saliencies[i].token for i in keep]
+        fig_w = max(12, min(0.35 * len(keep), 40))
+        fig, ax = plt.subplots(figsize=(fig_w, 3.5))
+        im = ax.imshow(filtered_scores.numpy(), aspect='auto', cmap='RdBu_r', vmin=0.0, vmax=max_abs)
+        ax.set_yticks([])
+        ax.set_xticks(range(len(keep)))
+        ax.set_xticklabels(filtered_labels, rotation=90, fontsize=8)
+        ax.set_title(f'Token saliency (LIG) — example {er.example_index} (threshold={self._chart_score_threshold})')
+        fig.colorbar(im, ax=ax, shrink=0.8)
+        fig.tight_layout()
+        fig.savefig(out_path, dpi=180)
+        plt.close(fig)
+
+    def _write_lig_html_report(self, er: LIGExampleResult, out_path: Path) -> None:
+        """Write a self-contained HTML report: colored token spans + segment + layer tables."""
+        max_abs = max((ts.saliency for ts in er.token_saliencies), default=1.0) or 1.0
+        prompt_html = ' '.join(
+            self._make_html_span(ts.token, ts.saliency, max_abs, ts.segment_label)
+            for ts in er.token_saliencies
+        )
+        seg_rows = '\n'.join(
+            f'<tr><td>{html.escape(s.label)}</td><td>{s.avg_saliency:.4f}</td>'
+            f'<td>{s.token_count}</td><td>{html.escape(s.text_preview)}</td></tr>'
+            for s in er.segment_saliencies
+        )
+        layer_rows = '\n'.join(
+            f'<tr><td>{p.layer_index}</td><td>{p.target_rank}</td><td>{p.target_prob:.4f}</td>'
+            f'<td>{"★ first rank-1" if p.first_top1 else ""}</td></tr>'
+            for p in er.layer_probes
+        )
+        body = f'''<!doctype html>
+<html><head><meta charset="utf-8"><title>LIG attribution report</title>
+<style>
+body {{ font-family: Arial, sans-serif; margin: 24px; }}
+.token {{ padding: 2px 4px; margin: 1px; border-radius: 4px; display: inline-block; }}
+.meta {{ margin-bottom: 16px; }}
+table {{ border-collapse: collapse; margin-top: 16px; }}
+td, th {{ border: 1px solid #ddd; padding: 6px 10px; }}
+small {{ color: #555; }}
+</style></head><body>
+<h1>LIG attribution — example {er.example_index}</h1>
+<div class="meta">
+<p><strong>Target token:</strong> {html.escape(er.target_token)} &nbsp;
+   <strong>rank:</strong> #{er.target_rank} &nbsp;
+   <strong>prob:</strong> {er.target_prob:.4f} &nbsp;
+   <strong>convergence delta:</strong> {er.convergence_delta:.4f}</p>
+<p><strong>Top-1 reached layer:</strong> {er.top1_reached_layer}</p>
+</div>
+<h2>Prompt tokens (saliency)</h2>
+<div>{prompt_html}</div>
+<h2>Panel C — Segment saliency</h2>
+<table><thead><tr><th>Segment</th><th>Avg saliency</th><th>Tokens</th><th>Preview</th></tr></thead>
+<tbody>{seg_rows}</tbody></table>
+<h2>Panel B — Layer probes</h2>
+<table><thead><tr><th>Layer</th><th>Rank</th><th>Prob</th><th>Note</th></tr></thead>
+<tbody>{layer_rows}</tbody></table>
+</body></html>'''
+        out_path.write_text(body, encoding='utf-8')
+
     # ── Model loading ──────────────────────────────────────────────────────────
-
-    def _load_model(self) -> Result[tuple, ProcError]:
-        """
-        Load without device_map="auto" — critical for Captum compatibility.
-        accelerate's AlignDevicesHook intercepts every forward call to stream
-        weights from disk, which breaks Captum's interpolation loop.
-
-        dtype is selected at __init__ time via self._load_dtype:
-          CPU      → float32  (stable gradients, no speed cost vs float16 on CPU)
-          MPS/CUDA → float16  (hardware-accelerated, 2× memory saving)
-          override → force_dtype passed by caller
-        """
-        try:
-            tokenizer = AutoTokenizer.from_pretrained(
-                self._hf_model_name, trust_remote_code=True
-            )
-            self._logger.info(
-                f"Loading model in {self._load_dtype} "
-                f"(device={self._device.type})"
-            )
-            model = AutoModelForCausalLM.from_pretrained(
-                self._hf_model_name,
-                dtype=self._load_dtype,   # float32 on CPU, float16 on MPS/CUDA
-                trust_remote_code=True,
-                # NO device_map="auto" — single device, no offloading
-            )
-            model.eval()
-            return Success((model, tokenizer))
-        except Exception as e:
-            return Failure(ProcError(
-                f"Failed to load '{self._hf_model_name}': {e}"
-            ))
 
     def _get_embed_layer(self, model: Any) -> torch.nn.Module | None:
         """Locate embed_tokens for common HuggingFace CausalLM architectures."""

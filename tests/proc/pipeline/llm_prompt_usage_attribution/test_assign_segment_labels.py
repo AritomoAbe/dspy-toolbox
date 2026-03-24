@@ -28,10 +28,10 @@ def _make_auditor():
 
     # Build a minimal stand-in if the real import is unavailable in test env
     try:
-        from proc.pipeline.llm_prompt_usage_attribution.lig_attribution_auditor import (
-            LIGAttributionAuditor,
+        from proc.pipeline.llm_prompt_usage_attribution.token_attribution_auditor import (
+            TokenAttributionAuditor,
         )
-        auditor = object.__new__(LIGAttributionAuditor)
+        auditor = object.__new__(TokenAttributionAuditor)
         import logging
         auditor._logger = logging.getLogger("test")
         return auditor
