@@ -80,6 +80,5 @@ def _main() -> None:
     dataset = TrainingSetDataset(Path(__file__).parent.parent / 'dataset' / 'testset_edge_cases_emails_7.jsonl')
     PromptAttributionTestSuite(dataset).run()
 
-
 if __name__ == '__main__':
     _main()

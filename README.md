@@ -15,8 +15,8 @@ Each stage answers a different question:
 |---|---|
 | 1. Score the Training Set | Is my data good enough to optimize against? |
 | 2. Score Actual Outputs | Is my compiled prompt stable and accurate? |
-| 3. Score How the LLM Uses the Prompt | Is the prompt working for the right reasons? (`SimplePromptAttributionAuditor` / `LIGAttributionAuditor`) |
-| 4. LoRA Fine-tuning + Re-scoring | Did fine-tuning internalize the task or overfit? |
+| 3. Score How the LLM Uses the Prompt | Is the prompt working for the right reasons? (`SimplePromptAttributionAuditor` / `TokenAttributionAuditor` / `PromptAttributionNode`) |
+| 4. LoRA Fine-tuning + Re-scoring | Did fine-tuning internalize the task or overfit? (`LoRAFineTuningNode`) |
 
 ---
 
@@ -87,7 +87,7 @@ src/proc/demos/meeting_invite/tuning/2_bootstrap/3_audit_bootstrap_tuning.py
 
 ## Stage 3 — Score How the LLM Uses the Prompt
 
-Two complementary auditors answer the same question from different angles.
+Three complementary auditors answer the same question from different angles.
 
 ### 3a. Leave-one-out Perturbation (`SimplePromptAttributionAuditor`)
 
@@ -101,40 +101,74 @@ Masks each logical prompt segment (INSTRUCTION, each DEMO) one at a time and re-
 
 When ablating a segment causes unparseable output, `score_ablated` is treated as `0.0` (the segment was critical).
 
-### 3b. Captum LayerIntegratedGradients (`LIGAttributionAuditor`)
+### 3b. Token Attribution (`TokenAttributionAuditor`)
 
-Gradient-based token attribution against a local PyTorch model. Produces a three-panel analysis:
+Gradient-based token attribution using Captum `LayerIntegratedGradients`. Requires a local HuggingFace model. Produces a three-panel analysis per example:
 
 | Panel | What it shows |
 |---|---|
-| A — Token Saliency | Per-token L2 norm of integrated gradients |
+| A — Token Saliency | Per-token L2 norm of integrated gradients — which tokens push the model toward its answer |
 | B — Logit Lens | Target-token rank per decoder layer (forward hooks) — shows where the model "commits" to its answer |
 | C — Segment Attribution | Token saliency aggregated per DSPy prompt segment (INSTRUCTION, DEMO, INPUT) |
 
-Requires a local HuggingFace model (`pip install torch transformers captum`). Default attribution model: `Qwen/Qwen2.5-1.5B-Instruct`.
+Default attribution model: `Qwen/Qwen2.5-1.5B-Instruct`.
 
 **Demo entry points:**
 ```
-src/proc/demos/meeting_invite/tuning/3_prompt_attribution/1_simple_prompt_attribution.py
-    → LIGAttributionAuditor against Qwen/Qwen2.5-1.5B-Instruct
+src/proc/demos/meeting_invite/tuning/3_prompt_attribution/1_token_attribution.py
+    → TokenAttributionAuditor against Qwen/Qwen2.5-1.5B-Instruct
 
-src/proc/demos/meeting_invite/tuning/3_prompt_attribution/2_simple_prompt_attribution_abe_gpt.py
-    → LIGAttributionAuditor wired to abe-gpt (custom GPT trained from scratch, served locally)
+src/proc/demos/meeting_invite/tuning/3_prompt_attribution/2_token_attribution_abe_gpt.py
+    → TokenAttributionAuditor wired to abe-gpt (custom GPT trained from scratch, served locally)
+```
+
+### 3c. Prompt Attribution (`PromptAttributionNode`)
+
+Also Captum `LayerIntegratedGradients`, but attributes at generation time: for each generated output token, scores every prompt token's contribution. Produces per-step artifacts:
+
+| Artifact | What it shows |
+|---|---|
+| `prompt_heatmap.png` | Aggregated prompt-token saliency across all generated steps — highlights the prompt regions that drove the full answer |
+| `step_matrix.png` | Step × prompt token attribution matrix — shows how the model's attention to each prompt token shifts as it generates each output token |
+| `report.html` | Interactive HTML report combining heatmap, step matrix, and top positive/negative tokens per region (INSTRUCTION, EMAIL) |
+
+Classifies each prompt token into regions (`CONTROL`, `INSTRUCTION`, `EMAIL`, `OTHER`) and surfaces the top-K positive and negative contributors per region.
+
+**Demo entry point:**
+```
+src/proc/demos/meeting_invite/tuning/3_prompt_attribution/3_prompt_attribution_test_suite.py
+    → PromptAttributionNode against Qwen/Qwen2.5-1.5B-Instruct
 ```
 
 ---
 
-## Stage 4 — LoRA Fine-tuning + Re-scoring with Captum
+## Stage 4 — LoRA Fine-tuning + Re-scoring (`LoRAFineTuningNode`)
 
-> **Planned**
+Once prompt optimization has been pushed to its limits, move to lightweight fine-tuning with LoRA. `LoRAFineTuningNode` wraps the full training loop and wires it directly into the pipeline:
 
-Once prompt optimization has been pushed to its limits, move to lightweight fine-tuning with LoRA. Then reapply Captum attribution to the fine-tuned weights:
+1. Renders each dataset example into a supervised `(prompt, completion)` pair using the compiled DSPy `ChatAdapter`.
+2. Applies PEFT LoRA adapters to a local HuggingFace `CausalLM`.
+3. Trains for `n_epochs` with AdamW + linear-warmup / cosine-decay schedule.
+4. Evaluates pass rate against the scorer after each epoch.
+5. Saves adapter weights and a structured `summary.json` + `training_log.json` to `output_dir`.
+6. Optionally runs `PromptAttributionNode` on a probe example **before** and **after** fine-tuning and writes a side-by-side `comparison.html` — so you can see directly whether the new weights changed how the model uses the prompt.
 
-- Check whether the new weights genuinely internalized the task structure
-- Detect overfitting to surface patterns in the training set
-- Compare token attribution before and after fine-tuning to understand what changed
+**Artifacts written to `output_dir/`:**
 
-This closes the loop between prompt-level optimization (Stages 1–3) and weight-level optimization.
+| Path | Contents |
+|---|---|
+| `adapter/` | PEFT adapter weights (`save_pretrained`) |
+| `training_log.json` | Per-step loss |
+| `summary.json` | Full run summary: hyperparams, epoch metrics, pass-rate delta |
+| `attribution_comparison/` | Before/after attribution artifacts + `comparison.html` (when enabled) |
+
+Default fine-tuning model: `Qwen/Qwen2.5-1.5B-Instruct`. LoRA targets `q_proj` and `v_proj` (Qwen-2.5 attention projections).
+
+**Demo entry point:**
+```
+src/proc/demos/meeting_invite/tuning/4_fine_tuning/4_fine_tuning_test_suite.py
+    → LoRAFineTuningNode on testset_edge_cases_emails_7.jsonl
+```
 
 ---
 
