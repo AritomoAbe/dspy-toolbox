@@ -9,6 +9,7 @@ from typing import Any
 import torch
 from dspy.adapters import ChatAdapter
 from returns.result import Failure, Result, Success
+from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from proc.base.dspy_llm import DSpyLLM
@@ -61,6 +62,7 @@ class HFAttributionBase(ProcNode):
         save_html: bool = True,
         save_plots: bool = True,
         chart_score_threshold: float = _HF_DEFAULT_CHART_SCORE_THRESHOLD,
+        peft_model_id: str | None = None,
     ) -> None:
         self._logger = logging.getLogger(type(self).__module__)
         self._dataset = dataset
@@ -87,6 +89,7 @@ class HFAttributionBase(ProcNode):
             self._load_dtype = torch.float16
             self._logger.info('dtype: float16 (%s — hardware-accelerated fp16)', self._device.type)
 
+        self._peft_model_id = peft_model_id
         self._save_html = save_html
         self._save_plots = save_plots
         self._chart_score_threshold = chart_score_threshold
@@ -114,7 +117,11 @@ class HFAttributionBase(ProcNode):
                     dtype=self._load_dtype,
                     trust_remote_code=True,
                 )
-            model.eval()
+            peft_id = self._peft_model_id
+            if peft_id:
+                with timed(f'_load_peft_adapter {peft_id}', logger=self._logger):
+                    model = PeftModel.from_pretrained(model, peft_id)  # type: ignore[assignment]
+            model.eval()  # type: ignore[no-untyped-call]
             return Success((model, tokenizer))
         except Exception as e:
             return Failure(ProcError(f"Failed to load '{self._hf_model_name}': {e}"))
@@ -135,7 +142,7 @@ class HFAttributionBase(ProcNode):
             return torch.device('cpu')
         try:
             t = torch.ones((2, 2), device='mps', requires_grad=True)
-            (t * t).sum().backward()
+            (t * t).sum().backward()  # type: ignore[no-untyped-call]
             del t
             torch.mps.empty_cache()
             self._logger.info(
@@ -191,4 +198,7 @@ class HFAttributionBase(ProcNode):
             color = f'rgba(0, 128, 0, {0.12 + 0.58 * strength:.3f})'
         else:
             color = f'rgba(200, 0, 0, {0.12 + 0.58 * strength:.3f})'
-        return f'<span class="token" title="region={region} score={score:+.6f}" style="background:{color}">{disp}</span>'
+        return (
+            f'<span class="token" title="region={region} score={score:+.6f}"'
+            f' style="background:{color}">{disp}</span>'
+        )

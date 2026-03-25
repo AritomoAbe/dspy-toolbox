@@ -23,7 +23,7 @@ import dspy
 
 from proc.base.dspy_llm import DSpyLLM
 from proc.base.proc_error import ProcError
-from proc.base.proc_score import ProcScore
+from proc.base.proc_score import ProcScore, ProcScoreContext
 from proc.base.timing import timed
 from proc.pipeline.dataset.base_dataset import BaseDataset
 from proc.pipeline.llm_prompt_usage_attribution._hf_attribution_base import (
@@ -89,7 +89,7 @@ class ExampleAttributionReport:
 
 
 @dataclass(slots=True)
-class PromptAttributionSummary:
+class PromptAttributionSummary(ProcScoreContext):
     hf_model_name: str
     output_dir: str
     example_count: int
@@ -125,6 +125,7 @@ class PromptAttributionNode(HFAttributionBase):
         top_k_tokens: int = 12,
         truncate_to_model_max_length: bool = True,
         chart_score_threshold: float = _HF_DEFAULT_CHART_SCORE_THRESHOLD,
+        peft_model_id: str | None = None,
     ) -> None:
         super().__init__(
             dataset=dataset,
@@ -138,6 +139,7 @@ class PromptAttributionNode(HFAttributionBase):
             save_html=save_html,
             save_plots=save_plots,
             chart_score_threshold=chart_score_threshold,
+            peft_model_id=peft_model_id,
         )
         self._generation_max_new_tokens = generation_max_new_tokens
         self._ig_steps = ig_steps
@@ -154,7 +156,7 @@ class PromptAttributionNode(HFAttributionBase):
 
         load_result = self._load_model()
         if not is_successful(load_result):
-            return load_result
+            return Failure(load_result.failure())
         model, tokenizer = load_result.unwrap()
         model.to(self._device)
         embed_layer = model.get_input_embeddings()

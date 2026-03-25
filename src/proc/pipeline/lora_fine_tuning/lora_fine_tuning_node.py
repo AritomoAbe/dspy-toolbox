@@ -16,11 +16,12 @@ Pipeline position
 The node:
   1. Renders each example into a supervised (prompt, completion) pair using
      the compiled DSPy ChatAdapter.
-  2. Applies PEFT LoRA adapters to the model.
-  3. Trains for ``n_epochs`` over the dataset.
-  4. Evaluates on the same dataset after each epoch using the scorer.
-  5. Saves the adapter weights and a structured run report to ``output_dir``.
-  6. Optionally runs ``PromptAttributionNode`` on a held-out probe example
+  2. Evaluates the raw base model on the dataset.
+  3. Applies PEFT LoRA adapters to the model.
+  4. Trains for ``n_epochs`` over the dataset.
+  5. Evaluates after each epoch using the scorer.
+  6. Saves the adapter weights and a structured run report to ``output_dir``.
+  7. Optionally runs ``PromptAttributionNode`` on a held-out probe example
      *before* and *after* fine-tuning and writes a side-by-side comparison
      report to ``output_dir/attribution_comparison/``.
 
@@ -34,19 +35,19 @@ Artifacts written to ``output_dir/``
 
 from __future__ import annotations
 
+import base64
 import json
 import logging
 import random
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, TypeAlias
 
-import dspy
 import torch
 from dspy.adapters import ChatAdapter
 from peft import LoraConfig, TaskType, get_peft_model
 from returns.pipeline import is_successful
 from returns.result import Failure, Result, Success
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, StoppingCriteria, StoppingCriteriaList
 
 from proc.base.dspy_llm import DSpyLLM
 from proc.base.proc_error import ProcError
@@ -57,45 +58,79 @@ from proc.pipeline.dataset.base_dataset import BaseDataset
 from proc.pipeline.llm_prompt_usage_attribution.prompt_attribution_node import (
     PromptAttributionNode,
 )
-from proc.pipeline.lora_fine_tuning.models import LoRAHyperParams, TrainingHyperParams, AttributionComparisonConfig, \
-    StepLog, EpochMetrics, LoRARunSummary, FAILURE_SCORE_THRESHOLD, STEP_LOG_PREFIX, TrainingPhase, AdapterSaveStatus
-from proc.pipeline.output_result_auditor.score_extractor import INVALID_SCORE, ScoreExtractor
+from proc.pipeline.lora_fine_tuning.models import (
+    AdapterSaveStatus,
+    AttributionComparisonConfig,
+    EpochMetrics,
+    FAILURE_SCORE_THRESHOLD,
+    LoRAHyperParams,
+    LoRARunSummary,
+    STEP_LOG_PREFIX,
+    StepLog,
+    TrainingHyperParams,
+    TrainingLogArtifact,
+    TrainingPhase,
+)
+from proc.pipeline.output_result_auditor.score_extractor import (
+    INVALID_SCORE,
+    ScoreExtractor,
+)
 
 _DEFAULT_HF_MODEL: str = "Qwen/Qwen2.5-1.5B-Instruct"
 _DEFAULT_OUTPUT_DIR: str = "runs/lora_finetuning"
+_DEFAULT_ATTR_DEVICE: str = "cpu"
+_DEFAULT_CPU_DEVICE: str = "cpu"
+_DEFAULT_CUDA_DEVICE: str = "cuda"
+_DEFAULT_MPS_DEVICE: str = "mps"
+_DEFAULT_SEED: int = 42
+_IGNORE_INDEX: int = -100
 
+_LABEL_LOAD_BASE_MODEL: str = "_load_base_model"
+_LABEL_GET_PEFT_MODEL: str = "get_peft_model"
+_LABEL_BUILD_TRAINING_PAIRS: str = "_build_training_pairs"
+_LABEL_BASELINE_EVAL: str = "_evaluate epoch=0 (baseline)"
+_LABEL_ATTRIBUTION_COMPARISON_DIR: str = "attribution_comparison"
+_LABEL_ADAPTER_DIR: str = "adapter"
+_LABEL_COMPARISON_HTML: str = "comparison.html"
+_LABEL_PROMPT_HEATMAP: str = "prompt_heatmap.png"
+_LABEL_SUMMARY_JSON: str = "summary.json"
+_LABEL_TRAINING_LOG_JSON: str = "training_log.json"
+_LABEL_UTF8: str = "utf-8"
+_LABEL_ASCII: str = "ascii"
+_LABEL_FORWARD_PASS: str = "_train_step forward"
+_LABEL_GENERATE: str = "_evaluate generate"
+_LABEL_ATTRIBUTION_SNAPSHOT: str = "attribution_snapshot phase="
+_LABEL_COMPLETED_MARKER: str = "[[ ## completed ## ]]"
+_WARMUP_START_FACTOR: float = 1e-6
+
+_TrainingPairs: TypeAlias = list[tuple[torch.Tensor, torch.Tensor]]
+
+
+def _read_png_b64(directory: Path, logger: logging.Logger) -> str:
+    """Find the first prompt heatmap under *directory* and return it base64-encoded."""
+    candidates = sorted(directory.glob(f"**/{_LABEL_PROMPT_HEATMAP}"))
+    if not candidates:
+        logger.warning(
+            f"_write_comparison_html: no {_LABEL_PROMPT_HEATMAP} found under {directory}"
+        )
+        return ""
+    return base64.b64encode(candidates[0].read_bytes()).decode(_LABEL_ASCII)
+
+
+class _CompletedMarkerStopping(StoppingCriteria):
+    def __init__(self, marker_ids: torch.Tensor) -> None:
+        self._marker_ids = marker_ids
+
+    def __call__(self, input_ids: torch.Tensor, scores: torch.Tensor, **kwargs: Any) -> bool:
+        if input_ids.shape[1] < self._marker_ids.shape[0]:
+            return False
+        return bool(
+            (input_ids[0, -self._marker_ids.shape[0]:] == self._marker_ids).all()
+        )
 
 class LoRAFineTuningNode(ProcNode):
     """
     Stage 4 — LoRA fine-tuning + attribution comparison.
-
-    Parameters
-    ----------
-    dataset:
-        Dataset to train and evaluate on.
-    llm:
-        Compiled DSPy LLM.  Used to render the chat-template prompt for each
-        example and to access the compiled predictor signature/demos.
-    scorer:
-        ScoreExtractor used to evaluate pass rate after each epoch.
-    hf_model_name:
-        HuggingFace CausalLM to fine-tune.  Should match (or be smaller than)
-        the attribution proxy model used in Stage 3.
-    output_dir:
-        Root directory for all artifacts.
-    lora:
-        LoRA adapter hyper-parameters.  Pass a custom ``LoRAHyperParams`` to
-        override defaults.
-    training:
-        Training hyper-parameters.  Pass a custom ``TrainingHyperParams`` to
-        override defaults.
-    attr_device:
-        Device for training and attribution.  Defaults to ``"cpu"``.
-    force_dtype:
-        Override automatic dtype selection (float32 on CPU, float16 on GPU).
-    attribution_comparison:
-        Configuration for the optional before/after attribution comparison run.
-        Set ``AttributionComparisonConfig(enabled=False)`` to skip.
     """
 
     _SCORE: float = 1.0
@@ -109,9 +144,10 @@ class LoRAFineTuningNode(ProcNode):
         output_dir: str | Path = _DEFAULT_OUTPUT_DIR,
         lora: Optional[LoRAHyperParams] = None,
         training: Optional[TrainingHyperParams] = None,
-        attr_device: str = "cpu",
+        attr_device: str = _DEFAULT_ATTR_DEVICE,
         force_dtype: Optional[torch.dtype] = None,
         attribution_comparison: Optional[AttributionComparisonConfig] = None,
+        seed: int = _DEFAULT_SEED,
     ) -> None:
         self._logger = logging.getLogger(__name__)
         self._dataset = dataset
@@ -122,13 +158,15 @@ class LoRAFineTuningNode(ProcNode):
         self._lora = lora or LoRAHyperParams()
         self._training = training or TrainingHyperParams()
         self._attr_cfg = attribution_comparison or AttributionComparisonConfig()
+        self._seed = seed
 
         self._device = self._resolve_device(torch.device(attr_device))
-        self._load_dtype = (
-            force_dtype
-            if force_dtype is not None
-            else (torch.float32 if self._device.type == "cpu" else torch.float16)
-        )
+        if force_dtype is None:
+            self._load_dtype: torch.dtype = (
+                torch.float32 if self._device.type == _DEFAULT_CPU_DEVICE else torch.float16
+            )
+        else:
+            self._load_dtype = force_dtype
 
         self._output_dir.mkdir(parents=True, exist_ok=True)
         self._logger.info(
@@ -136,9 +174,9 @@ class LoRAFineTuningNode(ProcNode):
             f"device={self._device}  dtype={self._load_dtype}"
         )
 
-    # ── ProcNode entry point ───────────────────────────────────────────────────
-
     def invoke(self) -> Result[ProcScore, ProcError]:
+        self._set_seed(self._seed)
+
         predictors = self._llm.predictors()
         if not predictors:
             return Failure(ProcError(
@@ -146,35 +184,28 @@ class LoRAFineTuningNode(ProcNode):
             ))
         predictor = predictors[0]
 
-        # Load model + tokenizer ───────────────────────────────────────────────
-        with timed("_load_base_model", logger=self._logger):
+        with timed(_LABEL_LOAD_BASE_MODEL, logger=self._logger):
             load_result = self._load_model()
         if not is_successful(load_result):
-            return load_result
+            return Failure(load_result.failure())
         model, tokenizer = load_result.unwrap()
 
-        # Wrap with LoRA adapters ───────────────────────────────────────────────
-        with timed("get_peft_model", logger=self._logger):
-            model = self._apply_lora(model)
-
-        # Build (prompt, completion) training pairs ────────────────────────────
-        with timed("_build_training_pairs", logger=self._logger):
+        with timed(_LABEL_BUILD_TRAINING_PAIRS, logger=self._logger):
             pairs_result = self._build_training_pairs(predictor, tokenizer)
         if not is_successful(pairs_result):
-            return pairs_result
-        training_pairs: list[tuple[torch.Tensor, torch.Tensor]] = pairs_result.unwrap()
+            return Failure(pairs_result.failure())
+        training_pairs = pairs_result.unwrap()
 
         if not training_pairs:
             return Failure(ProcError("Dataset produced zero training pairs."))
         self._logger.info(f"Built {len(training_pairs)} training pairs.")
 
-        # Optional: attribution snapshot BEFORE training ───────────────────────
         if self._attr_cfg.enabled:
-            before_dir = self._output_dir / "attribution_comparison" / TrainingPhase.BEFORE
+            before_dir = (
+                self._output_dir / _LABEL_ATTRIBUTION_COMPARISON_DIR / TrainingPhase.BEFORE
+            )
             attr_result = self._run_attribution_snapshot(
                 phase=TrainingPhase.BEFORE,
-                predictor=predictor,
-                tokenizer=tokenizer,
                 output_dir=before_dir,
             )
             if not is_successful(attr_result):
@@ -182,15 +213,21 @@ class LoRAFineTuningNode(ProcNode):
                     f"Pre-training attribution failed: {attr_result.failure()}.  Continuing."
                 )
 
-        # Evaluate baseline (epoch 0) ──────────────────────────────────────────
-        with timed("_evaluate epoch=0 (baseline)", logger=self._logger):
-            baseline_metrics = self._evaluate(epoch=0, predictor=predictor)
+        with timed(_LABEL_BASELINE_EVAL, logger=self._logger):
+            baseline_metrics = self._evaluate(
+                epoch=0,
+                predictor=predictor,
+                model=model,
+                tokenizer=tokenizer,
+            )
         self._logger.info(
             f"Baseline pass rate: {baseline_metrics.pass_rate:.1%}  "
             f"({baseline_metrics.n_valid}/{baseline_metrics.n_examples})"
         )
 
-        # Training loop ────────────────────────────────────────────────────────
+        with timed(_LABEL_GET_PEFT_MODEL, logger=self._logger):
+            model = self._apply_lora(model)
+
         optimiser = torch.optim.AdamW(
             filter(lambda p: p.requires_grad, model.parameters()),
             lr=self._training.learning_rate,
@@ -232,24 +269,31 @@ class LoRAFineTuningNode(ProcNode):
                     f"  epoch={epoch}  step={step_idx}  global={global_step}  loss={loss:.6f}"
                 )
 
-            # Epoch evaluation ─────────────────────────────────────────────────
             model.eval()
             with timed(f"_evaluate epoch={epoch}", logger=self._logger):
-                metrics = self._evaluate(epoch=epoch, predictor=predictor)
+                metrics = self._evaluate(
+                    epoch=epoch,
+                    predictor=predictor,
+                    model=model,
+                    tokenizer=tokenizer,
+                )
             epoch_metrics.append(metrics)
             self._logger.info(
                 f"Epoch {epoch} pass rate: {metrics.pass_rate:.1%}  "
                 f"({metrics.n_valid}/{metrics.n_examples})"
             )
 
-        # Optional: attribution snapshot AFTER training ────────────────────────
+        adapter_dir = self._output_dir / _LABEL_ADAPTER_DIR
+        save_status = self._save_adapter(model=model, adapter_dir=adapter_dir)
+
         if self._attr_cfg.enabled:
-            after_dir = self._output_dir / "attribution_comparison" / TrainingPhase.AFTER
+            after_dir = (
+                self._output_dir / _LABEL_ATTRIBUTION_COMPARISON_DIR / TrainingPhase.AFTER
+            )
             attr_result = self._run_attribution_snapshot(
                 phase=TrainingPhase.AFTER,
-                predictor=predictor,
-                tokenizer=tokenizer,
                 output_dir=after_dir,
+                adapter_dir=adapter_dir if save_status == AdapterSaveStatus.SAVED else None,
             )
             if not is_successful(attr_result):
                 self._logger.warning(
@@ -257,15 +301,12 @@ class LoRAFineTuningNode(ProcNode):
                 )
             else:
                 self._write_comparison_html(
-                    before_dir=self._output_dir / "attribution_comparison" / TrainingPhase.BEFORE,
+                    before_dir=(
+                        self._output_dir / _LABEL_ATTRIBUTION_COMPARISON_DIR / TrainingPhase.BEFORE
+                    ),
                     after_dir=after_dir,
                 )
 
-        # Save adapter weights ─────────────────────────────────────────────────
-        adapter_dir = self._output_dir / "adapter"
-        save_status = self._save_adapter(model=model, adapter_dir=adapter_dir)
-
-        # Write artifacts ──────────────────────────────────────────────────────
         initial_pass_rate = baseline_metrics.pass_rate
         final_pass_rate = epoch_metrics[-1].pass_rate
         summary = LoRARunSummary(
@@ -280,6 +321,7 @@ class LoRAFineTuningNode(ProcNode):
             initial_pass_rate=initial_pass_rate,
             final_pass_rate=final_pass_rate,
             pass_rate_delta=final_pass_rate - initial_pass_rate,
+            seed=self._seed,
         )
         self._write_artifacts(summary)
 
@@ -289,8 +331,6 @@ class LoRAFineTuningNode(ProcNode):
             f"(Δ{summary.pass_rate_delta:+.1%})"
         )
         return Success(ProcScore(value=self._SCORE, context=summary))
-
-    # ── Training step ──────────────────────────────────────────────────────────
 
     def _train_step(
         self,
@@ -311,50 +351,95 @@ class LoRAFineTuningNode(ProcNode):
         completion_ids = completion_ids.to(self._device)
 
         input_ids = torch.cat([prompt_ids, completion_ids], dim=1)
-
-        # Build labels: -100 for prompt tokens (masked), real IDs for completion.
-        ignore = torch.full_like(prompt_ids, fill_value=-100)
+        ignore = torch.full_like(prompt_ids, fill_value=_IGNORE_INDEX)
         labels = torch.cat([ignore, completion_ids], dim=1)
 
-        optimiser.zero_grad()
-        outputs = model(input_ids=input_ids, labels=labels)
+        optimiser.zero_grad(set_to_none=True)
+        with timed(_LABEL_FORWARD_PASS, logger=self._logger):
+            outputs = model(input_ids=input_ids, labels=labels)
         loss: torch.Tensor = outputs.loss
-        loss.backward()
+        loss.backward()  # type: ignore[no-untyped-call]
 
         torch.nn.utils.clip_grad_norm_(
-            model.parameters(), max_norm=self._training.max_grad_norm
+            filter(lambda p: p.requires_grad, model.parameters()),
+            max_norm=self._training.max_grad_norm,
         )
         optimiser.step()
         scheduler.step()
 
         return float(loss.detach().cpu().item())
 
-    # ── Evaluation ────────────────────────────────────────────────────────────
-
-    def _evaluate(self, epoch: int, predictor: Any) -> EpochMetrics:
+    def _evaluate(
+        self,
+        epoch: int,
+        predictor: Any,
+        model: Any,
+        tokenizer: Any,
+    ) -> EpochMetrics:
         """
         Run the scorer over the full dataset and return pass/fail counts.
-
-        Uses the API LLM (Ollama/Qwen3 via DSPy), not the HF proxy — the
-        goal is to measure whether the LoRA-tuned prompt proxy improves
-        the attribution signal, not to re-evaluate the API model directly.
-
-        For a tighter feedback loop, swap this for a generation pass on the
-        fine-tuned HF model itself.
         """
+        adapter = ChatAdapter()
         n_examples = 0
         n_valid = 0
         n_invalid = 0
 
+        model.eval()
         for example in self._dataset.load():
             n_examples += 1
-            with dspy.context(cache=False):
-                pred = self._llm(**example.inputs())
-            score = self._scorer.extraction_metric(example, pred)
-            if score == INVALID_SCORE or score < FAILURE_SCORE_THRESHOLD:
+            try:
+                dspy_msgs = adapter.format(
+                    signature=predictor.signature,
+                    demos=list(predictor.demos),
+                    inputs=example.inputs(),
+                )
+                prompt_text: str = tokenizer.apply_chat_template(
+                    dspy_msgs,
+                    tokenize=False,
+                    add_generation_prompt=True,
+                )
+                prompt_encoding = tokenizer(
+                    prompt_text,
+                    return_tensors="pt",
+                    add_special_tokens=False,
+                )
+                prompt_ids = prompt_encoding["input_ids"].to(self._device)
+                attention_mask = prompt_encoding["attention_mask"].to(self._device)
+
+                with torch.no_grad():
+                    with timed(
+                        f"{_LABEL_GENERATE}[epoch={epoch} example={n_examples - 1}]",
+                        logger=self._logger,
+                    ):
+                        marker_ids = tokenizer(
+                            _LABEL_COMPLETED_MARKER, return_tensors="pt", add_special_tokens=False
+                        )["input_ids"][0].to(self._device)
+
+                        output_ids = model.generate(
+                            input_ids=prompt_ids,
+                            attention_mask=attention_mask,
+                            max_new_tokens=self._training.max_new_tokens,
+                            do_sample=False,
+                            pad_token_id=tokenizer.pad_token_id,
+                            stopping_criteria=StoppingCriteriaList([_CompletedMarkerStopping(marker_ids)]),
+                        )
+                        generated_ids = output_ids[0, prompt_ids.shape[1]:]
+                generated_text = tokenizer.decode(generated_ids, skip_special_tokens=True)
+
+                pred = adapter.parse(
+                    signature=predictor.signature,
+                    completion=generated_text,
+                )
+                score = self._scorer.extraction_metric(example, pred)
+                if score == INVALID_SCORE or score < FAILURE_SCORE_THRESHOLD:
+                    n_invalid += 1
+                else:
+                    n_valid += 1
+            except Exception as exc:
+                self._logger.warning(
+                    f"_evaluate[epoch={epoch}]: example failed — {exc}"
+                )
                 n_invalid += 1
-            else:
-                n_valid += 1
 
         pass_rate = n_valid / n_examples if n_examples > 0 else 0.0
         return EpochMetrics(
@@ -365,21 +450,17 @@ class LoRAFineTuningNode(ProcNode):
             pass_rate=pass_rate,
         )
 
-    # ── Attribution snapshot ───────────────────────────────────────────────────
-
     def _run_attribution_snapshot(
         self,
         phase: TrainingPhase,
-        predictor: Any,
-        tokenizer: Any,
         output_dir: Path,
+        adapter_dir: Optional[Path] = None,
     ) -> Result[None, ProcError]:
         """
         Run ``PromptAttributionNode`` on the probe example and save to
-        ``output_dir``.
-
-        We create a single-example dataset wrapper so we can reuse the full
-        ``PromptAttributionNode.invoke()`` pipeline without duplication.
+        ``output_dir``.  When *adapter_dir* is provided (AFTER phase), the node
+        loads the saved LoRA adapter via ``peft_model_id`` so the comparison
+        reflects the fine-tuned weights rather than the bare base model.
         """
         self._logger.info(f"Running attribution snapshot: phase={phase}  dir={output_dir}")
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -399,8 +480,10 @@ class LoRAFineTuningNode(ProcNode):
             attr_device=str(self._device),
             save_html=self._attr_cfg.save_html,
             save_plots=self._attr_cfg.save_plots,
+            peft_model_id=str(adapter_dir) if adapter_dir is not None else None,
         )
-        with timed(f"attribution_snapshot phase={phase}", logger=self._logger):
+
+        with timed(f"{_LABEL_ATTRIBUTION_SNAPSHOT}{phase}", logger=self._logger):
             result = node.invoke()
 
         if not is_successful(result):
@@ -414,23 +497,13 @@ class LoRAFineTuningNode(ProcNode):
     ) -> None:
         """
         Write a side-by-side HTML comparison of before/after attribution heatmaps.
-
-        Reads the heatmap PNGs produced by PromptAttributionNode and embeds
-        them as base64 inline images so the report is self-contained.
         """
-        import base64
+        comparison_dir = self._output_dir / _LABEL_ATTRIBUTION_COMPARISON_DIR
+        comparison_dir.mkdir(parents=True, exist_ok=True)
+        out_path = comparison_dir / _LABEL_COMPARISON_HTML
 
-        comparison_dir = self._output_dir / "attribution_comparison"
-        out_path = comparison_dir / "comparison.html"
-
-        def _load_png_b64(directory: Path) -> str:
-            png_path = directory / "example_000" / "prompt_heatmap.png"
-            if not png_path.exists():
-                return ""
-            return base64.b64encode(png_path.read_bytes()).decode("ascii")
-
-        before_b64 = _load_png_b64(before_dir)
-        after_b64 = _load_png_b64(after_dir)
+        before_b64 = _read_png_b64(before_dir, self._logger)
+        after_b64 = _read_png_b64(after_dir, self._logger)
 
         before_img = (
             f'<img src="data:image/png;base64,{before_b64}" style="max-width:100%">'
@@ -465,29 +538,22 @@ h1, h2 {{ margin-top: 24px; }}
 </div>
 </body></html>"""
 
-        out_path.write_text(body, encoding="utf-8")
+        out_path.write_text(body, encoding=_LABEL_UTF8)
         self._logger.info(f"Attribution comparison report: {out_path}")
-
-    # ── Data preparation ───────────────────────────────────────────────────────
 
     def _build_training_pairs(
         self,
         predictor: Any,
         tokenizer: Any,
-    ) -> Result[list[tuple[torch.Tensor, torch.Tensor]], ProcError]:
+    ) -> Result[_TrainingPairs, ProcError]:
         """
         Build a list of (prompt_ids, completion_ids) tensors from the dataset.
-
-        The prompt is the full DSPy chat-template rendered text.
-        The completion is the expected output rendered by DSPy's ChatAdapter
-        (i.e. what the model *should* have produced).
         """
         adapter = ChatAdapter()
-        pairs: list[tuple[torch.Tensor, torch.Tensor]] = []
+        pairs: _TrainingPairs = []
 
         for index, example in enumerate(self._dataset.load()):
             try:
-                # Prompt: everything the model sees.
                 dspy_msgs = adapter.format(
                     signature=predictor.signature,
                     demos=list(predictor.demos),
@@ -499,7 +565,6 @@ h1, h2 {{ margin-top: 24px; }}
                     add_generation_prompt=True,
                 )
 
-                # Completion: expected output tokens.
                 completion_text: str = self._render_expected_completion(
                     example=example,
                     predictor=predictor,
@@ -535,24 +600,8 @@ h1, h2 {{ margin-top: 24px; }}
     def _render_expected_completion(self, example: Any, predictor: Any) -> str:
         """
         Render the expected assistant response in DSPy's ChatAdapter format.
-
-        DSPy's ChatAdapter formats the assistant turn as:
-
-            [[ ## field_name ## ]]
-            <value>
-
-            [[ ## completed ## ]]
-
-        We must match this format exactly so the model is trained to produce
-        output that ChatAdapter can parse.
-
-        ``example.labels()`` returns a dict of {output_field_name: value}
-        for all fields declared as outputs in the signature.  For this
-        pipeline the expected output is stored in the dataset under
-        ``"expected"`` and surfaced by TrainingSetDataset as a single
-        output field (e.g. ``meeting_time_extraction``).
         """
-        labels: dict[str, Any] = example.labels()
+        labels = example.labels()
         if not labels:
             self._logger.debug(
                 f"example has no labels — output fields: "
@@ -561,17 +610,20 @@ h1, h2 {{ margin-top: 24px; }}
             return ""
 
         lines: list[str] = []
-        for field_name, value in labels.items():
+        output_field_names = list(predictor.signature.output_fields.keys())
+
+        for field_name in output_field_names:
+            if field_name not in labels:
+                continue
+            value = labels[field_name]
             lines.append(f"[[ ## {field_name} ## ]]")
             if isinstance(value, (dict, list)):
-                lines.append(json.dumps(value, ensure_ascii=False))
+                lines.append(json.dumps(value, ensure_ascii=False, sort_keys=True))
             else:
                 lines.append(str(value).strip())
-            lines.append("")  # blank line between fields
-        lines.append("[[ ## completed ## ]]")
+            lines.append("")
+        lines.append(_LABEL_COMPLETED_MARKER)
         return "\n".join(lines)
-
-    # ── LoRA setup ─────────────────────────────────────────────────────────────
 
     def _apply_lora(self, model: Any) -> Any:
         """Wrap the model with PEFT LoRA adapters."""
@@ -596,17 +648,14 @@ h1, h2 {{ margin-top: 24px; }}
         )
         return model
 
-    # ── Model loading ──────────────────────────────────────────────────────────
-
     def _load_model(self) -> Result[tuple[Any, Any], ProcError]:
         """
         Load model without ``device_map="auto"`` (Captum compatibility).
-
-        Uses ``self._load_dtype`` selected at init time.
         """
         try:
             tokenizer = AutoTokenizer.from_pretrained(
-                self._hf_model_name, trust_remote_code=True
+                self._hf_model_name,
+                trust_remote_code=True,
             )
             if tokenizer.pad_token_id is None and tokenizer.eos_token_id is not None:
                 tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -616,17 +665,14 @@ h1, h2 {{ margin-top: 24px; }}
             )
             model = AutoModelForCausalLM.from_pretrained(
                 self._hf_model_name,
-                dtype=self._load_dtype,
+                dtype=self._load_dtype,  # 'torch_dtype' is deprecated in this transformers version
                 trust_remote_code=True,
-                # NO device_map="auto" — single device, no offloading.
             )
-            model.to(self._device)
-            model.eval()
+            model.to(self._device)  # type: ignore[arg-type]
+            model.eval()  # type: ignore[no-untyped-call]
             return Success((model, tokenizer))
         except Exception as exc:
             return Failure(ProcError(f"Failed to load '{self._hf_model_name}': {exc}"))
-
-    # ── Scheduler ─────────────────────────────────────────────────────────────
 
     def _build_scheduler(
         self,
@@ -640,25 +686,33 @@ h1, h2 {{ margin-top: 24px; }}
         """
         warmup = min(self._training.warmup_steps, max(0, total_steps - 1))
         if warmup == 0:
-            return torch.optim.lr_scheduler.ConstantLR(optimiser, factor=1.0)
+            return torch.optim.lr_scheduler.ConstantLR(
+                optimiser,
+                factor=1.0,
+                total_iters=1,
+            )
 
         return torch.optim.lr_scheduler.SequentialLR(
             optimiser,
             schedulers=[
                 torch.optim.lr_scheduler.LinearLR(
-                    optimiser, start_factor=1e-6, end_factor=1.0, total_iters=warmup
+                    optimiser,
+                    start_factor=_WARMUP_START_FACTOR,
+                    end_factor=1.0,
+                    total_iters=warmup,
                 ),
                 torch.optim.lr_scheduler.CosineAnnealingLR(
-                    optimiser, T_max=max(1, total_steps - warmup)
+                    optimiser,
+                    T_max=max(1, total_steps - warmup),
                 ),
             ],
             milestones=[warmup],
         )
 
-    # ── Adapter persistence ────────────────────────────────────────────────────
-
     def _save_adapter(
-        self, model: Any, adapter_dir: Path
+        self,
+        model: Any,
+        adapter_dir: Path,
     ) -> AdapterSaveStatus:
         """Save PEFT adapter weights to ``adapter_dir``."""
         try:
@@ -671,48 +725,48 @@ h1, h2 {{ margin-top: 24px; }}
             self._logger.error(f"Failed to save adapter: {exc}")
             return AdapterSaveStatus.FAILED
 
-    # ── Artifact writing ───────────────────────────────────────────────────────
-
     def _write_artifacts(self, summary: LoRARunSummary) -> None:
         """Write ``summary.json`` and ``training_log.json`` to ``output_dir``."""
-        summary_path = self._output_dir / "summary.json"
-        with open(summary_path, "w", encoding="utf-8") as fh:
+        summary_path = self._output_dir / _LABEL_SUMMARY_JSON
+        with open(summary_path, "w", encoding=_LABEL_UTF8) as fh:
             fh.write(summary.model_dump_json(indent=2))
         self._logger.info(f"Summary written to {summary_path}")
 
-        log_path = self._output_dir / "training_log.json"
-        with open(log_path, "w", encoding="utf-8") as fh:
-            json.dump(
-                [step.model_dump() for step in summary.step_logs],
-                fh,
-                indent=2,
-            )
+        log_path = self._output_dir / _LABEL_TRAINING_LOG_JSON
+        training_log = TrainingLogArtifact(
+            epoch_metrics=summary.epoch_metrics,
+            step_logs=summary.step_logs,
+        )
+        with open(log_path, "w", encoding=_LABEL_UTF8) as fh:
+            fh.write(training_log.model_dump_json(indent=2))
         self._logger.info(f"Training log written to {log_path}")
-
-    # ── Device helpers ─────────────────────────────────────────────────────────
 
     def _resolve_device(self, requested: torch.device) -> torch.device:
         """
         Validate the requested device.
-
-        MPS smoke-test is intentionally lightweight here — LoRA training
-        uses standard PyTorch autograd (not Captum), so MPS compatibility
-        is more reliable.  We still fall back to CPU if MPS is unavailable.
         """
-        if requested.type == "mps":
+        if requested.type == _DEFAULT_MPS_DEVICE:
             if not torch.backends.mps.is_available():
-                self._logger.warning("MPS requested but not available.  Falling back to CPU.")
-                return torch.device("cpu")
+                self._logger.warning(
+                    "MPS requested but not available.  Falling back to CPU."
+                )
+                return torch.device(_DEFAULT_CPU_DEVICE)
             return requested
-        if requested.type == "cuda":
+        if requested.type == _DEFAULT_CUDA_DEVICE:
             if not torch.cuda.is_available():
-                self._logger.warning("CUDA requested but not available.  Falling back to CPU.")
-                return torch.device("cpu")
+                self._logger.warning(
+                    "CUDA requested but not available.  Falling back to CPU."
+                )
+                return torch.device(_DEFAULT_CPU_DEVICE)
             return requested
         return requested
 
+    def _set_seed(self, seed: int) -> None:
+        random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
 
-# ── Internal helpers ───────────────────────────────────────────────────────────
 
 class _ProbeDataset(BaseDataset):
     """
@@ -726,11 +780,10 @@ class _ProbeDataset(BaseDataset):
         self._dataset = dataset
         self._example_index = example_index
 
-    def load(self) -> Any:  # type: ignore[override]
+    def load(self) -> list[Any]:
         for i, example in enumerate(self._dataset.load()):
             if i == self._example_index:
-                yield example
-                return
+                return [example]
         raise IndexError(
             f"_ProbeDataset: example_index={self._example_index} is out of range."
         )
