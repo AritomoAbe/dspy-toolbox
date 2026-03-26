@@ -36,8 +36,16 @@ Usage
 
 import argparse
 import json
+import logging
 import sys
 from pathlib import Path
+
+_RANDOM_SEED: int = 42
+_MIN_CORPUS_CHARS: int = 100_000
+
+logging.basicConfig(level=logging.INFO, format='%(levelname)s %(name)s: %(message)s')
+
+LOGGER = logging.getLogger(__name__)
 
 
 def format_windows(windows: list) -> str:
@@ -47,12 +55,15 @@ def format_windows(windows: list) -> str:
     parts = []
     for w in windows:
         tokens = []
-        if "day_of_week" in w:
-            tokens.append(w["day_of_week"])
-        if "time_of_day" in w:
-            tokens.append(w["time_of_day"])
-        if "iana_timezone" in w:
-            tokens.append(f"({w['iana_timezone']})")
+        day_of_week = w.get("day_of_week")
+        if day_of_week:
+            tokens.append(day_of_week)
+        time_of_day = w.get("time_of_day")
+        if time_of_day:
+            tokens.append(time_of_day)
+        iana_timezone = w.get("iana_timezone")
+        if iana_timezone:
+            tokens.append(f"({iana_timezone})")
         parts.append(" ".join(tokens))
     return " | ".join(parts)
 
@@ -95,10 +106,10 @@ def generate(
                 records.append(json.loads(line))
 
     if not records:
-        print("ERROR: No records found in input file.", file=sys.stderr)
+        LOGGER.error("ERROR: No records found in input file.")
         sys.exit(1)
 
-    print(f"Loaded {len(records)} records from {input_path}")
+    LOGGER.info(f"Loaded {len(records)} records from {input_path}")
 
     # Format all examples
     blocks = [format_example(r) for r in records]
@@ -107,7 +118,7 @@ def generate(
     # sees enough examples to learn patterns without memorising word-for-word.
     if shuffle and repeats > 1:
         import random
-        random.seed(42)
+        random.seed(_RANDOM_SEED)
 
     corpus_blocks = []
     for i in range(repeats):
@@ -118,20 +129,21 @@ def generate(
         else:
             corpus_blocks.extend(blocks)
 
-    corpus = "\n\n".join(corpus_blocks) + "\n"
+    joined = "\n\n".join(corpus_blocks)
+    corpus = f"{joined}\n"
 
     output_path.write_text(corpus, encoding="utf-8")
 
     n_chars = len(corpus)
     n_tokens_approx = n_chars // 4  # rough char-level estimate
-    print(f"Written {len(corpus_blocks)} blocks → {output_path}")
-    print(f"  Characters : {n_chars:,}")
-    print(f"  Tokens~    : {n_tokens_approx:,}  (rough estimate)")
-    print(f"  Unique chars: {len(set(corpus))}")
+    LOGGER.info(f"Written {len(corpus_blocks)} blocks → {output_path}")
+    LOGGER.info(f"  Characters : {n_chars:,}")
+    LOGGER.info(f"  Tokens~    : {n_tokens_approx:,}  (rough estimate)")
+    LOGGER.info(f"  Unique chars: {len(set(corpus))}")
 
-    if n_chars < 100_000:
-        print(
-            "\n  ⚠  Corpus is small (<100K chars). Consider --repeats 5 or more\n"
+    if n_chars < _MIN_CORPUS_CHARS:
+        LOGGER.info(
+            "\n  Corpus is small (<100K chars). Consider --repeats 5 or more\n"
             "     to give the character-level model enough signal to train on."
         )
 
@@ -167,7 +179,7 @@ def main() -> None:
     args = parser.parse_args()
 
     if not args.input.exists():
-        print(f"ERROR: Input file not found: {args.input}", file=sys.stderr)
+        LOGGER.error(f"ERROR: Input file not found: {args.input}")
         sys.exit(1)
 
     generate(

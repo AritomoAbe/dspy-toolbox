@@ -17,7 +17,7 @@ from proc.pipeline.llm_prompt_usage_attribution.models import (
 )
 from proc.pipeline.output_result_auditor.score_extractor import ScoreExtractor, INVALID_SCORE
 
-_ZERO_SCORE: float = 0.0  # noqa: WPS358
+_ZERO_SCORE: float = float()
 _SEGMENT_PREVIEW_LEN: int = 80
 _MASK_PLACEHOLDER: str = "[SEGMENT REMOVED]"
 _ACTIVE_THRESHOLD: float = 0.1
@@ -160,24 +160,21 @@ class SimplePromptAttributionAuditor(ProcNode):
     ) -> SegmentAttribution:
         """Replace the signature instructions with a blank and re-score."""
         original_instructions = predictor.signature.instructions
-        try:  # noqa: WPS501
-            predictor.signature = predictor.signature.with_instructions(
-                _MASK_PLACEHOLDER
-            )
+        predictor.signature = predictor.signature.with_instructions(_MASK_PLACEHOLDER)
+        try:
             score_ablated = self._run_score(example, predictor, original_demos, is_ablation=True) or _ZERO_SCORE
-            preview = original_instructions[:_SEGMENT_PREVIEW_LEN].replace("\n", " ")
-            result = SegmentAttribution(
-                segment_type=PromptSegmentType.INSTRUCTION,
-                segment_index=0,
-                segment_preview=preview,
-                attribution_score=score_full - score_ablated,
-                score_full=score_full,
-                score_ablated=score_ablated,
-            )
+        except Exception:
+            raise
         finally:
-            predictor.signature = predictor.signature.with_instructions(
-                original_instructions
-            )
+            predictor.signature = predictor.signature.with_instructions(original_instructions)
+        result = SegmentAttribution(
+            segment_type=PromptSegmentType.INSTRUCTION,
+            segment_index=0,
+            segment_preview=original_instructions[:_SEGMENT_PREVIEW_LEN].replace("\n", " "),
+            attribution_score=score_full - score_ablated,
+            score_full=score_full,
+            score_ablated=score_ablated,
+        )
         self._logger.info(
             f"INSTRUCTION attribution: {result.attribution_score:.4f}"
         )
@@ -193,21 +190,21 @@ class SimplePromptAttributionAuditor(ProcNode):
     ) -> SegmentAttribution:
         """Remove one demo and re-score with the remaining demos."""
         ablated_demos = [d for i, d in enumerate(original_demos) if i != demo_index]
-        try:  # noqa: WPS501
-            predictor.demos = ablated_demos
+        predictor.demos = ablated_demos
+        try:
             score_ablated = self._run_score(example, predictor, ablated_demos, is_ablation=True) or _ZERO_SCORE
-            demo = original_demos[demo_index]
-            preview = str(demo)[:_SEGMENT_PREVIEW_LEN].replace("\n", " ")
-            result = SegmentAttribution(
-                segment_type=PromptSegmentType.DEMO,
-                segment_index=demo_index,
-                segment_preview=preview,
-                attribution_score=score_full - score_ablated,
-                score_full=score_full,
-                score_ablated=score_ablated,
-            )
+        except Exception:
+            raise
         finally:
             predictor.demos = original_demos
+        result = SegmentAttribution(
+            segment_type=PromptSegmentType.DEMO,
+            segment_index=demo_index,
+            segment_preview=str(original_demos[demo_index])[:_SEGMENT_PREVIEW_LEN].replace("\n", " "),
+            attribution_score=score_full - score_ablated,
+            score_full=score_full,
+            score_ablated=score_ablated,
+        )
         self._logger.info(
             f"DEMO[{demo_index}] attribution: "
             f"{result.attribution_score:.4f}  "

@@ -36,9 +36,23 @@ from proc.pipeline.output_result_auditor.score_extractor import INVALID_SCORE, S
 
 _DEFAULT_MAX_NEW_TOKENS: int = 12
 _DEFAULT_IG_STEPS: int = 24
-_CONTROL_TOKENS: frozenset[str] = frozenset({
+_CONTROL_TOKENS: frozenset[str] = frozenset((
     '<|im_start|>', '<|im_end|>', 'system', 'user', 'assistant',
-})
+))
+
+_FIG_WIDTH_MIN: float = 12.0
+_FIG_WIDTH_MAX: float = 40.0
+_FIG_WIDTH_SCALE: float = 0.35
+_FIG_HEIGHT_MIN: float = 3.0
+_FIG_HEIGHT_MAX: float = 16.0
+_FIG_HEIGHT_SCALE: float = 0.55
+_FIG_HEIGHT_OFFSET: float = 2.0
+_PLOT_DPI: int = 180
+_PLOT_ROTATION: int = 90
+_PLOT_COLORBAR_SHRINK: float = 0.8
+_PLOT_FONT_SIZE_X: int = 8
+_PLOT_FONT_SIZE_Y: int = 9
+_TOP_K_DEFAULT: int = 12
 
 
 class TokenRegion(StrEnum):
@@ -224,7 +238,8 @@ class PromptAttributionNode(HFAttributionBase):
 
         used_generated_target = self._target_text is None
         target_text = generated_text if used_generated_target else self._target_text or ''
-        target_ids = tokenizer(target_text, return_tensors='pt', add_special_tokens=False)['input_ids'].to(self._device)
+        target_enc = tokenizer(target_text, return_tensors='pt', add_special_tokens=False)
+        target_ids = target_enc['input_ids'].to(self._device)
         if target_ids.numel() == 0:
             raise ValueError('Target text tokenized to an empty sequence.')
 
@@ -240,14 +255,17 @@ class PromptAttributionNode(HFAttributionBase):
         for step_idx in range(target_ids.shape[1]):
             step_target_id = int(target_ids[0, step_idx].item())
             step_target_token = tokenizer.decode([step_target_id])
-            prefix_embeds = embed_layer(prefix_ids).detach() if prefix_ids.shape[1] > 0 else None
+            if prefix_ids.shape[1] > 0:
+                prefix_embeds = embed_layer(prefix_ids).detach()
+            else:
+                prefix_embeds = None
 
             def forward_fn(prompt_embeds_batch: torch.Tensor) -> torch.Tensor:
-                if prefix_embeds is not None:
+                if prefix_embeds is None:
+                    full_embeds = prompt_embeds_batch
+                else:
                     prefix_batch = prefix_embeds.expand(prompt_embeds_batch.shape[0], -1, -1)
                     full_embeds = torch.cat([prompt_embeds_batch, prefix_batch], dim=1)
-                else:
-                    full_embeds = prompt_embeds_batch
                 out = model(inputs_embeds=full_embeds)
                 logits = out.logits[:, -1, :]
                 log_probs = F.log_softmax(logits.float(), dim=-1)
@@ -283,8 +301,12 @@ class PromptAttributionNode(HFAttributionBase):
         aggregate_scores_tensor = torch.stack(step_vectors, dim=0).sum(dim=0)
         aggregate_scores = aggregate_scores_tensor.tolist()
         rankings = self._build_rankings(prompt_tokens, token_regions, aggregate_scores)
-        instruction_score_sum, instruction_abs_score_sum = self._region_sums(aggregate_scores, token_regions, TokenRegion.INSTRUCTION)
-        email_score_sum, email_abs_score_sum = self._region_sums(aggregate_scores, token_regions, TokenRegion.EMAIL)
+        instruction_score_sum, instruction_abs_score_sum = self._region_sums(
+            aggregate_scores, token_regions, TokenRegion.INSTRUCTION,
+        )
+        email_score_sum, email_abs_score_sum = self._region_sums(
+            aggregate_scores, token_regions, TokenRegion.EMAIL,
+        )
 
         return ExampleAttributionReport(
             example_index=example_index,
@@ -331,68 +353,99 @@ class PromptAttributionNode(HFAttributionBase):
     def _pretty_log_report(self, report: ExampleAttributionReport) -> None:
         self._logger.info('=== Prompt ===\n%s', report.prompt_text)
         self._logger.info('=== Model generated answer ===\n%s', report.generated_text)
-        self._logger.info('=== Attribution target ===\n%s\nused_generated_target=%s', report.target_text, report.used_generated_target)
+        self._logger.info(
+            '=== Attribution target ===\n%s\nused_generated_target=%s',
+            report.target_text,
+            report.used_generated_target,
+        )
         if report.top_positive_tokens:
             tok = report.top_positive_tokens[0]
-            self._logger.info('=== Top POSITIVE non-control token ===\nindex=%d token=%r score=%+.6f', tok.index, tok.token, tok.score)
+            self._logger.info(
+                '=== Top POSITIVE non-control token ===\nindex=%d token=%r score=%+.6f',
+                tok.index, tok.token, tok.score,
+            )
         if report.top_negative_tokens:
             tok = report.top_negative_tokens[0]
-            self._logger.info('=== Top NEGATIVE non-control token ===\nindex=%d token=%r score=%+.6f', tok.index, tok.token, tok.score)
+            self._logger.info(
+                '=== Top NEGATIVE non-control token ===\nindex=%d token=%r score=%+.6f',
+                tok.index, tok.token, tok.score,
+            )
         if report.top_positive_email_tokens:
             tok = report.top_positive_email_tokens[0]
-            self._logger.info('=== Top POSITIVE EMAIL token ===\nindex=%d token=%r score=%+.6f', tok.index, tok.token, tok.score)
+            self._logger.info(
+                '=== Top POSITIVE EMAIL token ===\nindex=%d token=%r score=%+.6f',
+                tok.index, tok.token, tok.score,
+            )
         if report.top_negative_email_tokens:
             tok = report.top_negative_email_tokens[0]
-            self._logger.info('=== Top NEGATIVE EMAIL token ===\nindex=%d token=%r score=%+.6f', tok.index, tok.token, tok.score)
+            self._logger.info(
+                '=== Top NEGATIVE EMAIL token ===\nindex=%d token=%r score=%+.6f',
+                tok.index, tok.token, tok.score,
+            )
 
     def _plot_prompt_heatmap(self, report: ExampleAttributionReport, out_path: Path) -> None:
         scores = torch.tensor(report.aggregate_scores, dtype=torch.float32)
         max_abs = float(scores.abs().max().item()) if scores.numel() else 1.0
         keep = self._apply_chart_threshold(scores)
-        if not keep:
-            self._logger.warning(f'_plot_prompt_heatmap: all tokens filtered by threshold={self._chart_score_threshold}, skipping')
+        if len(keep) == 0:
+            self._logger.warning(
+                '_plot_prompt_heatmap: all tokens filtered by threshold=%s, skipping',
+                self._chart_score_threshold,
+            )
             return
         filtered_scores = scores[keep].unsqueeze(0)
         filtered_labels = [self._display_token(report.prompt_tokens[i]) for i in keep]
-        fig_w = max(12, min(0.35 * len(keep), 40))
+        fig_w = max(_FIG_WIDTH_MIN, min(_FIG_WIDTH_SCALE * len(keep), _FIG_WIDTH_MAX))
         fig, ax = plt.subplots(figsize=(fig_w, 3.5))
         im = ax.imshow(filtered_scores.numpy(), aspect='auto', cmap='RdBu_r', vmin=-max_abs, vmax=max_abs)
         ax.set_yticks([])
         ax.set_xticks(range(len(keep)))
-        ax.set_xticklabels(filtered_labels, rotation=90, fontsize=8)
-        ax.set_title(f'Prompt attribution — example {report.example_index} (threshold={self._chart_score_threshold})')
-        fig.colorbar(im, ax=ax, shrink=0.8)
+        ax.set_xticklabels(filtered_labels, rotation=_PLOT_ROTATION, fontsize=_PLOT_FONT_SIZE_X)
+        ax.set_title(
+            f'Prompt attribution — example {report.example_index}'
+            f' (threshold={self._chart_score_threshold})',
+        )
+        fig.colorbar(im, ax=ax, shrink=_PLOT_COLORBAR_SHRINK)
         fig.tight_layout()
-        fig.savefig(out_path, dpi=180)
+        fig.savefig(out_path, dpi=_PLOT_DPI)
         plt.close(fig)
 
     def _plot_step_matrix(self, report: ExampleAttributionReport, out_path: Path) -> None:
-        if not report.steps:
+        if len(report.steps) == 0:
             return
         matrix = torch.tensor([s.prompt_token_scores for s in report.steps], dtype=torch.float32)
         max_abs = float(matrix.abs().max().item()) if matrix.numel() else 1.0
         # Filter columns (prompt tokens) by their max absolute score across all steps
         col_max_abs = matrix.abs().max(dim=0).values
         keep = self._apply_chart_threshold(col_max_abs)
-        if not keep:
-            self._logger.warning(f'_plot_step_matrix: all tokens filtered by threshold={self._chart_score_threshold}, skipping')
+        if len(keep) == 0:
+            self._logger.warning(
+                '_plot_step_matrix: all tokens filtered by threshold=%s, skipping',
+                self._chart_score_threshold,
+            )
             return
         filtered_matrix = matrix[:, keep]
         filtered_labels = [self._display_token(report.prompt_tokens[i]) for i in keep]
-        fig_w = max(12, min(0.35 * len(keep), 40))
-        fig_h = max(3, min(0.55 * len(report.steps) + 2, 16))
+        fig_w = max(_FIG_WIDTH_MIN, min(_FIG_WIDTH_SCALE * len(keep), _FIG_WIDTH_MAX))
+        fig_h = max(_FIG_HEIGHT_MIN, min(_FIG_HEIGHT_SCALE * len(report.steps) + _FIG_HEIGHT_OFFSET, _FIG_HEIGHT_MAX))
         fig, ax = plt.subplots(figsize=(fig_w, fig_h))
         im = ax.imshow(filtered_matrix.numpy(), aspect='auto', cmap='RdBu_r', vmin=-max_abs, vmax=max_abs)
         ax.set_xticks(range(len(keep)))
-        ax.set_xticklabels(filtered_labels, rotation=90, fontsize=8)
+        ax.set_xticklabels(filtered_labels, rotation=_PLOT_ROTATION, fontsize=_PLOT_FONT_SIZE_X)
         ax.set_yticks(range(len(report.steps)))
-        ax.set_yticklabels([self._display_token(s.target_token) for s in report.steps], fontsize=9)
+        ax.set_yticklabels(
+            [self._display_token(s.target_token) for s in report.steps],
+            fontsize=_PLOT_FONT_SIZE_Y,
+        )
         ax.set_xlabel('Prompt token')
         ax.set_ylabel('Target token')
-        ax.set_title(f'Target-step attribution matrix — example {report.example_index} (threshold={self._chart_score_threshold})')
-        fig.colorbar(im, ax=ax, shrink=0.8)
+        ax.set_title(
+            f'Target-step attribution matrix — example {report.example_index}'
+            f' (threshold={self._chart_score_threshold})',
+        )
+        fig.colorbar(im, ax=ax, shrink=_PLOT_COLORBAR_SHRINK)
         fig.tight_layout()
-        fig.savefig(out_path, dpi=180)
+        fig.savefig(out_path, dpi=_PLOT_DPI)
         plt.close(fig)
 
     def _write_html_report(self, report: ExampleAttributionReport, out_path: Path) -> None:
@@ -402,36 +455,54 @@ class PromptAttributionNode(HFAttributionBase):
             for tok, score, region in zip(report.prompt_tokens, report.aggregate_scores, report.token_regions)
         )
         step_rows = '\n'.join(
-            f'<tr><td>{step.step_index}</td><td>{html.escape(self._display_token(step.target_token))}</td><td>{step.target_token_id}</td><td>{step.logprob:.6f}</td></tr>'
+            '<tr>'
+            f'<td>{step.step_index}</td>'
+            f'<td>{html.escape(self._display_token(step.target_token))}</td>'
+            f'<td>{step.target_token_id}</td>'
+            f'<td>{step.logprob:.6f}</td>'
+            '</tr>'
             for step in report.steps
         )
-        body = f'''<!doctype html>
-<html><head><meta charset="utf-8"><title>Prompt attribution report</title>
-<style>
-body {{ font-family: Arial, sans-serif; margin: 24px; }}
-.token {{ padding: 2px 4px; margin: 1px; border-radius: 4px; display: inline-block; }}
-.meta {{ margin-bottom: 16px; }}
-table {{ border-collapse: collapse; margin-top: 16px; }}
-td, th {{ border: 1px solid #ddd; padding: 6px 10px; }}
-small {{ color: #555; }}
-</style></head><body>
-<h1>Prompt attribution — example {report.example_index}</h1>
-<div class="meta">
-<p><strong>Generated answer:</strong> {html.escape(report.generated_text)}</p>
-<p><strong>Attribution target:</strong> {html.escape(report.target_text)} &nbsp; <small>used_generated_target={report.used_generated_target}</small></p>
-<p><strong>Instruction score sum:</strong> {report.instruction_score_sum:+.6f} &nbsp; <strong>Email score sum:</strong> {report.email_score_sum:+.6f}</p>
-</div>
-<h2>Prompt tokens</h2>
-<div>{prompt_html}</div>
-<h2>Per-target-token log-probs</h2>
-<table><thead><tr><th>Step</th><th>Token</th><th>Token ID</th><th>Logprob</th></tr></thead><tbody>{step_rows}</tbody></table>
-</body></html>'''
+        tgt_escaped = html.escape(report.target_text)
+        gen_escaped = html.escape(report.generated_text)
+        body = (
+            f'<!doctype html>\n'
+            f'<html><head><meta charset="utf-8"><title>Prompt attribution report</title>\n'
+            f'<style>\n'
+            f'body {{ font-family: Arial, sans-serif; margin: 24px; }}\n'
+            f'.token {{ padding: 2px 4px; margin: 1px; border-radius: 4px; display: inline-block; }}\n'
+            f'.meta {{ margin-bottom: 16px; }}\n'
+            f'table {{ border-collapse: collapse; margin-top: 16px; }}\n'
+            f'td, th {{ border: 1px solid #ddd; padding: 6px 10px; }}\n'
+            f'small {{ color: #555; }}\n'
+            f'</style></head><body>\n'
+            f'<h1>Prompt attribution — example {report.example_index}</h1>\n'
+            f'<div class="meta">\n'
+            f'<p><strong>Generated answer:</strong> {gen_escaped}</p>\n'
+            f'<p><strong>Attribution target:</strong> {tgt_escaped}'
+            f' &nbsp; <small>used_generated_target={report.used_generated_target}</small></p>\n'
+            f'<p><strong>Instruction score sum:</strong> {report.instruction_score_sum:+.6f}'
+            f' &nbsp; <strong>Email score sum:</strong> {report.email_score_sum:+.6f}</p>\n'
+            f'</div>\n'
+            f'<h2>Prompt tokens</h2>\n'
+            f'<div>{prompt_html}</div>\n'
+            f'<h2>Per-target-token log-probs</h2>\n'
+            f'<table><thead><tr>'
+            f'<th>Step</th><th>Token</th><th>Token ID</th><th>Logprob</th>'
+            f'</tr></thead><tbody>{step_rows}</tbody></table>\n'
+            f'</body></html>'
+        )
         out_path.write_text(body, encoding='utf-8')
 
     def _html_span(self, token: str, score: float, max_abs: float, region: str) -> str:
         return self._make_html_span(self._display_token(token), score, max_abs, region)
 
-    def _build_rankings(self, prompt_tokens: list[str], token_regions: list[TokenRegion], scores: list[float]) -> dict[str, list[RankedToken]]:
+    def _build_rankings(
+        self,
+        prompt_tokens: list[str],
+        token_regions: list[TokenRegion],
+        scores: list[float],
+    ) -> dict[str, list[RankedToken]]:
         max_abs = max((abs(x) for x in scores), default=1.0) or 1.0
         records: list[RankedToken] = []
         for idx, (tok, region, score) in enumerate(zip(prompt_tokens, token_regions, scores)):
@@ -444,10 +515,16 @@ small {{ color: #555; }}
                 score=float(score),
                 normalized_abs_score=float(abs(score) / max_abs),
             ))
-        positive_all = sorted((r for r in records if r.score > 0), key=lambda r: r.score, reverse=True)[:self._top_k_tokens]
-        negative_all = sorted((r for r in records if r.score < 0), key=lambda r: r.score)[:self._top_k_tokens]
-        positive_email = sorted((r for r in records if r.region == TokenRegion.EMAIL and r.score > 0), key=lambda r: r.score, reverse=True)[:self._top_k_tokens]
-        negative_email = sorted((r for r in records if r.region == TokenRegion.EMAIL and r.score < 0), key=lambda r: r.score)[:self._top_k_tokens]
+        positive_all = sorted(
+            (r for r in records if r.score > 0), key=lambda r: r.score, reverse=True,
+        )[:self._top_k_tokens]
+        negative_all = sorted(
+            (r for r in records if r.score < 0), key=lambda r: r.score,
+        )[:self._top_k_tokens]
+        email_positive = (r for r in records if r.region == TokenRegion.EMAIL and r.score > 0)
+        email_negative = (r for r in records if r.region == TokenRegion.EMAIL and r.score < 0)
+        positive_email = sorted(email_positive, key=lambda r: r.score, reverse=True)[:self._top_k_tokens]
+        negative_email = sorted(email_negative, key=lambda r: r.score)[:self._top_k_tokens]
         return {
             'positive_all': positive_all,
             'negative_all': negative_all,

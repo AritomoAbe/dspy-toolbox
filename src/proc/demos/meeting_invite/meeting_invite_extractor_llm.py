@@ -73,22 +73,22 @@ class MeetingInviteLLM(DSpyLLM[MeetingInvitePayload, EmailMeetingInfo]):  # type
             current_date=payload.current_date,
         )
         raw: str = prediction.extracted_json or ""
-        return Success(self._parse(raw))
+        return Success(_parse_llm_output(raw))
 
-    @staticmethod
-    def _parse(raw: str) -> EmailMeetingInfo:
-        cleaned = _strip_fences(raw)
-        try:
-            return _dict_to_email_meeting_info(json.loads(cleaned))
-        except (json.JSONDecodeError, Exception) as exc:
-            LOGGER.warning("MeetingInfoExtractor: failed to parse LLM output: %s | raw=%r", exc, raw)
-            return EmailMeetingInfo(
-                sender_iana_timezone=_UNKNOWN_TZ,
-                duration_minutes=_DEFAULT_DURATION,
-                urgency=Urgency.FLEXIBLE,
-                flexibility=Flexibility.FLEXIBLE,
-                preferred_windows=[],
-            )
+
+def _parse_llm_output(raw: str) -> EmailMeetingInfo:
+    cleaned = _strip_fences(raw)
+    try:
+        return _dict_to_email_meeting_info(json.loads(cleaned))
+    except (json.JSONDecodeError, Exception) as exc:
+        LOGGER.warning("MeetingInfoExtractor: failed to parse LLM output: %s | raw=%r", exc, raw)
+        return EmailMeetingInfo(
+            sender_iana_timezone=_UNKNOWN_TZ,
+            duration_minutes=_DEFAULT_DURATION,
+            urgency=Urgency.FLEXIBLE,
+            flexibility=Flexibility.FLEXIBLE,
+            preferred_windows=[],
+        )
 
 
 def _strip_fences(text: str) -> str:
@@ -109,5 +109,5 @@ def _dict_to_email_meeting_info(data: dict[str, Any]) -> EmailMeetingInfo:
         try:
             windows.append(PreferredWindow.model_validate(w))
         except Exception:
-            pass
+            ...
     return EmailMeetingInfo.model_validate({**data, _WINDOWS_KEY: windows})

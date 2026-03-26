@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from proc.demos.meeting_invite.meeting_invite_dataset import MeetingInviteDataset
-from proc.demos.meeting_invite.meeting_invite_extractor_llm import MeetingInviteLLM
+from proc.demos.meeting_invite.meeting_invite_extractor_llm import MeetingInviteLLM, _parse_llm_output
 from proc.demos.meeting_invite.meeting_invite_score_extractor import MeetingInviteScoreExtractor
 from proc.demos.meeting_invite.models import EmailMeetingInfo
 
@@ -45,17 +45,17 @@ class TestMeetingInviteParseOnRealData:
     def test_parse_all_expected_outputs(self, examples: list[Any]) -> None:
         for ex in examples:
             raw = json.dumps(ex.expected.model_dump(mode=_DUMP_MODE))
-            assert isinstance(MeetingInviteLLM._parse(raw), EmailMeetingInfo)
+            assert isinstance(_parse_llm_output(raw), EmailMeetingInfo)
 
     def test_parsed_urgency_matches_gold(self, examples: list[Any]) -> None:
         for ex in examples:
             raw = json.dumps(ex.expected.model_dump(mode=_DUMP_MODE))
-            assert MeetingInviteLLM._parse(raw).urgency == ex.expected.urgency
+            assert _parse_llm_output(raw).urgency == ex.expected.urgency
 
     def test_parsed_duration_matches_gold(self, examples: list[Any]) -> None:
         for ex in examples:
             raw = json.dumps(ex.expected.model_dump(mode=_DUMP_MODE))
-            assert MeetingInviteLLM._parse(raw).duration_minutes == ex.expected.duration_minutes
+            assert _parse_llm_output(raw).duration_minutes == ex.expected.duration_minutes
 
 
 class TestScoreExtractorOnRealData:

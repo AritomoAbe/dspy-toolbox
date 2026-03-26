@@ -3,7 +3,7 @@ from typing import Optional
 
 class ProcScoreContext:
     def __init__(self) -> None:
-        pass
+        ...
 
 
 class ProcScore:

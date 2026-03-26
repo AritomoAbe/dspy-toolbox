@@ -67,6 +67,8 @@ from proc.pipeline.lora_fine_tuning.models import (
     LoRARunSummary,
     STEP_LOG_PREFIX,
     StepLog,
+)
+from proc.pipeline.lora_fine_tuning.models import (
     TrainingHyperParams,
     TrainingLogArtifact,
     TrainingPhase,
@@ -102,8 +104,12 @@ _LABEL_GENERATE: str = "_evaluate generate"
 _LABEL_ATTRIBUTION_SNAPSHOT: str = "attribution_snapshot phase="
 _LABEL_COMPLETED_MARKER: str = "[[ ## completed ## ]]"
 _WARMUP_START_FACTOR: float = 1e-6
+_RETURN_TENSORS_PT: str = "pt"
+_KEY_INPUT_IDS: str = "input_ids"
+_KEY_ATTENTION_MASK: str = "attention_mask"
 
-_TrainingPairs: TypeAlias = list[tuple[torch.Tensor, torch.Tensor]]
+_TrainingPair: TypeAlias = tuple[torch.Tensor, torch.Tensor]
+_TrainingPairs: TypeAlias = list[_TrainingPair]
 
 
 def _read_png_b64(directory: Path, logger: logging.Logger) -> str:
@@ -122,11 +128,12 @@ class _CompletedMarkerStopping(StoppingCriteria):
         self._marker_ids = marker_ids
 
     def __call__(self, input_ids: torch.Tensor, scores: torch.Tensor, **kwargs: Any) -> bool:
-        if input_ids.shape[1] < self._marker_ids.shape[0]:
+        marker_len = self._marker_ids.shape[0]
+        if input_ids.shape[1] < marker_len:
             return False
-        return bool(
-            (input_ids[0, -self._marker_ids.shape[0]:] == self._marker_ids).all()
-        )
+        tail = input_ids[0, -marker_len:]
+        return bool((tail == self._marker_ids).all())
+
 
 class LoRAFineTuningNode(ProcNode):
     """
@@ -295,16 +302,16 @@ class LoRAFineTuningNode(ProcNode):
                 output_dir=after_dir,
                 adapter_dir=adapter_dir if save_status == AdapterSaveStatus.SAVED else None,
             )
-            if not is_successful(attr_result):
-                self._logger.warning(
-                    f"Post-training attribution failed: {attr_result.failure()}.  Continuing."
-                )
-            else:
+            if is_successful(attr_result):
                 self._write_comparison_html(
                     before_dir=(
                         self._output_dir / _LABEL_ATTRIBUTION_COMPARISON_DIR / TrainingPhase.BEFORE
                     ),
                     after_dir=after_dir,
+                )
+            else:
+                self._logger.warning(
+                    f"Post-training attribution failed: {attr_result.failure()}.  Continuing."
                 )
 
         initial_pass_rate = baseline_metrics.pass_rate
@@ -388,60 +395,19 @@ class LoRAFineTuningNode(ProcNode):
         for example in self._dataset.load():
             n_examples += 1
             try:
-                dspy_msgs = adapter.format(
-                    signature=predictor.signature,
-                    demos=list(predictor.demos),
-                    inputs=example.inputs(),
+                passed = self._evaluate_example(
+                    epoch, n_examples - 1, example, adapter, predictor, model, tokenizer,
                 )
-                prompt_text: str = tokenizer.apply_chat_template(
-                    dspy_msgs,
-                    tokenize=False,
-                    add_generation_prompt=True,
-                )
-                prompt_encoding = tokenizer(
-                    prompt_text,
-                    return_tensors="pt",
-                    add_special_tokens=False,
-                )
-                prompt_ids = prompt_encoding["input_ids"].to(self._device)
-                attention_mask = prompt_encoding["attention_mask"].to(self._device)
-
-                with torch.no_grad():
-                    with timed(
-                        f"{_LABEL_GENERATE}[epoch={epoch} example={n_examples - 1}]",
-                        logger=self._logger,
-                    ):
-                        marker_ids = tokenizer(
-                            _LABEL_COMPLETED_MARKER, return_tensors="pt", add_special_tokens=False
-                        )["input_ids"][0].to(self._device)
-
-                        output_ids = model.generate(
-                            input_ids=prompt_ids,
-                            attention_mask=attention_mask,
-                            max_new_tokens=self._training.max_new_tokens,
-                            do_sample=False,
-                            pad_token_id=tokenizer.pad_token_id,
-                            stopping_criteria=StoppingCriteriaList([_CompletedMarkerStopping(marker_ids)]),
-                        )
-                        generated_ids = output_ids[0, prompt_ids.shape[1]:]
-                generated_text = tokenizer.decode(generated_ids, skip_special_tokens=True)
-
-                pred = adapter.parse(
-                    signature=predictor.signature,
-                    completion=generated_text,
-                )
-                score = self._scorer.extraction_metric(example, pred)
-                if score == INVALID_SCORE or score < FAILURE_SCORE_THRESHOLD:
-                    n_invalid += 1
-                else:
-                    n_valid += 1
             except Exception as exc:
-                self._logger.warning(
-                    f"_evaluate[epoch={epoch}]: example failed — {exc}"
-                )
+                self._logger.warning(f"_evaluate[epoch={epoch}]: example failed — {exc}")
+                n_invalid += 1
+                continue
+            if passed:
+                n_valid += 1
+            else:
                 n_invalid += 1
 
-        pass_rate = n_valid / n_examples if n_examples > 0 else 0.0
+        pass_rate = n_valid / n_examples if n_examples > 0 else float()
         return EpochMetrics(
             epoch=epoch,
             n_examples=n_examples,
@@ -449,6 +415,61 @@ class LoRAFineTuningNode(ProcNode):
             n_invalid=n_invalid,
             pass_rate=pass_rate,
         )
+
+    def _evaluate_example(
+        self,
+        epoch: int,
+        example_idx: int,
+        example: Any,
+        adapter: ChatAdapter,
+        predictor: Any,
+        model: Any,
+        tokenizer: Any,
+    ) -> bool:
+        dspy_msgs = adapter.format(
+            signature=predictor.signature,
+            demos=list(predictor.demos),
+            inputs=example.inputs(),
+        )
+        prompt_text: str = tokenizer.apply_chat_template(
+            dspy_msgs,
+            tokenize=False,
+            add_generation_prompt=True,
+        )
+        prompt_encoding = tokenizer(
+            prompt_text,
+            return_tensors=_RETURN_TENSORS_PT,
+            add_special_tokens=False,
+        )
+        prompt_ids = prompt_encoding[_KEY_INPUT_IDS].to(self._device)
+        attention_mask = prompt_encoding[_KEY_ATTENTION_MASK].to(self._device)
+
+        with torch.no_grad():
+            with timed(
+                f"{_LABEL_GENERATE}[epoch={epoch} example={example_idx}]",
+                logger=self._logger,
+            ):
+                marker_ids = tokenizer(
+                    _LABEL_COMPLETED_MARKER,
+                    return_tensors=_RETURN_TENSORS_PT,
+                    add_special_tokens=False,
+                )[_KEY_INPUT_IDS][0].to(self._device)
+                output_ids = model.generate(
+                    input_ids=prompt_ids,
+                    attention_mask=attention_mask,
+                    max_new_tokens=self._training.max_new_tokens,
+                    do_sample=False,
+                    pad_token_id=tokenizer.pad_token_id,
+                    stopping_criteria=StoppingCriteriaList([_CompletedMarkerStopping(marker_ids)]),
+                )
+                generated_ids = output_ids[0, prompt_ids.shape[1]:]
+        generated_text = tokenizer.decode(generated_ids, skip_special_tokens=True)
+        pred = adapter.parse(
+            signature=predictor.signature,
+            completion=generated_text,
+        )
+        score = self._scorer.extraction_metric(example, pred)
+        return not (score == INVALID_SCORE or score < FAILURE_SCORE_THRESHOLD)
 
     def _run_attribution_snapshot(
         self,
@@ -480,7 +501,7 @@ class LoRAFineTuningNode(ProcNode):
             attr_device=str(self._device),
             save_html=self._attr_cfg.save_html,
             save_plots=self._attr_cfg.save_plots,
-            peft_model_id=str(adapter_dir) if adapter_dir is not None else None,
+            peft_model_id=None if adapter_dir is None else str(adapter_dir),
         )
 
         with timed(f"{_LABEL_ATTRIBUTION_SNAPSHOT}{phase}", logger=self._logger):
@@ -554,48 +575,55 @@ h1, h2 {{ margin-top: 24px; }}
 
         for index, example in enumerate(self._dataset.load()):
             try:
-                dspy_msgs = adapter.format(
-                    signature=predictor.signature,
-                    demos=list(predictor.demos),
-                    inputs=example.inputs(),
-                )
-                prompt_text: str = tokenizer.apply_chat_template(
-                    dspy_msgs,
-                    tokenize=False,
-                    add_generation_prompt=True,
-                )
-
-                completion_text: str = self._render_expected_completion(
-                    example=example,
-                    predictor=predictor,
-                )
-
-                prompt_ids = tokenizer(
-                    prompt_text,
-                    return_tensors="pt",
-                    add_special_tokens=False,
-                )["input_ids"]
-
-                completion_ids = tokenizer(
-                    completion_text,
-                    return_tensors="pt",
-                    add_special_tokens=False,
-                )["input_ids"]
-
-                if completion_ids.numel() == 0:
-                    self._logger.warning(
-                        f"example[{index}]: completion tokenised to empty sequence — skipping."
-                    )
-                    continue
-
-                pairs.append((prompt_ids, completion_ids))
-
+                pair = self._build_single_pair(index, example, adapter, predictor, tokenizer)
             except Exception as exc:
                 self._logger.warning(f"example[{index}]: failed to build pair — {exc}")
+                continue
+            if pair is not None:
+                pairs.append(pair)
 
-        if not pairs:
-            return Failure(ProcError("No valid training pairs could be built from the dataset."))
-        return Success(pairs)
+        if pairs:
+            return Success(pairs)
+        return Failure(ProcError("No valid training pairs could be built from the dataset."))
+
+    def _build_single_pair(
+        self,
+        index: int,
+        example: Any,
+        adapter: ChatAdapter,
+        predictor: Any,
+        tokenizer: Any,
+    ) -> Optional[_TrainingPair]:
+        dspy_msgs = adapter.format(
+            signature=predictor.signature,
+            demos=list(predictor.demos),
+            inputs=example.inputs(),
+        )
+        prompt_text: str = tokenizer.apply_chat_template(
+            dspy_msgs,
+            tokenize=False,
+            add_generation_prompt=True,
+        )
+        completion_text: str = self._render_expected_completion(
+            example=example,
+            predictor=predictor,
+        )
+        prompt_ids = tokenizer(
+            prompt_text,
+            return_tensors=_RETURN_TENSORS_PT,
+            add_special_tokens=False,
+        )[_KEY_INPUT_IDS]
+        completion_ids = tokenizer(
+            completion_text,
+            return_tensors=_RETURN_TENSORS_PT,
+            add_special_tokens=False,
+        )[_KEY_INPUT_IDS]
+        if completion_ids.numel() == 0:
+            self._logger.warning(
+                f"example[{index}]: completion tokenised to empty sequence — skipping."
+            )
+            return None
+        return prompt_ids, completion_ids
 
     def _render_expected_completion(self, example: Any, predictor: Any) -> str:
         """
@@ -653,26 +681,28 @@ h1, h2 {{ margin-top: 24px; }}
         Load model without ``device_map="auto"`` (Captum compatibility).
         """
         try:
-            tokenizer = AutoTokenizer.from_pretrained(
-                self._hf_model_name,
-                trust_remote_code=True,
-            )
-            if tokenizer.pad_token_id is None and tokenizer.eos_token_id is not None:
-                tokenizer.pad_token_id = tokenizer.eos_token_id
-
-            self._logger.info(
-                f"Loading {self._hf_model_name}  dtype={self._load_dtype}  device={self._device}"
-            )
-            model = AutoModelForCausalLM.from_pretrained(
-                self._hf_model_name,
-                dtype=self._load_dtype,  # 'torch_dtype' is deprecated in this transformers version
-                trust_remote_code=True,
-            )
-            model.to(self._device)  # type: ignore[arg-type]
-            model.eval()  # type: ignore[no-untyped-call]
-            return Success((model, tokenizer))
+            return Success(self._load_model_impl())
         except Exception as exc:
             return Failure(ProcError(f"Failed to load '{self._hf_model_name}': {exc}"))
+
+    def _load_model_impl(self) -> tuple[Any, Any]:
+        tokenizer = AutoTokenizer.from_pretrained(
+            self._hf_model_name,
+            trust_remote_code=True,
+        )
+        if tokenizer.pad_token_id is None and tokenizer.eos_token_id is not None:
+            tokenizer.pad_token_id = tokenizer.eos_token_id
+        self._logger.info(
+            f"Loading {self._hf_model_name}  dtype={self._load_dtype}  device={self._device}"
+        )
+        model = AutoModelForCausalLM.from_pretrained(
+            self._hf_model_name,
+            dtype=self._load_dtype,  # 'torch_dtype' is deprecated in this transformers version
+            trust_remote_code=True,
+        )
+        model.to(self._device)  # type: ignore[arg-type]
+        model.eval()  # type: ignore[no-untyped-call]
+        return model, tokenizer
 
     def _build_scheduler(
         self,
@@ -716,14 +746,17 @@ h1, h2 {{ margin-top: 24px; }}
     ) -> AdapterSaveStatus:
         """Save PEFT adapter weights to ``adapter_dir``."""
         try:
-            adapter_dir.mkdir(parents=True, exist_ok=True)
-            with timed("save_pretrained (adapter)", logger=self._logger):
-                model.save_pretrained(str(adapter_dir))
-            self._logger.info(f"Adapter saved to {adapter_dir}")
-            return AdapterSaveStatus.SAVED
+            return self._do_save_adapter(model, adapter_dir)
         except Exception as exc:
             self._logger.error(f"Failed to save adapter: {exc}")
             return AdapterSaveStatus.FAILED
+
+    def _do_save_adapter(self, model: Any, adapter_dir: Path) -> AdapterSaveStatus:
+        adapter_dir.mkdir(parents=True, exist_ok=True)
+        with timed("save_pretrained (adapter)", logger=self._logger):
+            model.save_pretrained(str(adapter_dir))
+        self._logger.info(f"Adapter saved to {adapter_dir}")
+        return AdapterSaveStatus.SAVED
 
     def _write_artifacts(self, summary: LoRARunSummary) -> None:
         """Write ``summary.json`` and ``training_log.json`` to ``output_dir``."""

@@ -10,7 +10,6 @@ from proc.base.proc_error import ProcError
 
 class _DSpyABCMeta(type(dspy.Module), ABCMeta):  # type: ignore[misc]  # noqa: WPS606
     """Combined metaclass that satisfies both dspy.Module and ABCMeta."""
-    pass
 
 
 class DSpyLLM(dspy.Module, BaseLLM[IN, OUT], metaclass=_DSpyABCMeta):
@@ -23,11 +22,11 @@ class DSpyLLM(dspy.Module, BaseLLM[IN, OUT], metaclass=_DSpyABCMeta):
 
     @abstractmethod
     def invoke(self, payload: IN) -> Result[OUT, ProcError]:
-        pass
+        ...
 
     @abstractmethod
     def get_demos(self, module: dspy.Module) -> Result[list[dspy.Example], ProcError]:  # noqa: WPS463
-        pass
+        ...
 
     def _ensure_dspy_configured(self) -> None:
         """

@@ -22,6 +22,8 @@ from proc.pipeline.lora_fine_tuning.models import (
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s %(name)s: %(message)s')
 
+_LEARNING_RATE: float = 5e-5
+
 
 class LoRAFineTuningTestSuite(TestSuite):
     def __init__(self, dataset: TrainingSetDataset) -> None:
@@ -36,14 +38,10 @@ class LoRAFineTuningTestSuite(TestSuite):
                 scorer=scorer,
                 hf_model_name='Qwen/Qwen2.5-1.5B-Instruct',
                 output_dir=Path(__file__).parent / 'runs' / 'lora_fine_tuning',
-                lora=LoRAHyperParams(
-                    r=16,
-                    lora_alpha=32,
-                    lora_dropout=0.05,
-                ),
+                lora=LoRAHyperParams(),
                 training=TrainingHyperParams(
                     n_epochs=3,
-                    learning_rate=5e-5,
+                    learning_rate=_LEARNING_RATE,
                     warmup_steps=5,
                 ),
                 attr_device='cpu',
@@ -53,14 +51,16 @@ class LoRAFineTuningTestSuite(TestSuite):
         ]
         super().__init__(nodes)
 
-
     def run(self) -> Result[ProcScore, ProcError]:
         original_cache = dspy.settings.lm.cache
         dspy.settings.lm.cache = False
-        try:  # noqa: WPS501
+        try:
             return super().run()
+        except Exception:
+            raise
         finally:
             dspy.settings.lm.cache = original_cache
+
 
 def _main() -> None:
     dataset = TrainingSetDataset(

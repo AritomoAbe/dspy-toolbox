@@ -90,6 +90,40 @@ _TOP_TOKEN_COUNT: int = 20
 # Regex to split the rendered prompt into logical segments (matches reference Panel C)
 _SEGMENT_SPLIT_PATTERN: str = r"(<\|im_start\|>|<\|im_end\|>|\[\[.*?\]\]|\n{2,})"
 
+_LABEL_INSTRUCTION: str = 'instruction'
+_LABEL_INPUT: str = 'input'
+_LABEL_UNKNOWN: str = 'unknown'
+_INSTR_MIN_LINE_LEN: int = 20
+_PREVIEW_MAX_WIDTH: int = 60
+_LOG_SEP_60: int = 60
+_LOG_SEP_64: int = 64
+_LOG_SEP_75: int = 75
+_DELTA_RELIABLE: float = 0.05
+_DELTA_BORDERLINE: float = 0.5
+_SEGMENT_RATIO_HIGH: float = 0.003
+_SEGMENT_RATIO_MED: float = 0.001
+_NORM_EPSILON: float = 1e-9
+_IG_CPU_WARN_STEPS: int = 20
+_SEGMENT_EXPECTED_HIGH: frozenset[str] = frozenset((_LABEL_INSTRUCTION, 'email_body'))
+_SEGMENT_EXPECTED_LOW: frozenset[str] = frozenset(('system_wrapper', 'field_label', 'email_to', 'email_from'))
+
+_DEVICE_CPU: str = 'cpu'
+_FIG_MIN_W: int = 12
+_FIG_W_SCALE: float = 0.35
+_FIG_MAX_W: int = 40
+_PLOT_ROTATION: int = 90
+_COLORBAR_SHRINK: float = 0.8
+_PLOT_DPI: int = 180
+_LIG_PROGRESS_INTERVAL: int = 20
+
+_LogitLensResult = tuple[list[LayerProbe], float, int]
+_LIGResult = tuple[list[float], float]
+
+
+def _mean(vals: list[float]) -> float:
+    return sum(vals) / len(vals) if vals else float()
+
+
 class TokenAttributionAuditor(HFAttributionBase):
     """
     Stage 3 — Score How the LLM Uses the Prompt (Layer Integrated Gradients).
@@ -141,7 +175,7 @@ class TokenAttributionAuditor(HFAttributionBase):
         hf_model_name: str = _HF_DEFAULT_MODEL,
         ig_steps: int = _DEFAULT_IG_STEPS,
         internal_batch_size: int = _HF_DEFAULT_INTERNAL_BATCH,
-        attr_device: str = 'cpu',
+        attr_device: str = _DEVICE_CPU,
         target_mode: str = 'content',
         force_dtype: torch.dtype | None = None,
         output_dir: str | Path = 'runs/token_attribution',
@@ -241,13 +275,13 @@ class TokenAttributionAuditor(HFAttributionBase):
             self._logger.info(
                 "MPS warmup — compiling Metal kernels (one-time cost, ~30-60s)..."
             )
-            _wt0 = time.perf_counter()
+            wt0 = time.perf_counter()
             with torch.no_grad():
-                _dummy = torch.zeros((1, 16), dtype=torch.long, device=self._device)
-                _ = hf_model(input_ids=_dummy)
+                warmup_ids = torch.zeros((1, 16), dtype=torch.long, device=self._device)
+                hf_model(input_ids=warmup_ids)
             torch.mps.empty_cache()
             self._logger.info(
-                f"MPS warmup complete in {time.perf_counter() - _wt0:.1f}s — "
+                f"MPS warmup complete in {time.perf_counter() - wt0:.1f}s — "
                 "subsequent forward passes will be fast."
             )
 
@@ -287,7 +321,7 @@ class TokenAttributionAuditor(HFAttributionBase):
         # For 4B+ models on CPU each backward pass requires ~2-4× the model's
         # parameter memory in autograd graph storage. On 16GB machines this causes
         # swap, making each step 10-100× slower than the forward pass alone.
-        if self._device.type == "cpu" and self._ig_steps > 20:
+        if self._device.type == _DEVICE_CPU and self._ig_steps > _IG_CPU_WARN_STEPS:
             self._logger.warning(
                 f"ig_steps={self._ig_steps} on CPU with {n_layers}-layer model may be very slow. "
                 f"Each backward pass through the autograd graph can exceed 30-60 min on 16GB RAM. "
@@ -301,7 +335,7 @@ class TokenAttributionAuditor(HFAttributionBase):
 
         for index, example in enumerate(self._dataset.load()):
             self._logger.info(f"Processing example[{index}]")
-            _example_t0 = time.perf_counter()
+            example_t0 = time.perf_counter()
 
             # Generate prediction via API LLM ──────────────────────────────────
             with timed(f"example[{index}] DSpy execution", logger=self._logger):
@@ -402,7 +436,7 @@ class TokenAttributionAuditor(HFAttributionBase):
             self._logger.info(
                 "[timing] example[%d] total: %.3fs",
                 index,
-                time.perf_counter() - _example_t0,
+                time.perf_counter() - example_t0,
             )
             self._log_example(example_result)
 
@@ -442,21 +476,24 @@ class TokenAttributionAuditor(HFAttributionBase):
         scores = torch.tensor([ts.saliency for ts in er.token_saliencies], dtype=torch.float32)
         max_abs = float(scores.abs().max().item()) if scores.numel() else 1.0
         keep = self._apply_chart_threshold(scores)
-        if not keep:
-            self._logger.warning(f'_plot_lig_heatmap: all tokens filtered by threshold={self._chart_score_threshold}, skipping')
+        if len(keep) == 0:
+            self._logger.warning(
+                f'_plot_lig_heatmap: all tokens filtered by '
+                f'threshold={self._chart_score_threshold}, skipping'
+            )
             return
         filtered_scores = scores[keep].unsqueeze(0)
         filtered_labels = [er.token_saliencies[i].token for i in keep]
-        fig_w = max(12, min(0.35 * len(keep), 40))
+        fig_w = max(_FIG_MIN_W, min(_FIG_W_SCALE * len(keep), _FIG_MAX_W))
         fig, ax = plt.subplots(figsize=(fig_w, 3.5))
-        im = ax.imshow(filtered_scores.numpy(), aspect='auto', cmap='RdBu_r', vmin=0.0, vmax=max_abs)
+        im = ax.imshow(filtered_scores.numpy(), aspect='auto', cmap='RdBu_r', vmin=float(), vmax=max_abs)
         ax.set_yticks([])
         ax.set_xticks(range(len(keep)))
-        ax.set_xticklabels(filtered_labels, rotation=90, fontsize=8)
+        ax.set_xticklabels(filtered_labels, rotation=_PLOT_ROTATION, fontsize=8)
         ax.set_title(f'Token saliency (LIG) — example {er.example_index} (threshold={self._chart_score_threshold})')
-        fig.colorbar(im, ax=ax, shrink=0.8)
+        fig.colorbar(im, ax=ax, shrink=_COLORBAR_SHRINK)
         fig.tight_layout()
-        fig.savefig(out_path, dpi=180)
+        fig.savefig(out_path, dpi=_PLOT_DPI)
         plt.close(fig)
 
     def _write_lig_html_report(self, er: LIGExampleResult, out_path: Path) -> None:
@@ -523,7 +560,7 @@ small {{ color: #555; }}
             return model.get_input_embeddings()
         return None
 
-    def _get_decoder_layers(self, model: Any) -> list | None:
+    def _get_decoder_layers(self, model: Any) -> list[Any] | None:
         """Locate decoder layer list for logit lens hooks."""
         if hasattr(model, "model") and hasattr(model.model, "layers"):
             return list(model.model.layers)
@@ -539,8 +576,8 @@ small {{ color: #555; }}
         tokenizer: Any,
         input_ids: torch.Tensor,
         target_id: int,
-        decoder_layers: list,
-    ) -> tuple[list[LayerProbe], float, int]:
+        decoder_layers: list[Any],
+    ) -> _LogitLensResult:
         """
         Register a forward hook on each decoder layer to capture the residual
         stream at the last token position. Project through norm + lm_head to
@@ -575,18 +612,18 @@ small {{ color: #555; }}
         # Cast to float32 explicitly — residuals are stored as float32
         # (.detach().float().cpu()) but the model may be loaded in float16.
         # Always project in float32 for numerical stability.
-        lm_head_cpu = model.lm_head.to("cpu").float()
-        norm_cpu = model.model.norm.to("cpu").float() if hasattr(model.model, "norm") else None
+        lm_head_cpu = model.lm_head.to(_DEVICE_CPU).float()
+        norm_cpu = model.model.norm.to(_DEVICE_CPU).float() if hasattr(model.model, "norm") else None
 
         probes: list[LayerProbe] = []
         seen_top1 = False
 
-        for i in range(len(decoder_layers)):
+        for i, _ in enumerate(decoder_layers):
             resid = residuals[i].squeeze(0)
-            if norm_cpu is not None:
-                normed = norm_cpu(resid.unsqueeze(0))
-            else:
+            if norm_cpu is None:
                 normed = resid.unsqueeze(0)
+            else:
+                normed = norm_cpu(resid.unsqueeze(0))
             logits_l = lm_head_cpu(normed).squeeze(0).float()
             probs_l = logits_l.softmax(dim=-1).detach()
             rank = int((probs_l > probs_l[target_id]).sum()) + 1
@@ -621,7 +658,7 @@ small {{ color: #555; }}
         embed_layer: torch.nn.Module,
         input_ids: torch.Tensor,
         target_id: int,
-    ) -> Result[tuple[list[float], float], ProcError]:
+    ) -> Result[_LIGResult, ProcError]:
         """
         Run Captum IntegratedGradients in native model dtype.
 
@@ -661,7 +698,9 @@ small {{ color: #555; }}
 
             # Use stored model dtype on primary device.
             # CPU fallback always uses float32 for gradient stability.
-            if device != self._device:
+            if device == self._device:
+                dtype = self._model_dtype
+            else:
                 # CPU fallback path: cast to float32 for numerical stability.
                 # This is safe because:
                 #   1. We are already on CPU (no device mismatch)
@@ -671,14 +710,12 @@ small {{ color: #555; }}
                 model.float()
                 dtype = torch.float32
                 self._logger.info("CPU fallback: model cast to float32")
-            else:
-                dtype = self._model_dtype
 
             # Compute embeddings in model dtype — no float() cast.
             # Captum interpolates between these in the same dtype.
             with torch.no_grad():
-                input_embeds    = embed_layer(ids)                      # (1,T,C) dtype
-                baseline_embeds = embed_layer(torch.zeros_like(ids))    # (1,T,C) dtype
+                input_embeds = embed_layer(ids)  # (1,T,C) dtype
+                baseline_embeds = embed_layer(torch.zeros_like(ids))  # (1,T,C) dtype
 
             self._logger.info(
                 f"_run_lig: device={device.type}  "
@@ -701,10 +738,10 @@ small {{ color: #555; }}
                 call_counter[0] += 1
                 step = call_counter[0]
 
-                if step % max(1, total_calls // 20) == 0 or step == 1 or step == total_calls:
+                if step % max(1, total_calls // _LIG_PROGRESS_INTERVAL) == 0 or step == 1 or step == total_calls:
                     elapsed = time.perf_counter() - t0[0]
-                    rate = step / elapsed if elapsed > 0 else 0.0
-                    remaining = (total_calls - step) / rate if rate > 0 else 0.0
+                    rate = step / elapsed if elapsed > 0 else float()
+                    remaining = (total_calls - step) / rate if rate > 0 else float()
                     self._logger.info(
                         f"    LIG step {step:>4d}/{total_calls}  "
                         f"({step / total_calls * 100:5.1f}%)  "
@@ -736,7 +773,7 @@ small {{ color: #555; }}
 
             # L2-norm over embedding dim, normalize to [0,1], move to CPU
             token_attr = attributions[0].float().norm(dim=-1).detach().cpu()
-            token_attr = (token_attr / (token_attr.max() + 1e-9)).tolist()
+            token_attr = (token_attr / (token_attr.max() + _NORM_EPSILON)).tolist()
             conv_delta = float(delta.item())
 
             # Explicit cleanup — release the autograd graph and all interpolated
@@ -750,11 +787,10 @@ small {{ color: #555; }}
 
         try:
             try:
-                token_attr, delta = _run_on_device(self._device)
-                return Success((token_attr, delta))
+                return Success(_run_on_device(self._device))
 
             except Exception as primary_err:
-                if self._device.type == "cpu":
+                if self._device.type == _DEVICE_CPU:
                     raise  # already on CPU — no fallback
 
                 # MPS failed (OOM or autograd error) — fall back to CPU float32
@@ -765,7 +801,7 @@ small {{ color: #555; }}
                 if torch.backends.mps.is_available():
                     torch.mps.empty_cache()
 
-                token_attr, delta = _run_on_device(torch.device("cpu"))
+                token_attr, delta = _run_on_device(torch.device(_DEVICE_CPU))
 
                 # Restore model to original device + dtype after CPU fallback
                 model.to(self._device).to(self._model_dtype)
@@ -776,17 +812,17 @@ small {{ color: #555; }}
             try:
                 model.to(self._device).to(self._model_dtype)
             except Exception:
-                pass
+                ...
             return Failure(ProcError(f"Captum LIG failed: {e}"))
 
     # ── Target token resolution ────────────────────────────────────────────────
 
     # Tokens that are pure format/structure and should be skipped in "content" mode.
     # These are DSPy output format markers, whitespace, and common chat-template tokens.
-    _FORMAT_TOKENS: frozenset[str] = frozenset({
+    _FORMAT_TOKENS: frozenset[str] = frozenset((
         "[[", "]]", "##", " ##", "## ", " ", "\n", "\t", "",
         "<|im_start|>", "<|im_end|>", "<|endoftext|>",
-    })
+    ))
 
     def _resolve_target_token(
         self,
@@ -879,10 +915,10 @@ small {{ color: #555; }}
         import re as _re
         from collections import Counter as _Counter
 
-        labels = ["unknown"] * len(tokens_str)
+        labels = [_LABEL_UNKNOWN for _ in tokens_str]
 
-        if not prompt_text:
-            return ["input"] * len(tokens_str)
+        if len(prompt_text) == 0:
+            return [_LABEL_INPUT for _ in tokens_str]
 
         # Build per-token character start offsets from tokens_str.
         token_char_starts = []
@@ -913,7 +949,7 @@ small {{ color: #555; }}
             if not text:
                 return False
             # Try exact match, then stripped
-            for candidate in [text, text.strip()]:
+            for candidate in (text, text.strip()):
                 idx = prompt_text.rfind(candidate) if use_rfind else prompt_text.find(candidate)
                 if idx != -1:
                     label_span(idx, idx + len(candidate), label)
@@ -941,29 +977,33 @@ small {{ color: #555; }}
 
         # ── 3. Task instruction block ─────────────────────────────────────────
         instr_text = predictor.signature.instructions or ""
-        if instr_text and not find_and_label(instr_text, "instruction"):
+        if instr_text and not find_and_label(instr_text, _LABEL_INSTRUCTION):
             # Try matching via first substantial line
             first_line = next(
-                (l.strip() for l in instr_text.splitlines() if len(l.strip()) > 20),
-                ""
+                (
+                    line_text.strip()
+                    for line_text in instr_text.splitlines()
+                    if len(line_text.strip()) > _INSTR_MIN_LINE_LEN
+                ),
+                "",
             )
             if first_line:
                 idx = prompt_text.find(first_line)
-                if idx != -1:
-                    instr_end = idx + len(instr_text.strip())
-                    label_span(idx, min(instr_end, len(prompt_text)), "instruction")
-                    self._logger.debug("instruction matched via first-line heuristic")
-                else:
+                if idx == -1:
                     self._logger.warning(
                         "instruction text not found in prompt — will be labeled as 'input'. "
                         "Check that predictor.signature.instructions matches the rendered prompt."
                     )
+                else:
+                    instr_end = idx + len(instr_text.strip())
+                    label_span(idx, min(instr_end, len(prompt_text)), _LABEL_INSTRUCTION)
+                    self._logger.debug("instruction matched via first-line heuristic")
 
         # ── 4. Input field values ─────────────────────────────────────────────
         field_labels = {
-            "email_from":   "email_from",
-            "email_to":     "email_to",
-            "email_body":   "email_body",
+            "email_from": "email_from",
+            "email_to": "email_to",
+            "email_body": "email_body",
             "current_date": "current_date",
         }
         for field_name, seg_label in field_labels.items():
@@ -984,17 +1024,15 @@ small {{ color: #555; }}
             find_and_label(demo_text, f"demo_{demo_idx}")
 
         # ── 6. Fill remaining unknowns as input ──────────────────────────────
-        for i in range(len(labels)):
-            if labels[i] == "unknown":
-                labels[i] = "input"
+        for i, cur_label in enumerate(labels):
+            if cur_label == _LABEL_UNKNOWN:
+                labels[i] = _LABEL_INPUT
 
         # ── 7. Log labeling summary ───────────────────────────────────────────
         label_counts = _Counter(labels)
-        self._logger.debug(
-            "segment label distribution: " +
-            ", ".join(f"{k}={v}" for k, v in sorted(label_counts.items()))
-        )
-        if label_counts.get("instruction", 0) == 0:
+        dist_str = ', '.join(f'{k}={v}' for k, v in sorted(label_counts.items()))
+        self._logger.debug(f"segment label distribution: {dist_str}")
+        if label_counts.get(_LABEL_INSTRUCTION, 0) == 0:
             self._logger.warning(
                 "No tokens labeled as 'instruction'. "
                 "Panel C instruction saliency will be missing."
@@ -1014,7 +1052,7 @@ small {{ color: #555; }}
 
         Returns a list of labels, one per token, same length as tokens_str.
         """
-        labels = ["unknown"] * len(tokens_str)
+        labels = [_LABEL_UNKNOWN for _ in tokens_str]
         cursor = 0
 
         def assign_range(start: int, end: int, label: str) -> None:
@@ -1037,16 +1075,20 @@ small {{ color: #555; }}
             cursor = end
 
         # Remaining tokens = input
-        assign_range(cursor, len(labels), "input")
+        assign_range(cursor, len(labels), _LABEL_INPUT)
 
         return labels
 
     def _demo_to_text(self, demo: Any, signature: Any) -> str:
         lines = []
         for field_name in list(signature.input_fields) + list(signature.output_fields):
-            val = getattr(demo, field_name, None) or (
-                demo.get(field_name, "") if hasattr(demo, "get") else ""
-            )
+            attr_val = getattr(demo, field_name, None)
+            if attr_val:
+                val = attr_val
+            elif hasattr(demo, 'get'):
+                val = demo.get(field_name, '')
+            else:
+                val = ''
             lines.append(f"{field_name}: {val}")
         return "\n".join(lines)
 
@@ -1074,12 +1116,12 @@ small {{ color: #555; }}
 
         results: list[SegmentSaliency] = []
         for label, scores in sorted(by_label.items()):
-            avg = sum(scores) / len(scores) if scores else 0.0
+            avg = sum(scores) / len(scores) if scores else float()
             preview_raw = next(
                 (p for p in split_parts if label.replace("_", " ") in p.lower()),
                 label,
             )
-            preview = textwrap.shorten(preview_raw, width=60, placeholder="…")
+            preview = textwrap.shorten(preview_raw, width=_PREVIEW_MAX_WIDTH, placeholder="…")
             results.append(SegmentSaliency(
                 label=label,
                 text_preview=preview,
@@ -1102,7 +1144,7 @@ small {{ color: #555; }}
             s.avg_saliency
             for er in example_results
             for s in er.segment_saliencies
-            if s.label == "instruction"
+            if s.label == _LABEL_INSTRUCTION
         ]
         demo_sals = [
             s.avg_saliency
@@ -1139,9 +1181,6 @@ small {{ color: #555; }}
             if len(deduped) >= _TOP_TOKEN_COUNT:
                 break
 
-        def _mean(vals: list[float]) -> float:
-            return sum(vals) / len(vals) if vals else 0.0
-
         return LIGAttributionResult(
             avg_input_saliency=_mean(input_sals),
             avg_instruction_saliency=_mean(instr_sals),
@@ -1159,9 +1198,9 @@ small {{ color: #555; }}
     def _log_example(self, er: LIGExampleResult) -> None:
         # Delta interpretation
         delta = er.convergence_delta
-        if abs(delta) < 0.05:
+        if abs(delta) < _DELTA_RELIABLE:
             delta_comment = "reliable"
-        elif abs(delta) < 0.5:
+        elif abs(delta) < _DELTA_BORDERLINE:
             delta_comment = "borderline — consider increasing ig_steps"
         else:
             delta_comment = "unreliable — increase ig_steps to 200+"
@@ -1197,7 +1236,7 @@ small {{ color: #555; }}
         self._logger.info(
             f"    {'layer':>5s}  {'rank':>6s}  {'prob':>7s}  note"
         )
-        self._logger.info(f"    {'-' * 60}")
+        self._logger.info(f"    {'-' * _LOG_SEP_60}")
 
         n_layers = len(er.layer_probes)
         for probe in er.layer_probes:
@@ -1228,7 +1267,6 @@ small {{ color: #555; }}
 
         # Panel B story — interpret the overall trajectory
         first_top1_layer = next((p.layer_index for p in er.layer_probes if p.first_top1), -1)
-        final_rank = er.layer_probes[-1].target_rank if er.layer_probes else -1
         n_layers = len(er.layer_probes)
 
         self._logger.info("  Panel B — Trajectory interpretation:")
@@ -1282,31 +1320,26 @@ small {{ color: #555; }}
         self._logger.info(
             f"    {'segment':<20s}  {'avg_sal':>7s}  {'tokens':>7s}  {'ratio':>8s}  comment"
         )
-        self._logger.info(f"    {'-' * 75}")
-
-        _RATIO_HIGH = 0.003
-        _RATIO_MED = 0.001
-        _EXPECTED_HIGH = {"email_body", "instruction"}
-        _EXPECTED_LOW = {"system_wrapper", "field_label", "email_to", "email_from"}
+        self._logger.info(f"    {'-' * _LOG_SEP_75}")
 
         for seg in er.segment_saliencies:
             n = seg.token_count
-            ratio = seg.avg_saliency / n if n > 0 else 0.0
+            ratio = seg.avg_saliency / n if n > 0 else float()
 
-            if ratio >= _RATIO_HIGH:
-                if seg.label in _EXPECTED_HIGH:
+            if ratio >= _SEGMENT_RATIO_HIGH:
+                if seg.label in _SEGMENT_EXPECTED_HIGH:
                     comment = "✓ model reads this"
-                elif seg.label in _EXPECTED_LOW:
+                elif seg.label in _SEGMENT_EXPECTED_LOW:
                     comment = "⚠ over-weighted — should not dominate"
                 else:
                     comment = "✓ active"
-            elif ratio >= _RATIO_MED:
-                if seg.label in _EXPECTED_HIGH:
+            elif ratio >= _SEGMENT_RATIO_MED:
+                if seg.label in _SEGMENT_EXPECTED_HIGH:
                     comment = "⚠ under-weighted — should be higher"
                 else:
                     comment = "~ borderline"
             else:
-                if seg.label in _EXPECTED_HIGH:
+                if seg.label in _SEGMENT_EXPECTED_HIGH:
                     comment = "✗ ignored — prompt optimization needed"
                 else:
                     comment = "~ ignored (ok if not critical)"
@@ -1318,10 +1351,10 @@ small {{ color: #555; }}
 
     def _log_summary(self, result: LIGAttributionResult) -> None:
         self._logger.info(
-            f"\n{'─' * 64}\n"
+            f"\n{'─' * _LOG_SEP_64}\n"
             f"LIG Attribution Summary  [{result.model_name}]  "
             f"{result.n_examples} examples\n"
-            f"{'─' * 64}"
+            f"{'─' * _LOG_SEP_64}"
         )
         self._logger.info(
             f"  Panel C — Segment saliency:\n"
@@ -1336,7 +1369,7 @@ small {{ color: #555; }}
         )
         self._logger.info(
             f"  Convergence delta: {result.avg_convergence_delta:.4f}  "
-            f"({'reliable' if result.avg_convergence_delta < 0.05 else 'increase ig_steps'})"
+            f"({'reliable' if result.avg_convergence_delta < _DELTA_RELIABLE else 'increase ig_steps'})"
         )
         self._logger.info("  Top salient tokens (Panel A, global):")
         for ts in result.top_saliency_tokens[:5]:

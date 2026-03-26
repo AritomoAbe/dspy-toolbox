@@ -10,6 +10,7 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s %(name)s: %(messag
 
 LOGGER = logging.getLogger(__name__)
 
+
 class MeetingInviteAbeGPT(MeetingInviteLLM):
     def _ensure_dspy_configured(self) -> None:
         if self._dspy_configured:
@@ -20,30 +21,33 @@ class MeetingInviteAbeGPT(MeetingInviteLLM):
         self._logger.info("DSPy configured with Ollama model=%s base_url=%s",
                           self._config.name.value, self._config.base_url)
 
+
 config = BaseLLMConfig()
 llm = MeetingInviteAbeGPT(config=config)
 
 original_cache = dspy.settings.lm.cache
 dspy.settings.lm.cache = False
-
 try:
     res = llm.invoke(
         payload=MeetingInvitePayload(
             email_from="1@test.com",
             email_to="2@test.com",
-            email_body="Hi Alex,\n\n"
-                       "Let's catch up on the retrospective. I can do Tuesday at lunchtime for 1 hour. (I'm on Paris time.)\n\n"
-                       "Cheers,"
-                       "Chris",
+            email_body=(
+                "Hi Alex,\n\n"
+                "Let's catch up on the retrospective. "
+                "I can do Tuesday at lunchtime for 1 hour. "
+                "(I'm on Paris time.)\n\n"
+                "Cheers,Chris"
+            ),
             current_date="2024-01-08",
         )
     )
-
-    assert is_successful(res)
-    meeting_info = res.unwrap()
-
-    LOGGER.info(f"Done. Extracted: {meeting_info}")
+except Exception:
+    raise
 finally:
     dspy.settings.lm.cache = original_cache
 
+assert is_successful(res)
+meeting_info = res.unwrap()
 
+LOGGER.info(f"Done. Extracted: {meeting_info}")

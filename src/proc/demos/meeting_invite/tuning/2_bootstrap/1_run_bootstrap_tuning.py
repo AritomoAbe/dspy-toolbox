@@ -33,18 +33,18 @@ def _main() -> None:
 
     trainset = dataset.load()
 
+    LOGGER.info("Starting BootstrapFewShot optimisation on %d examples…", len(trainset))
     original_cache = dspy.settings.lm.cache
     dspy.settings.lm.cache = False
-    try:  # noqa: WPS501
-        LOGGER.info("Starting BootstrapFewShot optimisation on %d examples…", len(trainset))
+    try:
         optimized = optimizer.compile(llm, trainset=trainset)
-        LOGGER.info("BootstrapFewShot complete.")
-
-        save_path = Path(__file__).parent / f'optimized_extractor_bootstrap_{time.time()}.json'
-        optimized.save(str(save_path))
-
+    except Exception:
+        raise
     finally:
         dspy.settings.lm.cache = original_cache
+    save_path = Path(__file__).parent / f'optimized_extractor_bootstrap_{time.time()}.json'
+    optimized.save(str(save_path))
+    LOGGER.info("BootstrapFewShot complete.")
 
 
 if __name__ == "__main__":

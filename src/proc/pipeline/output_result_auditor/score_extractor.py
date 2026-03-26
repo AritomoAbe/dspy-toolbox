@@ -9,8 +9,8 @@ INVALID_SCORE = -1
 class ScoreExtractor(ABC):
     @abstractmethod
     def extraction_metric(self, example: dspy.Example, prediction: dspy.Prediction, trace: Any = None) -> float:
-        pass
+        ...
 
     @abstractmethod
     def field_metric(self, field: str, expected_val: Any, predicted_val: Any) -> bool:
-        pass
+        ...

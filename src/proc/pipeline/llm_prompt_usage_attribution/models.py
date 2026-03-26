@@ -2,6 +2,9 @@ from enum import Enum
 
 from pydantic import BaseModel
 
+_EPSILON: float = 1e-9
+_TOP5: int = 5
+
 
 class PromptSegmentType(Enum):
     """
@@ -46,7 +49,7 @@ class ExampleAttribution(BaseModel):
     def instruction_attribution(self) -> float:
         scores = [s.attribution_score for s in self.segments
                   if s.segment_type == PromptSegmentType.INSTRUCTION]
-        return scores[0] if scores else 0.0
+        return scores[0] if scores else float()
 
     @property
     def demo_attributions(self) -> list[float]:
@@ -56,7 +59,7 @@ class ExampleAttribution(BaseModel):
     @property
     def avg_demo_attribution(self) -> float:
         scores = self.demo_attributions
-        return sum(scores) / len(scores) if scores else 0.0
+        return sum(scores) / len(scores) if scores else float()
 
 
 class AttributionResult(BaseModel):
@@ -175,7 +178,8 @@ class LIGExampleResult(BaseModel):
 
     @property
     def top5_tokens(self) -> list[TokenSaliency]:
-        return sorted(self.token_saliencies, key=lambda t: t.saliency, reverse=True)[:5]
+        ranked = sorted(self.token_saliencies, key=lambda t: t.saliency, reverse=True)
+        return ranked[:_TOP5]
 
     @property
     def input_vs_boilerplate_ratio(self) -> float:
@@ -186,8 +190,8 @@ class LIGExampleResult(BaseModel):
         """
         input_seg = next((s for s in self.segment_saliencies if s.label == "input"), None)
         instr_seg = next((s for s in self.segment_saliencies if s.label == "instruction"), None)
-        if not input_seg or not instr_seg or instr_seg.avg_saliency < 1e-9:
-            return 0.0
+        if not input_seg or not instr_seg or instr_seg.avg_saliency < _EPSILON:
+            return float()
         return input_seg.avg_saliency / instr_seg.avg_saliency
 
 

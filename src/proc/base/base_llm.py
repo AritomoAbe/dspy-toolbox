@@ -29,7 +29,7 @@ class BaseLLMConfig(BaseModel):
 
 
 class PromptPayLoad(BaseModel):
-    pass
+    """Base class for structured LLM prompt inputs."""
 
 
 class PromptResponse(BaseModel):
@@ -55,7 +55,7 @@ class BaseLLM(abc.ABC, Generic[IN, OUT]):
 
     @abc.abstractmethod
     def invoke(self, payload: IN) -> Result[OUT, ProcError]:
-        pass
+        ...
 
     @property
     def config(self) -> BaseLLMConfig:

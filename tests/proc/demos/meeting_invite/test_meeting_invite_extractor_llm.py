@@ -7,6 +7,7 @@ from proc.demos.meeting_invite.meeting_invite_extractor_llm import (
     MeetingInviteLLM,
     MeetingInvitePayload,
     _dict_to_email_meeting_info,
+    _parse_llm_output,
     _strip_fences,
 )
 from proc.demos.meeting_invite.models import EmailMeetingInfo, _DEFAULT_DURATION, _UNKNOWN_TZ
@@ -58,20 +59,20 @@ class TestParse:
 
     def test_valid_json_returns_model(self) -> None:
         raw = json.dumps({_WINDOWS_KEY: []})
-        assert isinstance(MeetingInviteLLM._parse(raw), EmailMeetingInfo)
+        assert isinstance(_parse_llm_output(raw), EmailMeetingInfo)
 
     def test_fenced_json_returns_model(self) -> None:
         inner = json.dumps({_WINDOWS_KEY: []})
         raw = f"```json\n{inner}\n```"
-        assert isinstance(MeetingInviteLLM._parse(raw), EmailMeetingInfo)
+        assert isinstance(_parse_llm_output(raw), EmailMeetingInfo)
 
     def test_invalid_json_returns_defaults(self) -> None:
-        result = MeetingInviteLLM._parse("not json")
+        result = _parse_llm_output("not json")
         assert result.sender_iana_timezone == _UNKNOWN_TZ
         assert result.duration_minutes == _DEFAULT_DURATION
 
     def test_empty_string_returns_defaults(self) -> None:
-        result = MeetingInviteLLM._parse("")
+        result = _parse_llm_output("")
         assert result.sender_iana_timezone == _UNKNOWN_TZ
 
 

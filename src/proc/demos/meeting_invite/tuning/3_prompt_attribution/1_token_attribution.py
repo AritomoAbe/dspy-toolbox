@@ -19,6 +19,29 @@ from proc.pipeline.llm_prompt_usage_attribution.token_attribution_auditor import
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s %(name)s: %(message)s')
 
+_IG_STEPS: int = 360
+_SWAP_ALERT_MB: int = 200
+
+
+def _watch_swap(stop: threading.Event) -> None:
+    baseline = psutil.swap_memory().used
+    while not stop.is_set():
+        s = psutil.swap_memory()
+        v = psutil.virtual_memory()
+        delta = (s.used - baseline) / 1024 ** 2
+        if delta > _SWAP_ALERT_MB:
+            logging.warning(
+                f"SWAP +{delta:.0f} MB | "
+                f"RAM free: {v.available / 1024 ** 2:.0f} MB | "
+                f"RAM used: {v.percent:.0f}%"
+            )
+        stop.wait(10)
+
+
+def _stop_watcher(stop: threading.Event, watcher: threading.Thread) -> None:
+    stop.set()
+    watcher.join()
+
 
 class TokenAttributionTestSuite(TestSuite):
 
@@ -38,7 +61,7 @@ class TokenAttributionTestSuite(TestSuite):
                 llm=llm,
                 scorer=scorer,
                 hf_model_name=h_model_name,
-                ig_steps=360,
+                ig_steps=_IG_STEPS,
                 attr_device="cpu",
                 force_dtype=torch.float32,
             ),
@@ -48,32 +71,18 @@ class TokenAttributionTestSuite(TestSuite):
 
     def run(self) -> Result[ProcScore, ProcError]:
         stop = threading.Event()
-
-        def _watch_swap():
-            baseline = psutil.swap_memory().used
-            while not stop.is_set():
-                s = psutil.swap_memory()
-                v = psutil.virtual_memory()
-                delta = (s.used - baseline) / 1024 ** 2
-                if delta > 200:  # alert after 200 MB new swap
-                    logging.warning(
-                        f"SWAP +{delta:.0f} MB | "
-                        f"RAM free: {v.available / 1024 ** 2:.0f} MB | "
-                        f"RAM used: {v.percent:.0f}%"
-                    )
-                stop.wait(10)
-
-        watcher = threading.Thread(target=_watch_swap, daemon=True)
+        watcher = threading.Thread(target=_watch_swap, args=(stop,), daemon=True)
         watcher.start()
 
         original_cache = dspy.settings.lm.cache
         dspy.settings.lm.cache = False
-        try:  # noqa: WPS501
+        try:
             return super().run()
+        except Exception:
+            raise
         finally:
             dspy.settings.lm.cache = original_cache
-            stop.set()
-            watcher.join()
+            _stop_watcher(stop, watcher)
 
 
 def _main() -> None:

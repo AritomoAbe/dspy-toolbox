@@ -38,7 +38,7 @@ class SignalToNoiseRatio(ProcNode):
     """
     SNR formula is mean / (sqrt(variance) + ε). For a discrete classifier scoring 0/1,
     the variance is entirely driven by how often the model flips its answer across runs. So the math reduces to:
-    
+
     - If the model never flips → variance ≈ 0 → SNR artificially huge (like your training set result)
     - If the model flips on ~20% of runs → variance ≈ 0.16 → SNR in the 2–10 range
     - If the model flips on ~50% of runs → variance ≈ 0.25 → SNR near 1 (problematic)

@@ -10,4 +10,4 @@ from proc.base.proc_score import ProcScore
 class ProcNode(Protocol):
     @abc.abstractmethod
     def invoke(self) -> Result[ProcScore, ProcError]:
-        pass
+        ...

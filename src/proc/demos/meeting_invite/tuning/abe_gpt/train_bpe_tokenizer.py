@@ -24,6 +24,11 @@ import logging
 from pathlib import Path
 from typing import Iterable
 
+_BOS_TOKEN: str = '<|bos|>'
+_EOS_TOKEN: str = '<|eos|>'
+_VOCAB_SIZE_8K: int = 8000
+_VOCAB_SIZE_16K: int = 16000
+
 logging.basicConfig(level=logging.INFO, format='%(levelname)s %(name)s: %(message)s')
 
 LOGGER = logging.getLogger(__name__)
@@ -36,9 +41,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--vocab-size",
         type=int,
-        default=8000,
-        choices=(8000, 16000),
-        help="Tokenizer vocabulary size (default: 8000)",
+        default=_VOCAB_SIZE_8K,
+        choices=(_VOCAB_SIZE_8K, _VOCAB_SIZE_16K),
+        help=f"Tokenizer vocabulary size (default: {_VOCAB_SIZE_8K})",
     )
     parser.add_argument(
         "--min-frequency",
@@ -71,15 +76,7 @@ def read_text(path: Path) -> str:
 
 
 def detect_special_tokens(text: str) -> list[str]:
-    candidates = [
-        "[UNK]",
-        "<|pad|>",
-        "<|bos|>",
-        "<|eos|>",
-        "<|email_start|>",
-        "<|email_end|>",
-    ]
-    tokens: list[str] = ["[UNK]", "<|pad|>", "<|bos|>", "<|eos|>"]
+    tokens: list[str] = ["[UNK]", "<|pad|>", _BOS_TOKEN, _EOS_TOKEN]
     for token in ("<|email_start|>", "<|email_end|>"):
         if token in text:
             tokens.append(token)
@@ -115,8 +112,8 @@ def train_tokenizer(input_corpus: Path, output_dir: Path, vocab_size: int, min_f
 
     tokenizer.train([str(input_corpus)], trainer)
 
-    bos = "<|bos|>" if "<|bos|>" in special_tokens else None
-    eos = "<|eos|>" if "<|eos|>" in special_tokens else None
+    bos = _BOS_TOKEN if _BOS_TOKEN in special_tokens else None
+    eos = _EOS_TOKEN if _EOS_TOKEN in special_tokens else None
     if bos and eos:
         tokenizer.post_processor = processors.TemplateProcessing(
             single=f"{bos} $A {eos}",
@@ -158,14 +155,18 @@ def train_tokenizer(input_corpus: Path, output_dir: Path, vocab_size: int, min_f
 def chunk_text(text: str, max_len: int = 2000) -> Iterable[str]:
     start = 0
     while start < len(text):
-        yield text[start : start + max_len]
+        yield text[start:start + max_len]
         start += max_len
 
 
 def print_stats(tokenizer, text: str) -> None:
+    email_sample = (
+        "<|email_start|>\nFrom: alice@example.com\nTo: bob@example.com\n"
+        "Please review the attached deck.\n<|email_end|>"
+    )
     pieces = [
         "Subject: Meeting tomorrow at 10\nCould we move it to 11?",
-        "<|email_start|>\nFrom: alice@example.com\nTo: bob@example.com\nPlease review the attached deck.\n<|email_end|>",
+        email_sample,
         text[:1000] if text else "",
     ]
     LOGGER.info("\nSample tokenization stats:")
@@ -173,9 +174,26 @@ def print_stats(tokenizer, text: str) -> None:
         if not piece:
             continue
         enc = tokenizer.encode(piece)
-        LOGGER.info(f"  Sample {i}: chars={len(piece):4d}, tokens={len(enc.ids):4d}, chars/token={len(piece)/max(len(enc.ids),1):.2f}")
+        n_chars = len(piece)
+        n_tokens = len(enc.ids)
+        chars_per_token = n_chars / max(n_tokens, 1)
+        LOGGER.info(
+            f"  Sample {i}: chars={n_chars:4d}, tokens={n_tokens:4d}, "
+            f"chars/token={chars_per_token:.2f}"
+        )
         preview = enc.tokens[:24]
         LOGGER.info(f"    Tokens preview: {preview}")
+
+
+def _log_training_summary(args: argparse.Namespace, tokenizer, special_tokens: list[str]) -> None:
+    LOGGER.info("Tokenizer training complete.")
+    LOGGER.info(f"Input corpus:        {args.input_corpus}")
+    LOGGER.info(f"Output directory:    {args.output_dir}")
+    LOGGER.info(f"Requested vocab:     {args.vocab_size}")
+    LOGGER.info(f"Actual vocab:        {tokenizer.get_vocab_size()}")
+    LOGGER.info(f"Min frequency:       {args.min_frequency}")
+    LOGGER.info(f"Special tokens:      {special_tokens}")
+    LOGGER.info("Artifacts written: tokenizer.json, vocab.json, merges.txt, tokenizer_config.json")
 
 
 def main() -> None:
@@ -190,14 +208,7 @@ def main() -> None:
         min_frequency=args.min_frequency,
     )
 
-    LOGGER.info("Tokenizer training complete.")
-    LOGGER.info(f"Input corpus:        {args.input_corpus}")
-    LOGGER.info(f"Output directory:    {args.output_dir}")
-    LOGGER.info(f"Requested vocab:     {args.vocab_size}")
-    LOGGER.info(f"Actual vocab:        {tokenizer.get_vocab_size()}")
-    LOGGER.info(f"Min frequency:       {args.min_frequency}")
-    LOGGER.info(f"Special tokens:      {special_tokens}")
-    LOGGER.info(f"Artifacts written:   tokenizer.json, vocab.json, merges.txt, tokenizer_config.json")
+    _log_training_summary(args, tokenizer, special_tokens)
 
     if args.show_stats:
         print_stats(tokenizer, text)

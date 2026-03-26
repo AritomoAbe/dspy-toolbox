@@ -66,9 +66,9 @@ class _InnerModel(nn.Module):
         # These names must match what _get_embed_layer / _get_decoder_layers
         # look for in LIGAttributionAuditor:
         self.embed_tokens = gpt.token_embedding_table   # nn.Embedding
-        self.layers       = list(gpt.blocks)            # list of Block modules
-        self.norm         = gpt.ln_f                    # final LayerNorm
-        self._gpt         = gpt
+        self.layers = list(gpt.blocks)            # list of Block modules
+        self.norm = gpt.ln_f                    # final LayerNorm
+        self._gpt = gpt
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self._gpt.blocks(x)
@@ -92,12 +92,12 @@ class GPTModelAdapter(nn.Module):
     def __init__(self, gpt: nn.Module):
         super().__init__()
         self._logger = logging.getLogger(__name__)
-        self.model   = _InnerModel(gpt)
+        self.model = _InnerModel(gpt)
         self.lm_head = gpt.lm_head
-        self._gpt    = gpt
+        self._gpt = gpt
 
         # Expose config attributes the auditor may read
-        self.config  = type("Config", (), {
+        self.config = type("Config", (), {
             "num_hidden_layers": len(list(gpt.blocks)),
         })()
 
@@ -123,10 +123,10 @@ class GPTModelAdapter(nn.Module):
         pos_ids = torch.arange(T, device=device)
         pos_emb = self._gpt.position_embedding_table(pos_ids)
 
-        x       = tok_emb + pos_emb                                     # (B, T, C)
-        x       = self._gpt.blocks(x)                                   # (B, T, C)
-        x       = self._gpt.ln_f(x)                                     # (B, T, C)
-        logits  = self._gpt.lm_head(x)                                  # (B, T, vocab)
+        x = tok_emb + pos_emb                                     # (B, T, C)
+        x = self._gpt.blocks(x)                                   # (B, T, C)
+        x = self._gpt.ln_f(x)                                     # (B, T, C)
+        logits = self._gpt.lm_head(x)                                  # (B, T, vocab)
 
         return _CausalLMOutput(logits=logits)
 
@@ -221,7 +221,7 @@ class GPTTokenizerAdapter:
         """
         parts = []
         for msg in messages:
-            role    = msg.get("role", "")
+            role = msg.get("role", "")
             content = msg.get("content", "")
             parts.append(f"[{role.upper()}] {content}")
         return "\n".join(parts)
@@ -229,12 +229,14 @@ class GPTTokenizerAdapter:
     def _safe_encode(self, text: str) -> list[int]:
         try:
             result = self._encode_fn(text)
-            return result if result else [0]
         except Exception as e:
             self._logger.warning(f'Encoding failed: {e}')
             return [0]
+        return result if result else [0]
+
 
 # ── GptLIGAttributionAuditor ───────────────────────────────────────────────────
+
 
 class GptLIGAttributionAuditor:
     """
@@ -275,7 +277,7 @@ class GptLIGAttributionAuditor:
         )
         from returns.result import Success
 
-        hf_model     = GPTModelAdapter(gpt_model)
+        hf_model = GPTModelAdapter(gpt_model)
         hf_tokenizer = GPTTokenizerAdapter(encode_fn, decode_fn, vocab_size)
 
         instance = TokenAttributionAuditor(
@@ -288,10 +290,7 @@ class GptLIGAttributionAuditor:
         #   new: single self._device
         #   old: separate self._attr_device + self._inference_device
         def _load_model_override(self_inner):
-            device = (
-                getattr(self_inner, "_device", None)
-                or getattr(self_inner, "_attr_device", None)
-            )
+            device = getattr(self_inner, "_device", None) or getattr(self_inner, "_attr_device", None)
             hf_model.eval()
             if device is not None:
                 hf_model.to(device)

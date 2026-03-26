@@ -32,6 +32,7 @@ from typing import Any
 EMAIL_START = "<|email_start|>"
 EMAIL_END = "<|email_end|>"
 FIELD_SEP = "\n"
+_STORE_TRUE: str = 'store_true'
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s %(name)s: %(message)s')
 
@@ -46,22 +47,22 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("output_txt", type=Path, help="Path to output corpus .txt file")
     parser.add_argument(
         "--include-expected",
-        action="store_true",
+        action=_STORE_TRUE,
         help="Include the 'expected' JSON payload in the corpus as text",
     )
     parser.add_argument(
         "--body-only",
-        action="store_true",
+        action=_STORE_TRUE,
         help="Write only email bodies, separated by blank lines and end markers",
     )
     parser.add_argument(
         "--lowercase",
-        action="store_true",
+        action=_STORE_TRUE,
         help="Lowercase all text before writing the corpus",
     )
     parser.add_argument(
         "--dedupe",
-        action="store_true",
+        action=_STORE_TRUE,
         help="Deduplicate identical rendered examples",
     )
     parser.add_argument(
@@ -162,7 +163,8 @@ def main() -> int:
             break
 
     args.output_txt.parent.mkdir(parents=True, exist_ok=True)
-    corpus = "\n\n".join(rendered_examples).strip() + "\n"
+    joined = "\n\n".join(rendered_examples).strip()
+    corpus = f"{joined}\n"
     args.output_txt.write_text(corpus, encoding="utf-8")
 
     total_chars = len(corpus)
@@ -170,15 +172,16 @@ def main() -> int:
     LOGGER.info(f"Wrote {len(rendered_examples)} examples to {args.output_txt}")
     LOGGER.info(f"Characters: {total_chars:,}")
     LOGGER.info(f"Lines: {total_lines:,}")
-    LOGGER.info(
-        "Mode: "
-        + ("body-only" if args.body_only else "structured email")
-        + (" + expected" if args.include_expected else "")
-        + (" + lowercase" if args.lowercase else "")
-        + (" + dedupe" if args.dedupe else "")
-    )
+    mode_parts = ["body-only" if args.body_only else "structured email"]
+    if args.include_expected:
+        mode_parts.append("+ expected")
+    if args.lowercase:
+        mode_parts.append("+ lowercase")
+    if args.dedupe:
+        mode_parts.append("+ dedupe")
+    LOGGER.info(f"Mode: {' '.join(mode_parts)}")
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main())

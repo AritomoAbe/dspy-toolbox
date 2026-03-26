@@ -19,7 +19,7 @@ class AdapterSaveStatus(StrEnum):
     FAILED = "failed"
 
 
-_FLOAT_ZERO: float = 0.0
+_FLOAT_ZERO: float = float()
 _FLOAT_ONE: float = 1.0
 
 _DEFAULT_N_EPOCHS: int = 3

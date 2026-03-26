@@ -31,6 +31,24 @@ pytest
 - `mypy` — configured in `setup.cfg` under `[mypy]`; strict mode (`disallow_untyped_defs`, `disallow_any_unimported`, `disallow_subclassing_any`, etc.)
 - `pytest` — test coverage must stay at **95% or above**; enforced automatically via `--cov-fail-under=95` in `pytest.ini`
 
+### Handling linter and type-checker violations
+
+Fix violations in code — **never** suppress them by:
+- Adding or extending entries in `per-file-ignores` in `setup.cfg`
+- Adding or extending the global `ignore =` line in `setup.cfg` under `[flake8]`
+- Adding `[mypy-*]` sections to `setup.cfg` to relax type checking for a module
+- Adding `# noqa` comments to source files
+- Adding `# type: ignore` annotations to source files
+
+**The existing suppression lists must never grow.** If a new violation appears, fix it in code.
+
+The only accepted suppressions are:
+- `WPS202` on files whose sole purpose is defining models/constants (i.e. `models.py` files) — these legitimately need many members
+- `# type: ignore[no-untyped-call]` for calls into untyped third-party library internals (e.g. `torch.Tensor.backward()`, `model.eval()`) where there is no alternative
+- `# type: ignore[assignment]` for PEFT/HuggingFace model assignment incompatibilities that are safe at runtime but untypeable with current stubs
+
+All other violations must be resolved in code: extract methods, add named constants, use type aliases, restructure conditionals, split complex functions, etc.
+
 ## Coding Conventions
 
 1. **No raw dicts for structured data** — every JSON-shaped structure (function parameters, return values, model fields, API payloads, etc.) must be represented by a Pydantic `BaseModel`. Never use `dict` as a public interface boundary.

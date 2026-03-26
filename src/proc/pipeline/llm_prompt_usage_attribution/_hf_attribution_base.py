@@ -8,8 +8,8 @@ from typing import Any
 
 import torch
 from dspy.adapters import ChatAdapter
-from returns.result import Failure, Result, Success
 from peft import PeftModel
+from returns.result import Failure, Result, Success
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from proc.base.dspy_llm import DSpyLLM
@@ -21,7 +21,12 @@ from proc.pipeline.output_result_auditor.score_extractor import ScoreExtractor
 
 _HF_DEFAULT_MODEL: str = 'Qwen/Qwen2.5-1.5B-Instruct'
 _HF_DEFAULT_INTERNAL_BATCH: int = 1
-_HF_DEFAULT_CHART_SCORE_THRESHOLD: float = 0.0
+_HF_DEFAULT_CHART_SCORE_THRESHOLD: float = float()
+
+_DEVICE_CPU: str = 'cpu'
+_DEVICE_MPS: str = 'mps'
+_COLOR_MIN_OPACITY: float = 0.12
+_COLOR_RANGE: float = 0.58
 
 
 class HFAttributionBase(ProcNode):
@@ -56,7 +61,7 @@ class HFAttributionBase(ProcNode):
         scorer: ScoreExtractor,
         hf_model_name: str = _HF_DEFAULT_MODEL,
         internal_batch_size: int = _HF_DEFAULT_INTERNAL_BATCH,
-        attr_device: str = 'cpu',
+        attr_device: str = _DEVICE_CPU,
         force_dtype: torch.dtype | None = None,
         output_dir: str | Path = 'runs/attribution',
         save_html: bool = True,
@@ -72,22 +77,24 @@ class HFAttributionBase(ProcNode):
         self._internal_batch_size = internal_batch_size
         self._device = self._validate_device(torch.device(attr_device))
         self._force_dtype = force_dtype
-        if force_dtype is not None:
-            self._load_dtype: torch.dtype = force_dtype
+        if force_dtype is None:
+            if self._device.type == _DEVICE_CPU:
+                self._load_dtype: torch.dtype = torch.float32
+                self._logger.info(
+                    'dtype: float32 (CPU — no hardware fp16 units; '
+                    'float32 gives better gradient stability with no speed penalty)',
+                )
+            else:
+                self._load_dtype = torch.float16
+                self._logger.info('dtype: float16 (%s — hardware-accelerated fp16)', self._device.type)
+        else:
+            auto_dtype = 'float32' if self._device.type == _DEVICE_CPU else 'float16'
+            self._load_dtype = force_dtype
             self._logger.info(
                 'dtype override: force_dtype=%s (auto would have chosen %s)',
                 force_dtype,
-                'float32' if self._device.type == 'cpu' else 'float16',
+                auto_dtype,
             )
-        elif self._device.type == 'cpu':
-            self._load_dtype = torch.float32
-            self._logger.info(
-                'dtype: float32 (CPU — no hardware fp16 units; '
-                'float32 gives better gradient stability with no speed penalty)',
-            )
-        else:
-            self._load_dtype = torch.float16
-            self._logger.info('dtype: float16 (%s — hardware-accelerated fp16)', self._device.type)
 
         self._peft_model_id = peft_model_id
         self._save_html = save_html
@@ -134,25 +141,25 @@ class HFAttributionBase(ProcNode):
         Performs an autograd smoke-test at init time and silently falls back to
         CPU if MPS is unavailable or autograd is broken in this PyTorch build.
         """
-        if requested.type != 'mps':
-            self._logger.info('Attribution device: %s', requested)
-            return requested
-        if not torch.backends.mps.is_available():
+        if requested.type == _DEVICE_MPS:
+            if torch.backends.mps.is_available():
+                try:
+                    t = torch.ones((2, 2), device=_DEVICE_MPS, requires_grad=True)
+                    (t * t).sum().backward()  # type: ignore[no-untyped-call]
+                    del t
+                    torch.mps.empty_cache()
+                    self._logger.info(
+                        'MPS autograd validated — using MPS for attribution. '
+                        'Expected speedup: 5-10× over CPU for float16 forward passes.',
+                    )
+                    return requested
+                except Exception as e:
+                    self._logger.warning('MPS autograd validation failed (%s). Falling back to CPU.', e)
+                    return torch.device(_DEVICE_CPU)
             self._logger.warning('MPS requested but not available. Falling back to CPU.')
-            return torch.device('cpu')
-        try:
-            t = torch.ones((2, 2), device='mps', requires_grad=True)
-            (t * t).sum().backward()  # type: ignore[no-untyped-call]
-            del t
-            torch.mps.empty_cache()
-            self._logger.info(
-                'MPS autograd validated — using MPS for attribution. '
-                'Expected speedup: 5-10× over CPU for float16 forward passes.',
-            )
-            return requested
-        except Exception as e:
-            self._logger.warning('MPS autograd validation failed (%s). Falling back to CPU.', e)
-            return torch.device('cpu')
+            return torch.device(_DEVICE_CPU)
+        self._logger.info('Attribution device: %s', requested)
+        return requested
 
     def _get_predictor(self) -> Result[Any, ProcError]:
         """Return the first DSPy predictor or a Failure if the LLM has no compiled predictors."""
@@ -182,8 +189,13 @@ class HFAttributionBase(ProcNode):
 
     def _apply_chart_threshold(self, scores: torch.Tensor) -> list[int]:
         """Return token indices whose normalized absolute score meets the threshold."""
-        max_abs = float(scores.abs().max().item()) if scores.numel() else 1.0
-        if self._chart_score_threshold <= 0.0 or max_abs == 0.0:
+        if scores.numel():
+            max_abs = float(scores.abs().max().item())
+        else:
+            max_abs = 1.0
+        no_threshold = self._chart_score_threshold <= 0
+        no_signal = max_abs == 0
+        if no_threshold or no_signal:
             return list(range(scores.shape[0]))
         return [
             i for i in range(scores.shape[0])
@@ -193,11 +205,14 @@ class HFAttributionBase(ProcNode):
     def _make_html_span(self, token_display: str, score: float, max_abs: float, region: str) -> str:
         """Return a color-coded HTML span for one token."""
         disp = html.escape(token_display)
-        strength = min(1.0, abs(score) / max_abs) if max_abs > 0 else 0.0
-        if score >= 0:
-            color = f'rgba(0, 128, 0, {0.12 + 0.58 * strength:.3f})'
+        if max_abs > 0:
+            strength = min(1.0, abs(score) / max_abs)
         else:
-            color = f'rgba(200, 0, 0, {0.12 + 0.58 * strength:.3f})'
+            strength = float()
+        if score >= 0:
+            color = f'rgba(0, 128, 0, {_COLOR_MIN_OPACITY + _COLOR_RANGE * strength:.3f})'
+        else:
+            color = f'rgba(200, 0, 0, {_COLOR_MIN_OPACITY + _COLOR_RANGE * strength:.3f})'
         return (
             f'<span class="token" title="region={region} score={score:+.6f}"'
             f' style="background:{color}">{disp}</span>'
